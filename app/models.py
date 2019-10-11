@@ -10,7 +10,7 @@ class User(pwdb.Model):
     level = peewee.IntegerField(default=0)
     state = peewee.IntegerField(default=0)
     role = peewee.IntegerField(default=1)
-    type = peewee.IntegerField(default=0)
+    register_type = peewee.IntegerField(default=0)
     agree_with_terms = peewee.BooleanField(default=False)
     phone_authentication_id = peewee.IntegerField()
     account_authentication_id = peewee.IntegerField()

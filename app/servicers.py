@@ -137,7 +137,7 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
                     User.create(
                         email=email,
                         password=password,
-                        type=AccountType.GOOGLE,
+                        register_type=AccountType.GOOGLE,
                         profile_photo_url=google_profile.profile_image,
                         agree_with_terms=True,
                         last_login_datetime=datetime.datetime.now(),
@@ -200,7 +200,7 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
                 User.create(
                     email=email,
                     password=password,
-                    type=account_type,
+                    register_type=account_type,
                     agree_with_terms=agree_with_terms,
                     last_login_datetime=datetime.datetime.now(),
                     created_at=datetime.datetime.now()
