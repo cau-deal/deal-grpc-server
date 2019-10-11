@@ -8,6 +8,11 @@ from protos.CommonResult_pb2 import *
 # Deal Servicer
 from protos.DealService_pb2 import *
 
+# peewee DB connect
+from peewee import *
+from app.extensions import pwdb
+
+
 from app.extensions import firebase, JWT, EmailSender
 
 from firebase_admin import messaging
@@ -58,36 +63,39 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
 
         result_tokens = []
 
-        try:
-            user = User.select().where(
-                (User.email == email) &
-                (User.password == password)
-            )
+        db = pwdb.database
+        with db.atomic() as transaction:
+            try:
+                user = User.select().where(
+                    (User.email == email) &
+                    (User.password == password)
+                )
 
-            if user.count() != 1:
-                raise Exception("User not found")
-            else:
-                user = user.get()
-                user.last_login_datetime = datetime.datetime.now()
-                user.save()
+                if user.count() != 1:
+                    raise Exception("User not found")
+                else:
+                    user = user.get()
+                    user.last_login_datetime = datetime.datetime.now()
+                    user.save()
 
-                if user.state == 1:
-                    raise Exception("You are blocked.")
+                    if user.state == 1:
+                        raise Exception("You are blocked.")
 
-            access_token = JWT.get_access_token(email)
-            refresh_token = JWTToken.get(JWTToken.user_email == email).token_key
+                access_token = JWT.get_access_token(email)
+                refresh_token = JWTToken.get(JWTToken.user_email == email).token_key
 
-            result_tokens = [
-                JWTResult(type=JWTType.ACCESS, token=access_token),
-                JWTResult(type=JWTType.REFRESH, token=refresh_token)
-            ]
+                result_tokens = [
+                    JWTResult(type=JWTType.ACCESS, token=access_token),
+                    JWTResult(type=JWTType.REFRESH, token=refresh_token)
+                ]
 
-            result_code = ResultCode.SUCCESS
-            result_message = 'SUCCESS'
+                result_code = ResultCode.SUCCESS
+                result_message = 'SUCCESS'
 
-        except Exception as e:
-            result_code = ResultCode.ERROR
-            result_message = str(e)
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
 
         return SignInResponse(
             result=CommonResult(
@@ -102,6 +110,11 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
 
         # todo transaction 처리
 
+        # DB 객체 불러오기
+
+        # mysql_db = MySQLDatabase()
+        # SQL_ADDR = 'deal.ct7ygagy10fd.ap-northeast-2.rds.amazonaws.com'
+        Database.atomic()
         sign_in_request = request.credential
         google_profile = request.profile
 
@@ -110,54 +123,57 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
 
         result_tokens = []
 
-        try:
-            user = User.select().where(
-                (User.email == email) &
-                (User.password == password)
-            )
-            
-            access_token = JWT.get_access_token(email)
-
-            if user.count() != 1:
-                User.create(
-                    email=email,
-                    password=password,
-                    type=AccountType.GOOGLE,
-                    profile_photo_url=google_profile.profile_image,
-                    agree_with_terms=True,
-                    last_login_datetime=datetime.datetime.now(),
-                    created_at=datetime.datetime.now()
+        db = pwdb.database
+        with db.atomic() as transaction:
+            try:
+                user = User.select().where(
+                    (User.email == email) &
+                    (User.password == password)
                 )
-                refresh_token = JWT.get_refresh_token(email, access_token)
-                JWTToken.create(
-                    token_key=refresh_token,
-                    user_email=email,
-                    created_at=datetime.datetime.now()
-                )
+                
+                access_token = JWT.get_access_token(email)
 
-                result_tokens = [
-                    JWTResult(type=JWTType.ACCESS, token=access_token),
-                    JWTResult(type=JWTType.REFRESH, token=refresh_token)
-                ]
+                if user.count() != 1:
+                    User.create(
+                        email=email,
+                        password=password,
+                        type=AccountType.GOOGLE,
+                        profile_photo_url=google_profile.profile_image,
+                        agree_with_terms=True,
+                        last_login_datetime=datetime.datetime.now(),
+                        created_at=datetime.datetime.now()
+                    )
+                    refresh_token = JWT.get_refresh_token(email, access_token)
+                    JWTToken.create(
+                        token_key=refresh_token,
+                        user_email=email,
+                        created_at=datetime.datetime.now()
+                    )
 
-            else:
-                user = user.get()
-                user.last_login_datetime = datetime.datetime.now()
-                user.save()
+                    result_tokens = [
+                        JWTResult(type=JWTType.ACCESS, token=access_token),
+                        JWTResult(type=JWTType.REFRESH, token=refresh_token)
+                    ]
 
-                if user.state == 1:
-                    raise Exception("You are blocked.")
+                else:
+                    user = user.get()
+                    user.last_login_datetime = datetime.datetime.now()
+                    user.save()
 
-                result_tokens = [
-                    JWTResult(type=JWTType.ACCESS, token=access_token)
-                ]
+                    if user.state == 1:
+                        raise Exception("You are blocked.")
 
-            result_code = ResultCode.SUCCESS
-            result_message = 'SUCCESS'
+                    result_tokens = [
+                        JWTResult(type=JWTType.ACCESS, token=access_token)
+                    ]
 
-        except Exception as e:
-            result_code = ResultCode.ERROR
-            result_message = str(e)
+                result_code = ResultCode.SUCCESS
+                result_message = 'SUCCESS'
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
 
         return SignInResponse(
             result=CommonResult(
@@ -178,37 +194,39 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
         platform_type = request.platform
 
         result_tokens = []
+        db = pwdb.database
+        with db.atomic() as transaction:
+            try:
+                User.create(
+                    email=email,
+                    password=password,
+                    type=account_type,
+                    agree_with_terms=agree_with_terms,
+                    last_login_datetime=datetime.datetime.now(),
+                    created_at=datetime.datetime.now()
+                )
 
-        try:
-            User.create(
-                email=email,
-                password=password,
-                type=account_type,
-                agree_with_terms=agree_with_terms,
-                last_login_datetime=datetime.datetime.now(),
-                created_at=datetime.datetime.now()
-            )
+                access_token = JWT.get_access_token(email)
+                refresh_token = JWT.get_refresh_token(email, access_token)
 
-            access_token = JWT.get_access_token(email)
-            refresh_token = JWT.get_refresh_token(email, access_token)
+                JWTToken.create(
+                    token_key=refresh_token,
+                    user_email=email,
+                    created_at=datetime.datetime.now()
+                )
 
-            JWTToken.create(
-                token_key=refresh_token,
-                user_email=email,
-                created_at=datetime.datetime.now()
-            )
+                result_tokens = [
+                    JWTResult(type=JWTType.ACCESS, token=access_token),
+                    JWTResult(type=JWTType.REFRESH, token=refresh_token)
+                ]
 
-            result_tokens = [
-                JWTResult(type=JWTType.ACCESS, token=access_token),
-                JWTResult(type=JWTType.REFRESH, token=refresh_token)
-            ]
+                result_code = ResultCode.SUCCESS
+                result_message = "SUCCESS"
 
-            result_code = ResultCode.SUCCESS
-            result_message = "SUCCESS"
-
-        except Exception as e:
-            result_code = ResultCode.ERROR
-            result_message = str(e)
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
 
         return SignUpResponse(
             result=CommonResult(
@@ -235,7 +253,7 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
         )
 
 
-#class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
+""" #class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
 class DealServicer(DealServicer, metaclass=ServicerMeta):
     @unverified
     def stb(self, request, context):
@@ -254,3 +272,4 @@ class DealServicer(DealServicer, metaclass=ServicerMeta):
 
     def Accuse(self, request, context):
         return
+ """
