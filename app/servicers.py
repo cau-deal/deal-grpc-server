@@ -3,10 +3,17 @@ from sea.servicer import ServicerMeta
 from app.models import User, JWTToken
 from protos.AuthService_pb2 import *
 from protos.AuthService_pb2_grpc import *
+
 from protos.CommonResult_pb2 import *
 
 # Deal Servicer
 from protos.DealService_pb2 import *
+from protos.DealService_pb2_grpc import *
+
+# Mission Servicer
+from protos.MissionService_pb2 import *
+from protos.MissionService_pb2_grpc import *
+from app.models import Mission
 
 # peewee DB connect
 from peewee import *
@@ -253,8 +260,8 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
         )
 
 
-""" #class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
-class DealServicer(DealServicer, metaclass=ServicerMeta):
+#class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
+class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
     @unverified
     def stb(self, request, context):
         print("Hello SengHyeon")
@@ -264,7 +271,6 @@ class DealServicer(DealServicer, metaclass=ServicerMeta):
         inquiry = request.inquiry
         title = inquiry.title
         contents = inquiry.contents 
-
         return
 
     def LookUpInquiry(self, request, context):
@@ -272,4 +278,131 @@ class DealServicer(DealServicer, metaclass=ServicerMeta):
 
     def Accuse(self, request, context):
         return
- """
+
+class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
+    @verified
+    def RegisterMission(self, request, context):
+        # Mission Obj
+        ms = request.mission
+
+        # Mission Obj parsing
+        mission_id = ms.mission_id
+        title = ms.title
+        contents = ms.contents
+        mission_type = ms.mission_type
+        data_type = ms.data_type
+        unit_package = ms.unit_package
+        price_of_package = ms.price_of_package
+        deadline = ms.deadline
+        order_package_quantity = ms.order_package_quantity
+        summary = ms.summary
+        contact_clause = ms.contact_clause
+        specification = ms.specification
+        mission_explanation_images = ms.mission_explanation_images """List"""
+        created_at = ms.created_at
+        db = pwdb.database
+
+        # Return Mission Response default
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown"
+        register_mission_result = RegisterMissionResult.UNKNOWN_REGISTER_MISSION_RESULT
+           
+        # DB Transaction
+        # table : mission
+        with db.atomic() as transaction:
+            try: 
+                Mission.create(
+                    mission_id = mission_id,
+                    title = title,
+                    contents = contetnts,
+                    mission_type = mission_type,
+                    data_type = data_type,
+                    unit_package = unit_package,
+                    price_of_package = price_of_package,
+                    deadline = deadline,
+                    order_package_quantity = order_package_quantity,
+                    summary = summary,
+                    contact_clause  = contact_clause,
+                    specification = specification,
+                    mission_explanation_images = mission_explanation_images,
+                    created_at = created_at,
+                )
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Register Mission Success"
+                register_mission_result = RegisterMissionResult.SUCCESS_REGISTER_MISSION_RESULT
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+            
+        return RegisterMissionResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message
+            ),
+            register_mission_result = register_mission_result
+        )
+
+        
+
+
+    @verified    
+    def SearchMission(self, request, context):
+        # Mission Obj
+        ms = request.mission
+
+        # Mission Obj parsing
+        _type = ms.type
+        keyword = ms.keyword
+        mission_page = ms.mission_page
+        
+        mission_page_mode = mission_page.mission_page
+        from = mission_page.from
+        to = mission_page.amount        
+
+    @verified
+    def SearchMissionWithId(self, request, context):
+        pass
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    @verified
+    def SearchMissionReleventMe(self, request, context):
+        pass
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    @verified
+    def SearchMissionReleventMe(self, request, context):
+        pass
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    @verified
+    def GetAssignedMission(self, request, context):
+        pass
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    @verified
+    def SubmitCollectMissionOutput(self, request, context):
+        pass
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    @verified
+    def SubmitProcessMissionOutput(self, request, context):
+        pass
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    
