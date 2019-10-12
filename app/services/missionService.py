@@ -18,7 +18,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         ms = request.mission
 
         # Mission Obj parsing
-        id = ms.mission_id
+        mission_id = ms.mission_id
         title = ms.title
         contents = ms.contents
         mission_type = ms.mission_type
@@ -161,7 +161,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SearchMissionWithId(self, request, context):
-        
+        pass
 
     @verified
     def SearchMissionReleventMe(self, request, context):
