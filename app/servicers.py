@@ -14,6 +14,7 @@ from protos.DealService_pb2_grpc import *
 from protos.MissionService_pb2 import *
 from protos.MissionService_pb2_grpc import *
 from app.models import Mission
+from app.extensions import JWT
 
 # peewee DB connect
 from peewee import *
@@ -114,13 +115,7 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
 
     @unverified
     def SignInWithGoogle(self, request, context):
-
-        # todo transaction 처리
-
-        # DB 객체 불러오기
-
         # mysql_db = MySQLDatabase()
-        # SQL_ADDR = 'deal.ct7ygagy10fd.ap-northeast-2.rds.amazonaws.com'
         Database.atomic()
         sign_in_request = request.credential
         google_profile = request.profile
@@ -279,6 +274,7 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
     def Accuse(self, request, context):
         return
 
+
 class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
     @verified
     def RegisterMission(self, request, context):
@@ -298,8 +294,11 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         summary = ms.summary
         contact_clause = ms.contact_clause
         specification = ms.specification
-        mission_explanation_images = ms.mission_explanation_images """List"""
+        mission_explanation_images = ms.mission_explanation_images
+        mission_state = ms.mission_state
         created_at = ms.created_at
+
+        # Database Obj
         db = pwdb.database
 
         # Return Mission Response default
@@ -309,9 +308,18 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
            
         # DB Transaction
         # table : mission
+
+        # Extract Email
+        metadata = dict(context.invocation_metadata())
+        _email_addr = (metadata['aud']) if metadata['aud'] else ""
+
+        JWT.decode()
+
+
         with db.atomic() as transaction:
             try: 
                 Mission.create(
+                    register_email = _email_addr,
                     mission_id = mission_id,
                     title = title,
                     contents = contetnts,
@@ -325,6 +333,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     contact_clause  = contact_clause,
                     specification = specification,
                     mission_explanation_images = mission_explanation_images,
+                    mission_state = mission_state,
                     created_at = created_at,
                 )
 
@@ -346,22 +355,27 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             register_mission_result = register_mission_result
         )
 
-        
-
-
     @verified    
     def SearchMission(self, request, context):
         # Mission Obj
-        ms = request.mission
+        ms = request
 
         # Mission Obj parsing
-        _type = ms.type
+        mission_type = ms.mission_type
         keyword = ms.keyword
         mission_page = ms.mission_page
         
         mission_page_mode = mission_page.mission_page
-        from = mission_page.from
-        to = mission_page.amount        
+
+        _offset = mission_page._offset
+        amount = mission_page.amount
+
+        Mission.select(Mission.mission_id)
+               .where()
+        )
+
+
+
 
     @verified
     def SearchMissionWithId(self, request, context):

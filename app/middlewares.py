@@ -15,6 +15,7 @@ class AccessTokenVerifyMiddleWare(BaseMiddleware):
             aud = (metadata['aud']) if metadata['aud'] else ""
             is_valid = JWT.validate(ticket, aud)
             context.verified = True
+            context._login_email = aud
         except Exception as e:
             print(e)
             context.verified = False

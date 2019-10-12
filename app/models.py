@@ -32,8 +32,8 @@ class JWTToken(pwdb.Model):
 
 class Mission(pwdb.Model):
     mission_id  = peewee.IntegerField(primary_key=True)
-    register_email=peewee.CharField(max_length=64,null=false)
-    title       = peewee.CharField(max_length=255,null=false)
+    register_email=peewee.CharField(max_length=64,null=False)
+    title       = peewee.CharField(max_length=255,null=False)
     contents    = peewee.TextField()
     mission_type= peewee.IntegerField()
     data_type   = peewee.IntegerField()
@@ -48,3 +48,13 @@ class Mission(pwdb.Model):
 
     class Meta:
         db_table = 'mission'
+        
+class MissionExplanationImage(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    mission_id  = peewee.IntegerField()
+    image_type = peewee.IntegerField()
+    url = peewee.CharField()
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'mission_explanation_image'
