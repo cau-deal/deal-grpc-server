@@ -42,19 +42,12 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         result_message = "Unknown"
         register_mission_result = RegisterMissionResult.UNKNOWN_REGISTER_MISSION_RESULT
 
-        # DB Transaction
-        # table : mission
-
-        # Extract Email
-        metadata = dict(context.invocation_metadata())
-        _email_addr = (metadata['aud']) if metadata['aud'] else ""
-
         # JWT.decode()
 
         with db.atomic() as transaction:
             try:
                 Mission.create(
-                    register_email=_email_addr,
+                    register_email=context.user_email
                     id=mission_id,
                     title=title,
                     contents=contents,
@@ -130,14 +123,18 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             try:
                 # Keyword NOT Exist
                 if(_query_type is NO_KEY_WORD):
+                    # mission type, _offset, keyword
                     cursor = db.execute_sql(
-                        'SELECT mission.id AS id, title, mission_type, price_of_package, deadline, summary, url AS thumbnail_url, mission.created_at AS created_at, mission.state AS state FROM mission, mission_explanation_image WHERE (mission_type = @mission_type AND mission.id > @_offset AND mission.id = mission_explanation_image.mission_id AND mission_explanation_image.image_type = 1 AND (title LIKE @keyword OR contents LIKE @keyword)) ORDER BY id DESC LIMIT 10;'
-                        )
+                        'SELECT mission.id AS id, title, mission_type, price_of_package, deadline, summary, url AS thumbnail_url, mission.created_at AS created_at, mission.state AS state FROM mission, mission_explanation_image WHERE (mission_type = ? AND mission.id > ? AND mission.id = mission_explanation_image.mission_id AND mission_explanation_image.image_type = 1) ORDER BY id DESC LIMIT 10;'
+                        ,(mission_type, _offset),
+                    )
 
                 # Keyword Exist
                 else:
+                    # mission_type, _offset, keyw, keyw
                     cursor = db.execute_sql(
-                        'SELECT mission.id AS id, title, mission_type, price_of_package, deadline, summary, url AS thumbnail_url, mission.created_at AS created_at, mission.state AS state FROM mission, mission_explanation_image WHERE (mission_type = @mission_type AND mission.id > @_offset AND mission.id = mission_explanation_image.mission_id AND mission_explanation_image.image_type = 1 AND (title LIKE @keyword OR contents LIKE @keyword)) ORDER BY id DESC LIMIT 10;'
+                        'SELECT mission.id AS id, title, mission_type, price_of_package, deadline, summary, url AS thumbnail_url, mission.created_at AS created_at, mission.state AS state FROM mission, mission_explanation_image WHERE (mission_type = ? AND mission.id > ? AND mission.id = mission_explanation_image.mission_id AND mission_explanation_image.image_type = 1 AND (title LIKE ? OR contents LIKE ?)) ORDER BY id DESC LIMIT 10;'
+                        ,(mission_type, _offset, keyword, keyword),
                     )
 
                 result_code = ResultCode.SUCCESS
@@ -150,13 +147,31 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e)
                 search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
 
+            misson_protoes = []
+
+            # id, title, ms_type, price_of_package, deadline, summary, url, created_at, state,
+            for row in cursor:
+                misson_protoes.append(
+                    MissionProto(
+                        mission_id = row[0],
+                        title = row[1],
+                        mission_type = row[2],
+                        price_of_package = row[3],
+                        deadline = row[4],
+                        summary = row[5],
+                        mission_state = row[8],
+                        created_at = row[7],
+                        thumbnail_url = row[6],                        
+                    )
+                )
 
         return SearchMissionResponse(
             result=CommonResult(
                 result_code=result_code,
                 message=result_message
             ),
-            register_mission_result=search_mission_result
+            search_mission_result=search_mission_result,
+            mission_protoes = mission_protoes,
         )
 
     @verified
