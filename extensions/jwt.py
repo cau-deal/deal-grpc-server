@@ -23,17 +23,10 @@ class JWT:
 
     def validate(self, token):
         payload = jwt.decode(token, self.secret, issuer=self.iss, audience=self.aud, algorithms=self.algorithm)
-<<<<<<< HEAD
         return payload['sub']
 
     # token is access token
     def decode(self, token):
-=======
-        return True
-
-    # token is access token
-    def decode(self, token, email):
->>>>>>> eefed2f... Add more codes of  MissionServiceServicer
         return jwt.decode(token, self.secret, issuer=self.iss, audience=self.aud, algorithms=self.algorithm)
 
     def get_access_token(self, email):
@@ -45,7 +38,6 @@ class JWT:
             'iss': self.iss
         }, self.secret, algorithm=self.algorithm)
 
-<<<<<<< HEAD
     def get_refresh_token(self, email, access_token):
         return jwt.encode({
             'exp': datetime.datetime.utcnow() + datetime.timedelta(days=14),
@@ -53,13 +45,5 @@ class JWT:
             'aud': self.aud,
             'iss': self.iss,
             'sub': email
-=======
-    def get_refresh_token(self, access_token):
-        return jwt.encode({
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=14)
-            'iat': time.time(),
-            'aud': self.aud,
-            'iss': self.iss
->>>>>>> eefed2f... Add more codes of  MissionServiceServicer
         }, self.secret, algorithm=self.algorithm) if self.validate(access_token) else ""
 
