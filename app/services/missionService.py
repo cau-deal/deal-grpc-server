@@ -6,10 +6,8 @@ from app.extensions import pwdb
 from app.models import Mission
 from protos.CommonResult_pb2 import ResultCode, CommonResult
 from protos.Data_pb2 import MissionExplanationImageType, MissionExplanationImage
-from protos.MissionService_pb2 import RegisterMissionResult, RegisterMissionResponse, SearchMissionResult, \
-    SearchMissionResponse
-from protos.MissionService_pb2_grpc import MissionServiceServicer
-
+from protos.MissionService_pb2 import *
+from protos.MissionService_pb2_grpc import *
 
 class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
     @verified
@@ -125,7 +123,14 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 if(_query_type is NO_KEY_WORD):
                     # mission type, _offset, keyword
                     cursor = db.execute_sql(
-                        'SELECT mission.id AS id, title, mission_type, price_of_package, deadline, summary, url AS thumbnail_url, mission.created_at AS created_at, mission.state AS state FROM mission, mission_explanation_image WHERE (mission_type = ? AND mission.id > ? AND mission.id = mission_explanation_image.mission_id AND mission_explanation_image.image_type = 1) ORDER BY id DESC LIMIT 10;'
+                        'SELECT mission.id AS id, title, mission_type, price_of_package, deadline, summary, \
+                            url AS thumbnail_url, mission.created_at AS created_at, mission.state AS state \
+                                FROM mission, mission_explanation_image \
+                                WHERE (mission_type = ? \
+                                    AND mission.id > ? \
+                                    AND mission.id = mission_explanation_image.mission_id \
+                                    AND mission_explanation_image.image_type = 1) \
+                                ORDER BY id DESC LIMIT 10;'
                         ,(mission_type, _offset),
                     )
 
@@ -133,7 +138,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 else:
                     # mission_type, _offset, keyw, keyw
                     cursor = db.execute_sql(
-                        'SELECT mission.id AS id, title, mission_type, price_of_package, deadline, summary, url AS thumbnail_url, mission.created_at AS created_at, mission.state AS state FROM mission, mission_explanation_image WHERE (mission_type = ? AND mission.id > ? AND mission.id = mission_explanation_image.mission_id AND mission_explanation_image.image_type = 1 AND (title LIKE ? OR contents LIKE ?)) ORDER BY id DESC LIMIT 10;'
+                        'SELECT mission.id AS id, title, mission_type, price_of_package, deadline, summary, \
+                            url AS thumbnail_url, mission.created_at AS created_at, mission.state AS state \
+                        FROM mission, mission_explanation_image WHERE (mission_type = ? AND mission.id > ? AND mission.id = mission_explanation_image.mission_id AND mission_explanation_image.image_type = 1 AND (title LIKE ? OR contents LIKE ?)) ORDER BY id DESC LIMIT 10;'
                         ,(mission_type, _offset, keyword, keyword),
                     )
 

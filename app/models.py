@@ -31,7 +31,7 @@ class JWTToken(pwdb.Model):
         db_table = "jwt_token"
 
 class Mission(pwdb.Model):
-    mission_id  = peewee.IntegerField(primary_key=True)
+    id  = peewee.IntegerField(primary_key=True)
     register_email=peewee.CharField(max_length=64,null=False)
     title       = peewee.CharField(max_length=255,null=False)
     contents    = peewee.TextField()
@@ -57,9 +57,10 @@ class ConductMission(pwdb.Model):
     deadline = peewee.DateTimeField()
     created_at = peewee.DateTimeField()
     complete_datetime = peewee.DateTimeField()
+    
     class Meta:
         db_table = 'conduct_mission'
-        
+
 class MissionExplanationImage(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
     mission_id  = peewee.IntegerField()
@@ -69,3 +70,17 @@ class MissionExplanationImage(pwdb.Model):
 
     class Meta:
         db_table = 'mission_explanation_image'
+
+
+class InquiryModel(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    user_email = peewee.CharField()
+    title = peewee.CharField()
+    contents = peewee.TextField()
+    is_complete = peewee.IntegerField()
+    category = peewee.CharField()
+    created_at = peewee.DateTimeField()
+    answer_content = peewee.TextField()
+
+    class Meta:
+        db_table = 'inquiry'
