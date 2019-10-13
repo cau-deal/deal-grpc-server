@@ -1,3 +1,5 @@
+import hashlib
+
 import firebase_admin
 
 # from sea.contrib.extensions.celery import AsyncTask

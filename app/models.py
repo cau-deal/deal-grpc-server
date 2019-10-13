@@ -12,8 +12,8 @@ class User(pwdb.Model):
     role = peewee.IntegerField(default=1)
     register_type = peewee.IntegerField(default=0)
     agree_with_terms = peewee.BooleanField(default=False)
-    phone_authentication_id = peewee.IntegerField()
-    account_authentication_id = peewee.IntegerField()
+    is_phone_authentication = peewee.IntegerField()
+    is_account_authentication = peewee.IntegerField()
     profile_photo_url = peewee.IntegerField()
     last_login_datetime = peewee.DateTimeField(default=datetime.datetime.now())
     created_at = peewee.DateTimeField(default=datetime.datetime.now())
@@ -31,7 +31,7 @@ class JWTToken(pwdb.Model):
         db_table = "jwt_token"
 
 class Mission(pwdb.Model):
-    mission_id  = peewee.IntegerField(primary_key=True)
+    id  = peewee.IntegerField(primary_key=True)
     register_email=peewee.CharField(max_length=64,null=False)
     title       = peewee.CharField(max_length=255,null=False)
     contents    = peewee.TextField()
@@ -48,13 +48,14 @@ class Mission(pwdb.Model):
 
     class Meta:
         db_table = 'mission'
-        
-class MissionExplanationImage(pwdb.Model):
-    id = peewee.IntegerField(primary_key=True)
-    mission_id  = peewee.IntegerField()
-    image_type = peewee.IntegerField()
-    url = peewee.CharField()
-    created_at = peewee.DateTimeField()
 
+class ConductMission(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    worker_email = peewee.CharField()
+    mission_id = peewee.IntegerField()
+    state = peewee.IntegerField()
+    deadline = peewee.DateTimeField()
+    created_at = peewee.DateTimeField()
+    complete_datetime = peewee.DateTimeField()
     class Meta:
-        db_table = 'mission_explanation_image'
+        db_table = 'conduct_mission'
