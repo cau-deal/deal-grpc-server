@@ -150,6 +150,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e)
                 search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
 
+
         return SearchMissionResponse(
             result=CommonResult(
                 result_code=result_code,
