@@ -93,7 +93,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
     @verified
     def SearchMission(self, request, context):
         # Mission Obj
-        ms = request
+        ms = request.mission
 
         # Mission Obj parsing
         mission_type = ms.mission_type
@@ -176,7 +176,35 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SearchMissionWithId(self, request, context):
-        pass
+        mission_id = request.mission_id
+
+        db = pwdb.database
+
+        result_code = ResultCode.SUCCESS
+        result_message = "Unknown"
+        search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
+
+        with db.atomic as transaction:
+            try:
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful Search Mission"
+                search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
+                result = Mission.select().where(Mission.id == mission_id)
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
+
+        return SearchMissionWithIdResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message
+            ),
+            search_mission_result = search_mission_result,
+            mission = result,
+        )
 
     @verified
     def SearchMissionReleventMe(self, request, context):
