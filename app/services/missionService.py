@@ -54,7 +54,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         with db.atomic() as transaction:
             try:
                 query = Mission.create(
-                    register_email=context.user_email,
+                    register_email=context.login_email,
                     title=title,
                     contents=contents,
                     mission_type=mission_type,
@@ -245,7 +245,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 # TODO 유효한 상태인지 확인할것
 
                 ConductMission.create(
-                    worker_email = context.user_email,
+                    worker_email = context.login_email,
                     mission_id = mission_id,
                     state = ConductMissionState.UNKNOWN_CONDUCT_MISSION_STATE,
                     deadline = datetime.datetime.now() + datetime.timedelta(days=1.0),

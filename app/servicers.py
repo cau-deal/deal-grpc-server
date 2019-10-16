@@ -1,8 +1,9 @@
-from app.services import authService, dealService, missionService
+from app.services import authService, dealService, missionService, phoneService
 
 AuthServiceServicer = authService.AuthServiceServicer
 dealServiceServicer = dealService.DealServiceServicer
 missionServiceServicer = missionService.MissionServiceServicer
+phoneServiceServicer = phoneService.PhoneServiceServicer
 
 # message = messaging.Message(
 #     android=messaging.AndroidConfig(

@@ -71,6 +71,7 @@ class MissionExplanationImage(pwdb.Model):
     class Meta:
         db_table = 'mission_explanation_image'
 
+#Deal Service
 
 class InquiryModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
@@ -84,3 +85,30 @@ class InquiryModel(pwdb.Model):
 
     class Meta:
         db_table = 'inquiry'
+
+
+# PhoneAuth
+class PhoneAuthentication(pwdb.Model):
+    #user_email = peewee.ForeignKeyField(User, backref='user_email')
+    user_email = peewee.CharField(primary_key=True)
+    phone_num = peewee.CharField()
+    name = peewee.CharField()
+    sex = peewee.IntegerField()
+    is_native = peewee.BooleanField()
+    birth = peewee.DateField()
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+
+    class Meta:
+        db_table = 'phone_authentication'
+
+# PhoneAuth
+class AccountAuthentication(pwdb.Model):
+    #user_email = peewee.CharField(primary_key=True)
+    user_email = peewee.ForeignKeyField(User, column_name='email')
+    account_num = peewee.CharField()
+    name = peewee.CharField()
+    bank = peewee.CharField()
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+
+    class Meta:
+        db_table = 'account_authentication'

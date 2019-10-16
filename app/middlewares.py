@@ -12,11 +12,11 @@ class AccessTokenVerifyMiddleWare(BaseMiddleware):
 
         try:
             ticket = (metadata['ticket']) if metadata['ticket'] else ""
-            context._login_email = JWT.validate(ticket)
+            context.login_email = JWT.validate(ticket)
             context.verified = True
         except Exception as e:
             print(e)
-            context._login_email = ""
+            context.login_email = ""
             context.verified = False
 
         return request, context
