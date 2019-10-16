@@ -3,11 +3,20 @@ from sea.servicer import ServicerMeta
 
 from app.decorators import verified
 from app.extensions import pwdb
+
 from app.models import Mission
+from app.models import ConductMission
+
 from protos.CommonResult_pb2 import ResultCode, CommonResult
-from protos.Data_pb2 import MissionExplanationImageType, MissionExplanationImage
+
+from protos.Data_pb2 import MissionExplanationImageType
+from protos.Data_pb2 import MissionExplanationImage
+
 from protos.MissionService_pb2 import *
 from protos.MissionService_pb2_grpc import *
+
+import datetime
+
 
 class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
     @verified
@@ -16,7 +25,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         ms = request.mission
 
         # Mission Obj parsing
-        mission_id = ms.mission_id
+        mission_id = 0
         title = ms.title
         contents = ms.contents
         mission_type = ms.mission_type
@@ -44,9 +53,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                Mission.create(
-                    register_email=context.user_email
-                    id=mission_id,
+                query = Mission.create(
+                    register_email=context.user_email,
                     title=title,
                     contents=contents,
                     mission_type=mission_type,
@@ -62,10 +70,12 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     mission_state=mission_state,
                     created_at=created_at,
                 )
+                
+                # Registered Mission Tuple print
+                print(query)
 
                 for images in mission_explanation_images:
                     MissionExplanationImage.create(
-                        mission_id=mission_id,
                         image_type=MissionExplanationImageType.UNKNOWN_MISSION_EXPLANATION_IMAGE_TYPE,
                         url=images.url,
                     )
@@ -120,22 +130,22 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         with db.atomic as transaction:
             try:
                 # Keyword NOT Exist
-                if(_query_type is NO_KEY_WORD):
+                if _query_type == NO_KEY_WORD:
                     # mission type, _offset, keyword
-                    cursor = db.execute_sql(
-                        'SELECT mission.id AS id, title, mission_type, price_of_package, deadline, summary, \
-                            url AS thumbnail_url, mission.created_at AS created_at, mission.state AS state \
-                                FROM mission, mission_explanation_image \
-                                WHERE (mission_type = ? \
-                                    AND mission.id > ? \
-                                    AND mission.id = mission_explanation_image.mission_id \
-                                    AND mission_explanation_image.image_type = 1) \
-                                ORDER BY id DESC LIMIT 10;'
-                        ,(mission_type, _offset),
-                    )
+                    query = (Mission
+                    .select(Mission.id, Mission.title, Mission.price_of_package, Mission.deadline, Mission.summary, \
+                        MissionExplanationImage.url.alias('url'), Mission.created_at.alias('created_at'), \
+                        Mission.state) 
+                    .join(MissionExplanationImage)
+                    .where(
+                        (Mission.mission_type == mission_type) &
+                        (Mission.id > _offset) &
+                        (Mission.id > MissionExplanationImage.id) &
+                        (MissionExplanationImage.image_type == 1)
+                        .order_by(SQL('id').desc())
+                        .limt(10)))
 
-                # Keyword Exist
-                else:
+                else :
                     # mission_type, _offset, keyw, keyw
                     cursor = db.execute_sql(
                         'SELECT mission.id AS id, title, mission_type, price_of_package, deadline, summary, \
@@ -187,7 +197,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         db = pwdb.database
 
-        result_code = ResultCode.SUCCESS
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown"
         search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
 
@@ -221,18 +231,58 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         raise NotImplementedError('Method not implemented!')
 
     @verified
-    def SearchMissionReleventMe(self, request, context):
-        pass
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    @verified
     def GetAssignedMission(self, request, context):
-        pass
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        mission_id = request.mission_id
+
+        db = pwdb.database
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown"
+        assign_mission_result = AssignMissionResult.UNKNOWN_ASSIGN_MISSION_RESULT
+
+        with db.atomic() as transaction:
+            try:
+                # TODO 유효한 상태인지 확인할것
+
+                ConductMission.create(
+                    worker_email = context.user_email,
+                    mission_id = mission_id,
+                    state = ConductMissionState.UNKNOWN_CONDUCT_MISSION_STATE,
+                    deadline = datetime.datetime.now() + datetime.timedelta(days=1.0),
+                    created_at = datetime.datetime.now(),
+                    complete_datetime = datetime.datetime.now() + datetime.timedelta(days=1.0),
+                )
+
+                #GetAssignedMission-2
+                cntval = ConductMission.select().count().where(
+                    (ConductMission.mission_id == mission_id)
+                    & (ConductMission.state <=4)
+                )
+
+                ms = Mission.select().where(
+                    mission_id == Mission.id
+                )
+
+                if ms.order_package_quantity >= cntval:
+                    Mission.update(state=MissionState.SOLD_OUT).where(Mission.id == mission_id).execute()
+
+                result_code = ResultCode.SUCCESS
+                result_message = "GetAssigned Mission Complete"
+                assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
+
+            return GetAssignedMissionResponse(
+                result=CommonResult(
+                    result_code=result_code,
+                    message = result_message,
+                ),
+                assign_mission_result=assign_mission_result,
+            )
 
     @verified
     def SubmitCollectMissionOutput(self, request, context):

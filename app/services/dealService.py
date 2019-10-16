@@ -7,7 +7,7 @@ from app.extensions import pwdb
 from app.decorators import unverified, verified
 from protos.DealService_pb2_grpc import *
 from protos.DealService_pb2 import *
-from app.model import InquiryModel
+from app.models import InquiryModel
 
 import datetime
 
