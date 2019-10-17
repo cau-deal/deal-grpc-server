@@ -5,6 +5,7 @@ UserServiceServicer = userService.UserServiceServicer
 dealServiceServicer = dealService.DealServiceServicer
 missionServiceServicer = missionService.MissionServiceServicer
 phoneServiceServicer = phoneService.PhoneServiceServicer
+userServiceServicer = userService.UserServiceServicer
 
 
 # message = messaging.Message(
