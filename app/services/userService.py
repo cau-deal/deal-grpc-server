@@ -75,14 +75,20 @@ class UserServiceServicer(UserServiceServicer, metaclass=ServicerMeta):
         db = pwdb.database
         with db.atomic() as transaction:
             try: 
-                query = User\
+                q = User\
                 .select(User.email, User.level, User.state, User.role, User.profile_photo_url)\
                 .where(User.email == context.login_email)
 
-                name_query = PhoneAuthentication\
+                nq = PhoneAuthentication\
                     .select(PhoneAuthentication.name)\
                     .where(PhoneAuthentication.user_email == context.login_email)
                 
+                for _ in q:
+                    query = _
+                
+                for _ in nq:
+                    name_query = _
+
                 if len(name_query) == 0:
                     message = "phone auth name not exist"
                     raise Exception
