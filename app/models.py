@@ -30,24 +30,26 @@ class JWTToken(pwdb.Model):
     class Meta:
         db_table = "jwt_token"
 
+
 class Mission(pwdb.Model):
-    id  = peewee.IntegerField(primary_key=True)
-    register_email=peewee.CharField(max_length=64,null=False)
-    title       = peewee.CharField(max_length=255,null=False)
-    contents    = peewee.TextField()
-    mission_type= peewee.IntegerField()
-    data_type   = peewee.IntegerField()
-    state       = peewee.IntegerField(default=0)
-    unit_package= peewee.IntegerField()
+    id = peewee.IntegerField(primary_key=True)
+    register_email = peewee.CharField(max_length=64, null=False)
+    title = peewee.CharField(max_length=255, null=False)
+    contents = peewee.TextField()
+    mission_type = peewee.IntegerField()
+    data_type = peewee.IntegerField()
+    state = peewee.IntegerField(default=0)
+    unit_package = peewee.IntegerField()
     order_package_quantitiy = peewee.IntegerField()
     deadline = peewee.DateTimeField()
-    created_at=peewee.DateTimeField()
-    summary     = peewee.CharField(max_length=255, null=True)
+    created_at = peewee.DateTimeField()
+    summary = peewee.CharField(max_length=255, null=True)
     contact_clause = peewee.TextField(null=True)
-    specification  = peewee.TextField(null=True)
+    specification = peewee.TextField(null=True)
 
     class Meta:
         db_table = 'mission'
+
 
 class ConductMission(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
@@ -57,13 +59,14 @@ class ConductMission(pwdb.Model):
     deadline = peewee.DateTimeField()
     created_at = peewee.DateTimeField()
     complete_datetime = peewee.DateTimeField()
-    
+
     class Meta:
         db_table = 'conduct_mission'
 
+
 class MissionExplanationImage(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
-    mission_id  = peewee.IntegerField()
+    mission_id = peewee.IntegerField()
     image_type = peewee.IntegerField()
     url = peewee.CharField()
     created_at = peewee.DateTimeField()
@@ -71,7 +74,8 @@ class MissionExplanationImage(pwdb.Model):
     class Meta:
         db_table = 'mission_explanation_image'
 
-#Deal Service
+
+# Deal Service
 
 class InquiryModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
@@ -89,10 +93,10 @@ class InquiryModel(pwdb.Model):
 
 # PhoneAuth
 class PhoneAuthentication(pwdb.Model):
-    #user_email = peewee.ForeignKeyField(User, backref='user_email')
-    user_email = peewee.CharField(primary_key=True)
+    user_email = peewee.ForeignKeyField(User, column_name='email')
     phone_num = peewee.CharField()
     name = peewee.CharField()
+    mobile_carrier = peewee.CharField()
     sex = peewee.IntegerField()
     is_native = peewee.BooleanField()
     birth = peewee.DateField()
@@ -101,9 +105,10 @@ class PhoneAuthentication(pwdb.Model):
     class Meta:
         db_table = 'phone_authentication'
 
+
 # PhoneAuth
 class AccountAuthentication(pwdb.Model):
-    #user_email = peewee.CharField(primary_key=True)
+    # user_email = peewee.CharField(primary_key=True)
     user_email = peewee.ForeignKeyField(User, column_name='email')
     account_num = peewee.CharField()
     name = peewee.CharField()

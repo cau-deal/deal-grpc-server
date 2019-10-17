@@ -16,6 +16,7 @@ from protos.CommonResult_pb2 import *
 
 import datetime
 
+
 class PhoneServiceServicer(PhoneServiceServicer, metaclass=ServicerMeta):
 
     @verified
@@ -31,52 +32,44 @@ class PhoneServiceServicer(PhoneServiceServicer, metaclass=ServicerMeta):
         result_message = "Unknown Phone Auth Result"
         phone_result = PhoneResult.UNKNOWN_PHONE_RESULT
 
-
         print(request)
-        MOBILE_CARRIER = [
-            "UNKNOWN_MOBILE_CARRIER",
-            "KTF",
-            "SKT",
-            "LGU",
-            "KTR",
-            "SKR",
-            "LGR",
-        ]
 
-        if request.sex == Sex.MALE:
-            sex = 1
-        elif request.sex == Sex.FEMALE:
-            sex = 2
-        else:
-            sex = 0
+        MOBILE_CARRIER = {
+            MobileCarrier.UNKNOWN_MOBILE_CARRIER: "UNKNOWN_MOBILE_CARRIER",
+            MobileCarrier.KTF: "KTF",
+            MobileCarrier.SKT: "SKT",
+            MobileCarrier.LGU: "LGU",
+            MobileCarrier.KTR: "KTR",
+            MobileCarrier.SKR: "SKR",
+            MobileCarrier.LGR: "LGR",
+        }
+
+        SEX = {
+            Sex.UNKOWN_SEX: 0,
+            Sex.MALE: 1,
+            Sex.FEMALE: 2
+        }
 
         db = pwdb.database
-        print(birth.year)
 
         with db.atomic() as transaction:
             try:
                 ins_res = PhoneAuthentication.create(
-                    user_email = context.login_email,
-                    phone_num = phone_num,
-                    name = name,
-                    mobile_carrier = MOBILE_CARRIER[mobile_carrier],
-                    sex = sex,
-                    is_native = is_native,
-                    birth = datetime.date(year=birth.day, month=birth.month, day=birth.day),
+                    user_email=context.login_email,
+                    phone_num=phone_num,
+                    name=name,
+                    mobile_carrier=MOBILE_CARRIER[mobile_carrier],
+                    sex=SEX[sex],
+                    is_native=is_native,
+                    birth=datetime.date(year=birth.year, month=birth.month, day=birth.day),
                 )
 
-                
+                res = User \
+                    .update(is_phone_authentication=True) \
+                    .where(User.email == context.login_email) \
+                    .execute()
 
-                res = User\
-                .update(is_phone_authentication=True)\
-                .where(User.email == context.login_email)\
-                .execute()
-
-
-                print(ins_res)
-
-                if ins_res==0:
-                    print("INSERT ERROR")
+                if ins_res == 0:
                     raise Exception
 
                 result_code = ResultCode.SUCCESS
@@ -85,13 +78,13 @@ class PhoneServiceServicer(PhoneServiceServicer, metaclass=ServicerMeta):
 
                 print(res)
                 if res == 0:
-                    print("UPDATE ERROR")
                     raise Exception
+
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
                 result_message = str(e)
-                print("EXCEPTION: "+str(e))
+                print("EXCEPTION: " + str(e))
                 phone_result = PhoneResult.FAIL_PHONE_RESULT
 
         return PhoneAuthResponse(
