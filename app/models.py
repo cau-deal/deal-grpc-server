@@ -79,7 +79,7 @@ class MissionExplanationImage(pwdb.Model):
 
 class InquiryModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
-    user_email = peewee.CharField()
+    user_email = peewee.ForeignKeyField(User, column_name='user_email')
     title = peewee.CharField()
     contents = peewee.TextField()
     is_complete = peewee.IntegerField()
