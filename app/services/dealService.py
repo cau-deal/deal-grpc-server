@@ -5,6 +5,7 @@ from app.decorators import verified
 from app.extensions import pwdb
 
 from app.decorators import unverified, verified
+from protos.Datetime_pb2 import Datetime
 from protos.DealService_pb2_grpc import *
 from protos.DealService_pb2 import *
 from app.models import InquiryModel
@@ -72,6 +73,14 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown LookUpInquiry"
 
+        Category = {
+            "UNKNOWN": InquiryCategory.UNKNOWN_INQUIRY_CATEGORY,
+            "POINT": InquiryCategory.POINT,
+            "PROJECT": InquiryCategory.PROJECT,
+            "REGISTER": InquiryCategory.REGISTER,
+            "ETC": InquiryCategory.ETC_INQUIRY,
+        }
+
         db = pwdb.database
 
         with db.atomic() as transaction:
@@ -80,16 +89,14 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
 
                 # Row = (id, user_email, title, contents, is_complete, category, created_at, answer_cont)
                 for row in query:
+                    d = row.created_at
                     inquiry_with_answer.append(
                         InquiryWithAnswer(
-                            title=row.title,
-                            contents=row.contents,
+                            inquiry=Inquiry(title=row.title, contents=row.contents, category=Category[row.category]),
+                            created_at=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute, sec=d.second),
                             is_complete=row.is_complete,
-                            category=row.category,
-                            created_at=row.created_at,
-                            answer_content=row.answer_content,
                             answer=row.answer_content,
-                        ),
+                        )
                     )
 
                 result_code = ResultCode.SUCCESS
