@@ -35,7 +35,7 @@ class PhoneServiceServicer(PhoneServiceServicer, metaclass=ServicerMeta):
         print(request)
 
         MOBILE_CARRIER = {
-            MobileCarrier.UNKNOWN_MOBILE_CARRIER: "UNKNOWN_MOBILE_CARRIER",
+            MobileCarrier.UNKNOWN_MOBILE_CARRIER: "UNKNOWN",
             MobileCarrier.KTF: "KTF",
             MobileCarrier.SKT: "SKT",
             MobileCarrier.LGU: "LGU",

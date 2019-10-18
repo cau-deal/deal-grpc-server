@@ -93,7 +93,7 @@ class InquiryModel(pwdb.Model):
 
 # PhoneAuth
 class PhoneAuthentication(pwdb.Model):
-    user_email = peewee.ForeignKeyField(User, column_name='email')
+    user_email = peewee.ForeignKeyField(User, column_name='user_email')
     phone_num = peewee.CharField()
     name = peewee.CharField()
     mobile_carrier = peewee.CharField()
