@@ -67,15 +67,30 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def LookUpInquiry(self, request, context):
+
+        inquiry_with_answer = []
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown LookUpInquiry"
 
         db = pwdb.database
-        with db.atomic as transaction:
+
+        with db.atomic() as transaction:
             try:
-                query = (Inquiry
-                    .select()
-                    .where(Inquiry.user_email == context.login_email))
+                query = (InquiryModel.select().where(InquiryModel.user_email == context.login_email))
+
+                # Row = (id, user_email, title, contents, is_complete, category, created_at, answer_cont)
+                for row in query:
+                    inquiry_with_answer.append(
+                        InquiryWithAnswer(
+                            title=row.title,
+                            contents=row.contents,
+                            is_complete=row.is_complete,
+                            category=row.category,
+                            created_at=row.created_at,
+                            answer_content=row.answer_content,
+                            answer=row.answer_content,
+                        ),
+                    )
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful look up inquiry"
@@ -85,30 +100,12 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
                 result_code = ResultCode.ERROR
                 result_message = str(e)
 
-            inquiry_with_answer = []
-
-            # Row = (id, user_email, title, contents, is_complete, category, created_at, answer_cont)
-            for row in query:
-                inquiry_with_answer.append(
-                    inquiry = Inquiry(
-                        title=row.title,
-                        contents=row.contents,
-                        is_complete=row.is_complete,
-                        category=row.category,
-                        created_at=row.created_at,
-                        answer_content=answer_content,
-                    ),
-                    is_complete = row.is_complete,
-                    created_at = row.created_at,
-                    answer = row.answer_content,
-                )
-
         return LookUpInquiryResponse(
-            result = CommonResult(
+            result=CommonResult(
                 result_code=result_code,
                 message=result_message,
             ),
-            inquiries = inquiry_with_answer,
+            inquiries=inquiry_with_answer,
         )
 
     @verified
@@ -152,5 +149,3 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
                 message=result_message,
             ),
         )
-
-
