@@ -1,6 +1,0 @@
-grpc
-PyJWT
-peeweext
-peewee
-sea
-celery
