@@ -66,7 +66,6 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
         db = pwdb.database
         with db.atomic as transaction:
             try:
-                # mission_type, _offset, keyw, keyw
                 query = (Inquiry
                     .select()
                     .where(Inquiry.user_email == context.login_email))
@@ -79,31 +78,30 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
                 result_code = ResultCode.ERROR
                 result_message = str(e)
 
-            inquiry_protoes = []
+            inquiry_with_answer = []
 
-            # id, title, ms_type, price_of_package, deadline, summary, url, created_at, state,
-            for row in cursor:
-                inquiry_protoes.append(
-                    Inquiry(
-                        mission_id=row[0],
-                        title=row[1],
-                        mission_type=row[2],
-                        price_of_package=row[3],
-                        deadline=row[4],
-                        summary=row[5],
-                        mission_state=row[8],
-                        created_at=row[7],
-                        thumbnail_url=row[6],
-                    )
+            # Row = (id, user_email, title, contents, is_complete, category, created_at, answer_cont)
+            for row in query:
+                inquiry_with_answer.append(
+                    inquiry = Inquiry(
+                        title=row.title,
+                        contents=row.contents,
+                        is_complete=row.is_complete,
+                        category=row.category,
+                        created_at=row.created_at,
+                        answer_content=answer_content,
+                    ),
+                    is_complete = row.is_complete,
+                    created_at = row.created_at,
+                    answer = row.answer_content,
                 )
 
-        return SearchMissionResponse(
-            result=CommonResult(
+        return LookUpInquiryResponse(
+            result = CommonResult(
                 result_code=result_code,
-                message=result_message
+                message=result_message,
             ),
-            search_mission_result=search_mission_result,
-            mission_protoes=mission_protoes,
+            inquiries = inquiry_with_answer,
         )
 
     @verified
