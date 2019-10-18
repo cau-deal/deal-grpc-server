@@ -51,6 +51,7 @@ class UserServiceServicer(UserServiceServicer, metaclass=ServicerMeta):
             )
         )
 
+    @verified
     def LookUpUserInfo(self, request, context):
 
         # init
@@ -85,7 +86,7 @@ class UserServiceServicer(UserServiceServicer, metaclass=ServicerMeta):
                 state=UserState.NORMAL,
                 role=Role.USER,
                 profile_photo_url=res.profile_photo_url,
-                name=res.phoneauthentication.name,
+                name=res.phoneauthentication.name if hasattr(res, 'phoneauthentication') else "회원",
             ),
         )
 

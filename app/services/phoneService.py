@@ -45,7 +45,7 @@ class PhoneServiceServicer(PhoneServiceServicer, metaclass=ServicerMeta):
         }
 
         SEX = {
-            Sex.UNKOWN_SEX: 0,
+            Sex.UNKNOWN_SEX: 0,
             Sex.MALE: 1,
             Sex.FEMALE: 2
         }
