@@ -37,7 +37,7 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
         db = pwdb.database
         with db.atomic() as transaction:
             try:
-                InquiryModel.create(
+                res = InquiryModel.create(
                     user_email=context.login_email,
                     title=title,
                     contents=contents,
@@ -46,6 +46,13 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
                     created_at=datetime.datetime.now(),
                     answer_content="",
                 )
+
+                if res.get():
+                    result_code = ResultCode.SUCCESS
+                    result_message = 'SUCCESS'
+                else:
+                    raise Exception
+
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
