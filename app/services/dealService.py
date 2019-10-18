@@ -60,7 +60,51 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def LookUpInquiry(self, request, context):
-        return
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown LookUpInquiry"
+
+        db = pwdb.database
+        with db.atomic as transaction:
+            try:
+                # mission_type, _offset, keyw, keyw
+                query = (Inquiry
+                    .select()
+                    .where(Inquiry.user_email == context.login_email))
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful look up inquiry"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+            inquiry_protoes = []
+
+            # id, title, ms_type, price_of_package, deadline, summary, url, created_at, state,
+            for row in cursor:
+                inquiry_protoes.append(
+                    Inquiry(
+                        mission_id=row[0],
+                        title=row[1],
+                        mission_type=row[2],
+                        price_of_package=row[3],
+                        deadline=row[4],
+                        summary=row[5],
+                        mission_state=row[8],
+                        created_at=row[7],
+                        thumbnail_url=row[6],
+                    )
+                )
+
+        return SearchMissionResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message
+            ),
+            search_mission_result=search_mission_result,
+            mission_protoes=mission_protoes,
+        )
 
     @verified
     def Accuse(self, request, context):
