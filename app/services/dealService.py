@@ -21,17 +21,17 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
 
         title = inquiry.title
         contents = inquiry.contents
-        category = request.category
+        category = inquiry.category
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown Inquiry result"
 
         Category = {
-            InquiryCategory.UNKNOWN_INQUIRY_CATEGORY: 0,
-            InquiryCategory.POINT: 1,
-            InquiryCategory.PROJECT: 2,
-            InquiryCategory.REGISTER: 3,
-            InquiryCategory.ETC_INQUIRY: 4,
+            InquiryCategory.UNKNOWN_INQUIRY_CATEGORY: "UNKNOWN",
+            InquiryCategory.POINT: "POINT",
+            InquiryCategory.PROJECT: "PROJECT",
+            InquiryCategory.REGISTER: "REGISTER",
+            InquiryCategory.ETC_INQUIRY: "ETC",
         }
 
         db = pwdb.database
@@ -64,6 +64,44 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def Accuse(self, request, context):
-        return
+        accuse = request.accuse
+
+        mission_id = accuse.mission_id
+        contents = accuse.contents
+        category = accuse.category
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Accuse result"
+
+        Category = {
+            InquiryCategory.UNKNOWN_INQUIRY_CATEGORY: "UNKNOWN",
+            InquiryCategory.POINT: "INSULT",
+            InquiryCategory.PROJECT: "ADVERTIESMENT",
+            InquiryCategory.REGISTER: "ADULT",
+            InquiryCategory.ETC_INQUIRY: "ETC",
+        }
+
+        db = pwdb.database
+        with db.atomic() as transaction:
+            try:
+                InquiryModel.create(
+                    user_email=context.login_email,
+                    mission_id=mission_id,
+                    is_complete=False,
+                    category=Category[category],
+                    created_at=datetime.datetime.now(),
+                    contents=contents,
+                )
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+        return InquiryResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+        )
 
 
