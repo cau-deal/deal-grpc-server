@@ -33,13 +33,14 @@ class JWTToken(pwdb.Model):
 
 class Mission(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
-    register_email = peewee.CharField(max_length=64, null=False)
+    register_email = peewee.ForeignKeyField(User, column_name='register_email')
     title = peewee.CharField(max_length=255, null=False)
     contents = peewee.TextField()
     mission_type = peewee.IntegerField()
     data_type = peewee.IntegerField()
     state = peewee.IntegerField(default=0)
     unit_package = peewee.IntegerField()
+    price_of_package = peewee.IntegerField()
     order_package_quantitiy = peewee.IntegerField()
     deadline = peewee.DateTimeField()
     created_at = peewee.DateTimeField()
@@ -66,7 +67,7 @@ class ConductMission(pwdb.Model):
 
 class MissionExplanationImage(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
-    mission_id = peewee.IntegerField()
+    mission_id = peewee.ForeignKeyField(Mission, column_name='mission_id')
     image_type = peewee.IntegerField()
     url = peewee.CharField()
     created_at = peewee.DateTimeField()
