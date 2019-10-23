@@ -48,7 +48,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         # Return Mission Response default
         result_code = ResultCode.UNKNOWN_RESULT_CODE
-        result_message = "Unknown"
+        result_message = "Unknown Register Mission"
         register_mission_result = RegisterMissionResult.UNKNOWN_REGISTER_MISSION_RESULT
 
         # JWT.decode()
@@ -228,7 +228,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_code=result_code,
                 message=result_message
             ),
-            search_mission_result = search_mission_result,
+            search_mission_result=search_mission_result,
             mission=query,
         )
 
