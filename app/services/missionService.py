@@ -233,7 +233,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         )
 
     @verified
-    def SearchMissionReleventMe(self, request, context):
+    def SearchMissionRelevantMe(self, request, context):
+        mission_protoes = []
+
         relevant_type = request.relevant_type
         mission_page = request.mission_page
 
@@ -242,7 +244,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         amount = mission_page.amount
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
-        result_message = "Unknown Search Mission Relevent me"
+        result_message = "Unknown Search Mission Relevant me"
         search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
 
         if mission_page_mode == MissionPageMode.INITAILIZE_MISSION_PAGE:
@@ -254,38 +256,22 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 MEI = MissionExplanationImage.alias()
                 MEIT = MissionExplanationImageType.alias()
 
-                if relevant_type == RelevantType.PROCESSING_RELEVANT
+                # work mission
+                if relevant_type == RelevantType.REGISTER_RELEVANT_TYPE:
+                    query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                            .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+                                & Mission.id >= _offset & Mission.register_email == context.login_email)
+                            .limit(amount))
 
-                # Keyword NOT Exist
-                if _query_type == NO_KEY_WORD:
-                    # mission type is not all
-                    if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
-                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                        & Mission.id >= _offset & Mission.mission_type == mission_type)
-                                 .limit(amount))
-                    # mission type is all
-                    else:
-                        query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
-                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                        & Mission.id >= _offset)
-                                 .limit(amount))
-                # keyword exist
+                # register mission
                 else:
-                    # mission type is not all
-                    if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
-                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                        & Mission.id >= _offset & Mission.mission_type == mission_type
-                                        & (Mission.title ** keyword | Mission.contents ** keyword))
-                                 .limit(amount))
-                    # mission type is all
-                    else:
-                        query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
-                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                        & Mission.id >= _offset & (
-                                                    Mission.title ** keyword | Mission.contents ** keyword))
-                                 .limit(amount))
+                    mission_ids = (ConductMission.select(ConductMission.mission_id)
+                                   .where(ConductMission.worker_email == context.login_email))
+                    # WHERE value 'In' clause
+                    query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                            .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+                                & Mission.id >= _offset & Mission.id << mission_ids)
+                            .limit(amount))
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission"
@@ -322,13 +308,10 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             mission_protoes=mission_protoes,
         )
 
-        pass
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
     @verified
     def GetAssignedMission(self, request, context):
+        # 아직 구현 완료 아님
+
         mission_id = request.mission_id
 
         db = pwdb.database
