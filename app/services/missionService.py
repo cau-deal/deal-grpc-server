@@ -140,13 +140,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                and Mission.id >= _offset and Mission.mission_type == mission_type)
+                                & Mission.id >= _offset & Mission.mission_type == mission_type)
                                 .limit(amount))
                     # mission type is all
                     else:
                         query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                and Mission.id >= _offset)
+                                & Mission.id >= _offset)
                                 .limit(amount))
                 # keyword exist
                 else:
@@ -154,14 +154,14 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                and Mission.id >= _offset and Mission.mission_type == mission_type
-                                and (Mission.title ** keyword or Mission.contents ** keyword))
+                                & Mission.id >= _offset & Mission.mission_type == mission_type
+                                & (Mission.title ** keyword | Mission.contents ** keyword))
                                 .limit(amount))
                     # mission type is all
                     else:
                         query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                and Mission.id >= _offset and (Mission.title ** keyword or Mission.contents ** keyword))
+                                & Mission.id >= _offset & (Mission.title ** keyword | Mission.contents ** keyword))
                                 .limit(amount))
 
                 result_code = ResultCode.SUCCESS
@@ -206,15 +206,16 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         db = pwdb.database
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
-        result_message = "Unknown"
+        result_message = "Unknown Search Mission With Id"
         search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
 
         with db.atomic as transaction:
             try:
+                query = Mission.select().where(Mission.id == mission_id)
+
                 result_code = ResultCode.SUCCESS
-                result_message = "Successful Search Mission"
+                result_message = "Successful Search Mission With Id"
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
-                result = Mission.select().where(Mission.id == mission_id)
 
             except Exception as e:
                 transaction.rollback()
@@ -228,7 +229,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 message=result_message
             ),
             search_mission_result = search_mission_result,
-            mission = result,
+            mission=query,
         )
 
     @verified
