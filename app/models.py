@@ -108,8 +108,7 @@ class PhoneAuthentication(pwdb.Model):
 
 # PhoneAuth
 class AccountAuthentication(pwdb.Model):
-    # user_email = peewee.CharField(primary_key=True)
-    user_email = peewee.ForeignKeyField(User, column_name='email')
+    user_email = peewee.ForeignKeyField(User, column_name='user_email')
     account_num = peewee.CharField()
     name = peewee.CharField()
     bank = peewee.CharField()

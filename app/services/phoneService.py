@@ -64,13 +64,13 @@ class PhoneServiceServicer(PhoneServiceServicer, metaclass=ServicerMeta):
                     birth=datetime.date(year=birth.year, month=birth.month, day=birth.day),
                 )
 
+                if ins_res == 0:
+                    raise Exception
+
                 res = User \
                     .update(is_phone_authentication=True) \
                     .where(User.email == context.login_email) \
                     .execute()
-
-                if ins_res == 0:
-                    raise Exception
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Phone Auth success"
