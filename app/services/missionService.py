@@ -6,6 +6,7 @@ from app.extensions import pwdb
 
 from app.models import MissionModel
 from app.models import ConductMission
+from app.models import MissionExplanationImageModel
 
 from protos.CommonResult_pb2 import ResultCode, CommonResult
 
@@ -155,8 +156,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                MEI123 = MissionExplanationImage.alias()
-                MEIT123 = MissionExplanationImageType.alias()
+                MEI = MissionExplanationImageModel.alias()
+                #MEIT = MissionExplanationImageType.alias()
                 # Keyword NOT Exist
                 if _query_type == NO_KEY_WORD:
                     # mission type is not all

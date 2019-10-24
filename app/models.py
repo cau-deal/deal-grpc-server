@@ -65,7 +65,7 @@ class ConductMission(pwdb.Model):
         db_table = 'conduct_mission'
 
 
-class MissionExplanationImage(pwdb.Model):
+class MissionExplanationImageModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
     mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
     image_type = peewee.IntegerField()
