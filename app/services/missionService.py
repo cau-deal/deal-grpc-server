@@ -97,10 +97,10 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     order_package_quantity=order_package_quantity,
                     deadline=datetime.datetime(year=d_year, month=d_month, day=d_day,
                                                hour=d_hour, minute=d_min, second=d_sec),
-                    summary=summary,
-                    contact_clause=contact_clause,
-                    specification=specification,
                     created_at=datetime.datetime.now(),
+                    #summary=summary,
+                    #contact_clause=contact_clause,
+                    #specification=specification,
                 )
                 
                 # Registered Mission Tuple print
