@@ -128,11 +128,11 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
         result_message = "Unknown Accuse result"
 
         Category = {
-            AccuseCategory.UNKNOWN_INQUIRY_CATEGORY: "UNKNOWN",
-            AccuseCategory.POINT: "INSULT",
-            AccuseCategory.PROJECT: "ADVERTIESMENT",
-            AccuseCategory.REGISTER: "ADULT",
-            AccuseCategory.ETC_INQUIRY: "ETC",
+            AccuseCategory.UNKNOWN_ACCUSE_CATEGORY: "UNKNOWN",
+            AccuseCategory.INSULT: "INSULT",
+            AccuseCategory.ADVERTISEMENT: "ADVERTIESMENT",
+            AccuseCategory.ADULT: "ADULT",
+            AccuseCategory.ETC_ACCUSE: "ETC",
         }
 
         db = pwdb.database
