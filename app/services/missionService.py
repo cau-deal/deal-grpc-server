@@ -148,7 +148,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             _query_type = YES_KEY_WORD
             keyword = "%" + keyword + "%"
 
-        if mission_page_mode == MissionPageMode.INITAILIZE_MISSION_PAGE:
+        if mission_page_mode == MissionPageMode.INITIALIZE_MISSION_PAGE:
             _offset = 0
 
         db = pwdb.database
@@ -269,7 +269,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         result_message = "Unknown Search Mission Relevant me"
         search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
 
-        if mission_page_mode == MissionPageMode.INITAILIZE_MISSION_PAGE:
+        if mission_page_mode == MissionPageMode.INITIALIZE_MISSION_PAGE:
             _offset = 0
 
         db = pwdb.database
