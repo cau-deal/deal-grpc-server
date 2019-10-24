@@ -160,30 +160,30 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 if _query_type == NO_KEY_WORD:
                     # mission type is not all
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                & Mission.id >= _offset & Mission.mission_type == mission_type)
+                                & MissionModel.id >= _offset & MissionModel.mission_type == mission_type)
                                 .limit(amount))
                     # mission type is all
                     else:
-                        query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                & Mission.id >= _offset)
+                                & MissionModel.id >= _offset)
                                 .limit(amount))
                 # keyword exist
                 else:
                     # mission type is not all
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                & Mission.id >= _offset & Mission.mission_type == mission_type
-                                & (Mission.title ** keyword | Mission.contents ** keyword))
+                                & MissionModel.id >= _offset & MissionModel.mission_type == mission_type
+                                & (MissionModel.title ** keyword | MissionModel.contents ** keyword))
                                 .limit(amount))
                     # mission type is all
                     else:
-                        query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                & Mission.id >= _offset & (Mission.title ** keyword | Mission.contents ** keyword))
+                                & MissionModel.id >= _offset & (MissionModel.title ** keyword | MissionModel.contents ** keyword))
                                 .limit(amount))
 
                 result_code = ResultCode.SUCCESS
@@ -233,7 +233,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic as transaction:
             try:
-                query = Mission.select().where(Mission.id == mission_id)
+                query = MissionModel.select().where(MissionModel.id == mission_id)
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission With Id"
@@ -280,9 +280,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 # work mission
                 if relevant_type == RelevantType.REGISTER_RELEVANT_TYPE:
-                    query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                    query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
                             .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                & Mission.id >= _offset & Mission.register_email == context.login_email)
+                                & MissionModel.id >= _offset & MissionModel.register_email == context.login_email)
                             .limit(amount))
 
                 # register mission
@@ -290,9 +290,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     mission_ids = (ConductMission.select(ConductMission.mission_id)
                                    .where(ConductMission.worker_email == context.login_email))
                     # WHERE value 'In' clause
-                    query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                    query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
                             .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                & Mission.id >= _offset & Mission.id << mission_ids)
+                                & MissionModel.id >= _offset & MissionModel.id << mission_ids)
                             .limit(amount))
 
                 result_code = ResultCode.SUCCESS
