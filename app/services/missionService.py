@@ -111,11 +111,11 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 transaction.rollback()
                 result_code = ResultCode.ERROR
                 #result_message = str(e)
-                error_message = str(e) + "\n" + context.login_email + "\n" + title + "\n" + contents + "\n" + \
-                                str(mission_type) + "\n" + str(DATA_TYPE[data_type]) + "\n" + str(unit_package) + "\n"+\
-                                str(price_of_package) + "\n" + str(datetime.datetime(year=d_year,month=d_month,day=d_day,hour=d_hour,minute=d_min,second=d_sec)) \
-                                     + "\n" + str(order_package_quantity) + "\n" + summary + "\n" + contact_clause + "\n" \
-                                     + specification + "\n" + str(MISSION_STATE[mission_state]) + "\n" + str(datetime.datetime.now())
+                error_message = str(e) + "  " + context.login_email + "  " + title + "  " + contents + "  " + \
+                                str(mission_type) + "  " + str(DATA_TYPE[data_type]) + "  " + str(unit_package) + "  "+\
+                                str(price_of_package) + "  " + str(datetime.datetime(year=d_year,month=d_month,day=d_day,hour=d_hour,minute=d_min,second=d_sec)) \
+                                     + "  " + str(order_package_quantity) + "  " + summary + "  " + contact_clause + "  " \
+                                     + specification + "  " + str(MISSION_STATE[mission_state]) + "  " + str(datetime.datetime.now())
                 result_message = error_message
                 register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
