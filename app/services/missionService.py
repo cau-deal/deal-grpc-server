@@ -39,7 +39,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         deadline = mission.deadline
 
         deadline_datetime = datetime.datetime(year=deadline.year, month=deadline.month, day=deadline.day,
-                                     hour=deadline.hour, minute=deadline.min, second=deadline.sec),
+                                     hour=deadline.hour, minute=deadline.min, second=deadline.sec)
 
         order_package_quantity = mission.order_package_quantity
         summary = mission.summary
