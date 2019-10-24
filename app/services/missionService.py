@@ -81,7 +81,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                """
                 Mission.create(
                     register_email=context.login_email,
                     title=title,
@@ -98,29 +97,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     contact_clause=contact_clause,
                     specification=specification,
                 )
-                """
 
-                MissionModel.select().where(MissionModel.register_email=="grpc_test@test.com")
-
-                """
-                Mission.create(
-                    register_mission_result="grpc_test@test.com",
-                    title=" ",
-                    contents=" ",
-                    mission_type=1,
-                    data_type=1,
-                    state=1,
-                    unit_package=1,
-                    price_of_package=1,
-                    order_package_quantity=1,
-                    deadline=datetime.datetime.now(),
-                    created_at=datetime.datetime.now(),
-                    summary=" ",
-                    contact_clause=" ",
-                    specification=" ",
-                )
-                """
-                
                 # Registered Mission Tuple print
                 result_code = ResultCode.SUCCESS
                 result_message = "Register Mission Success"
