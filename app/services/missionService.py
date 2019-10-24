@@ -155,8 +155,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                #MEI = MissionExplanationImage.alias()
-                #MEIT = MissionExplanationImageType.alias()
+                MEI123 = MissionExplanationImage.alias()
+                MEIT123 = MissionExplanationImageType.alias()
                 # Keyword NOT Exist
                 if _query_type == NO_KEY_WORD:
                     # mission type is not all
