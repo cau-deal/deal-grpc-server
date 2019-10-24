@@ -200,7 +200,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
 
             # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
-            """
+
             for row in query:
                 mission_protoes.append(
                     MissionProto(
@@ -215,7 +215,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         thumbnail_url=row.url,
                     )
                 )
-                """
+
 
         return SearchMissionResponse(
             result=CommonResult(
