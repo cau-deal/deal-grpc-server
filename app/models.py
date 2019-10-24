@@ -79,16 +79,28 @@ class MissionExplanationImage(pwdb.Model):
 
 class InquiryModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
-    user_email = peewee.CharField()
+    user_email = peewee.ForeignKeyField(User, column_name='user_email')
     title = peewee.CharField()
     contents = peewee.TextField()
-    is_complete = peewee.IntegerField()
+    is_complete = peewee.BooleanField()
     category = peewee.CharField()
     created_at = peewee.DateTimeField()
     answer_content = peewee.TextField()
 
     class Meta:
         db_table = 'inquiry'
+
+class AccuseModel(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    user_email = peewee.ForeignKeyField(User, column_name='user_email')
+    mission_id = peewee.ForeignKeyField(Mission, column_name='mission_id')
+    is_complete = peewee.BooleanField()
+    category = peewee.CharField()
+    created_at = peewee.DateTimeField()
+    contents = peewee.TextField()
+
+    class Meta:
+        db_table = 'accuse'
 
 
 # PhoneAuth
@@ -108,8 +120,7 @@ class PhoneAuthentication(pwdb.Model):
 
 # PhoneAuth
 class AccountAuthentication(pwdb.Model):
-    # user_email = peewee.CharField(primary_key=True)
-    user_email = peewee.ForeignKeyField(User, column_name='email')
+    user_email = peewee.ForeignKeyField(User, column_name='user_email')
     account_num = peewee.CharField()
     name = peewee.CharField()
     bank = peewee.CharField()
