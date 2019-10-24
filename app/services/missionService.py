@@ -110,7 +110,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e)
+                result_message = str(e) + "test"
                 #result_message = str(e) + "\n" + context.login_email + "\n" + title + "\n" + contents + "\n" + mission_type\
                 #                     + "\n" + DATA_TYPE[data_type] + "\n" + unit_package + "\n" + price_of_package + "\n" \
                 #                     + datetime.datetime(year=d_year,month=d_month,day=d_day,hour=d_hour,minute=d_min,second=d_sec) \
