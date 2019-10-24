@@ -99,9 +99,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     specification=specification,
                 )
                 """
-                Mission.create(
-                    title=" ",
-                )
+
+                """
                 Mission.create(
                     register_mission_result="grpc_test@test.com",
                     title=" ",
@@ -118,6 +117,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     contact_clause=" ",
                     specification=" ",
                 )
+                """
                 
                 # Registered Mission Tuple print
                 result_code = ResultCode.SUCCESS
