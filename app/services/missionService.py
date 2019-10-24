@@ -4,7 +4,7 @@ from sea.servicer import ServicerMeta
 from app.decorators import verified
 from app.extensions import pwdb
 
-from app.models import Mission
+from app.models import MissionModel
 from app.models import ConductMission
 
 from protos.CommonResult_pb2 import ResultCode, CommonResult
@@ -100,7 +100,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 )
                 """
 
-                Mission.select().where(Mission.user_email=="grpc_test@test.com")
+                MissionModel.select().where(Mission.user_email=="grpc_test@test.com")
 
                 """
                 Mission.create(
