@@ -131,7 +131,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         keyword = request.keyword
         mission_page = request.mission_page
 
-        mission_page_mode = mission_page.mission_page
+        mission_page_mode = mission_page.mission_page_mode
         _offset = mission_page._offset
         amount = mission_page.amount
 
