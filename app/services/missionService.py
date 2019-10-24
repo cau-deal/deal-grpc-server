@@ -211,7 +211,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         deadline=row.deadline,
                         summary=row.summary,
                         mission_state=row.state,
-                        created_at=row.created_at,
+                        #created_at=row.created_at,
                         #thumbnail_url=row.url,
                     )
                 )

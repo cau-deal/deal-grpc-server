@@ -70,7 +70,7 @@ class MissionExplanationImageModel(pwdb.Model):
     mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
     image_type = peewee.IntegerField()
     url = peewee.CharField()
-    created_at = peewee.DateTimeField()
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
 
     class Meta:
         db_table = 'mission_explanation_image'
