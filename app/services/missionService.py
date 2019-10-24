@@ -1,4 +1,3 @@
-from google.auth.transport import grpc
 from peewee import JOIN
 from sea.servicer import ServicerMeta
 
@@ -100,6 +99,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     specification=specification,
                 )
                 """
+                Mission.create(
+                    title=" ",
+                )
                 Mission.create(
                     register_mission_result="grpc_test@test.com",
                     title=" ",
