@@ -37,8 +37,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         deadline = ms.deadline
 
         d_year = deadline.year
-        d_month= deadline.month
-        d_day  = deadline.day
+        d_month = deadline.month
+        d_day = deadline.day
         d_hour = deadline.hour
         d_min = deadline.min
         d_sec = deadline.sec
@@ -54,7 +54,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         db = pwdb.database
         # Return Mission Response default
         result_code = ResultCode.UNKNOWN_RESULT_CODE
-        result_message = "Unknown"
+        result_message = "Unknown Register mission"
         register_mission_result = RegisterMissionResult.UNKNOWN_REGISTER_MISSION_RESULT
 
         #ENUM Mission Type
@@ -67,21 +67,19 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         #ENUM DataType
         DATA_TYPE = {
-            DataType.UNKNOWN_DATA_TYPE : 0,
-            DataType.IMAGE : 1,
-            DataType.SOUND : 2,
-            DataType.SURVEY : 3,
+            DataType.UNKNOWN_DATA_TYPE: 0,
+            DataType.IMAGE: 1,
+            DataType.SOUND: 2,
+            DataType.SURVEY: 3,
         }
 
         MISSION_STATE = {
-            MissionState.UNKNOWN_MISSION_STATE : 0,
-            MissionState.DURING_MISSION : 1,
-            MissionState.SOLD_OUT : 2,
-            MissionState.WATING_CONFIRM_PURCHASE : 3,
-            MissionState.COMPLETE_MISSION : 4,
+            MissionState.UNKNOWN_MISSION_STATE: 0,
+            MissionState.DURING_MISSION: 1,
+            MissionState.SOLD_OUT: 2,
+            MissionState.WATING_CONFIRM_PURCHASE: 3,
+            MissionState.COMPLETE_MISSION: 4,
         }
-
-        #ENUM MissionState
 
         with db.atomic() as transaction:
             try:
@@ -89,17 +87,16 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     register_email=context.login_email,
                     title=title,
                     contents=contents,
-                    mission_type=mission_type,
+                    mission_type=MISSION_TYPE[mission_type],
                     data_type=DATA_TYPE[data_type],
                     unit_package=unit_package,
                     price_of_package=price_of_package,
-                    deadline=datetime.datetime(year=d_year,month=d_month,day=d_day,hour=d_hour,minute=d_min,second=d_sec),
                     order_package_quantity=order_package_quantity,
+                    deadline=datetime.datetime(year=d_year, month=d_month, day=d_day,
+                                               hour=d_hour, minute=d_min, second=d_sec),
                     summary=summary,
                     contact_clause=contact_clause,
                     specification=specification,
-                    state=MISSION_STATE[mission_state],
-                    created_at=datetime.datetime.now(),
                 )
                 
                 # Registered Mission Tuple print

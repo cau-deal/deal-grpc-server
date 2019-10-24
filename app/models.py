@@ -38,15 +38,15 @@ class Mission(pwdb.Model):
     contents = peewee.TextField()
     mission_type = peewee.IntegerField()
     data_type = peewee.IntegerField()
-    state = peewee.IntegerField(default=0)
+    state = peewee.IntegerField(default=1)
     unit_package = peewee.IntegerField()
     price_of_package = peewee.IntegerField()
     order_package_quantity = peewee.IntegerField()
     deadline = peewee.DateTimeField()
     created_at = peewee.DateTimeField(default=datetime.datetime.now())
-    summary = peewee.CharField()
-    contact_clause = peewee.TextField()
-    specification = peewee.TextField()
+    summary = peewee.CharField(null=True)
+    contact_clause = peewee.TextField(null=True)
+    specification = peewee.TextField(null=True)
 
     class Meta:
         db_table = 'mission'
