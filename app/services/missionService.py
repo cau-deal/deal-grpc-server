@@ -140,7 +140,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
 
         NO_KEY_WORD = 1
-        YES_KEY_WORD= 2
+        YES_KEY_WORD = 2
 
         if len(keyword) == 0:
             _query_type = NO_KEY_WORD
@@ -152,7 +152,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             _offset = 0
 
         db = pwdb.database
-        with db.atomic as transaction:
+
+        with db.atomic() as transaction:
             try:
                 MEI = MissionExplanationImage.alias()
                 MEIT = MissionExplanationImageType.alias()
@@ -198,6 +199,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
 
             # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
+            """
             for row in query:
                 mission_protoes.append(
                     MissionProto(
@@ -212,6 +214,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         thumbnail_url=row.url,
                     )
                 )
+                """
 
         return SearchMissionResponse(
             result=CommonResult(
@@ -232,7 +235,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         result_message = "Unknown Search Mission With Id"
         search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
 
-        with db.atomic as transaction:
+        with db.atomic() as transaction:
             try:
                 query = MissionModel.select().where(MissionModel.id == mission_id)
 
@@ -274,7 +277,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             _offset = 0
 
         db = pwdb.database
-        with db.atomic as transaction:
+        with db.atomic() as transaction:
             try:
                 MEI = MissionExplanationImage.alias()
                 MEIT = MissionExplanationImageType.alias()
