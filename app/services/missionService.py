@@ -81,7 +81,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                Mission.create(
+                MissionModel.create(
                     register_email=context.login_email,
                     title=title,
                     contents=contents,
