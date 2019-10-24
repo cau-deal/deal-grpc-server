@@ -202,6 +202,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
 
             for row in query:
+                d = row.created_at
                 mission_protoes.append(
                     MissionProto(
                         mission_id=row.id,
@@ -211,7 +212,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         deadline=row.deadline,
                         summary=row.summary,
                         mission_state=row.state,
-                        #created_at=row.created_at,
+                        created_at=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute, sec=d.second),
                         #thumbnail_url=row.url,
                     )
                 )
