@@ -93,7 +93,7 @@ class InquiryModel(pwdb.Model):
 class AccuseModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
     user_email = peewee.ForeignKeyField(User, column_name='user_email')
-    mission_id = peewee.ForeignKeyField(Mission, column_name='id')
+    mission_id = peewee.ForeignKeyField(Mission, column_name='mission_id')
     is_complete = peewee.BooleanField()
     category = peewee.CharField()
     created_at = peewee.DateTimeField()

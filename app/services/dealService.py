@@ -9,6 +9,7 @@ from protos.Datetime_pb2 import Datetime
 from protos.DealService_pb2_grpc import *
 from protos.DealService_pb2 import *
 from app.models import InquiryModel
+from app.models import AccuseModel
 
 from protos.CommonResult_pb2 import *
 
@@ -127,17 +128,17 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
         result_message = "Unknown Accuse result"
 
         Category = {
-            InquiryCategory.UNKNOWN_INQUIRY_CATEGORY: "UNKNOWN",
-            InquiryCategory.POINT: "INSULT",
-            InquiryCategory.PROJECT: "ADVERTIESMENT",
-            InquiryCategory.REGISTER: "ADULT",
-            InquiryCategory.ETC_INQUIRY: "ETC",
+            AccuseCategory.UNKNOWN_INQUIRY_CATEGORY: "UNKNOWN",
+            AccuseCategory.POINT: "INSULT",
+            AccuseCategory.PROJECT: "ADVERTIESMENT",
+            AccuseCategory.REGISTER: "ADULT",
+            AccuseCategory.ETC_INQUIRY: "ETC",
         }
 
         db = pwdb.database
         with db.atomic() as transaction:
             try:
-                InquiryModel.create(
+                AccuseModel.create(
                     user_email=context.login_email,
                     mission_id=mission_id,
                     is_complete=False,
