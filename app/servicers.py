@@ -5,8 +5,7 @@ UserServiceServicer = userService.UserServiceServicer
 dealServiceServicer = dealService.DealServiceServicer
 missionServiceServicer = missionService.MissionServiceServicer
 phoneServiceServicer = phoneService.PhoneServiceServicer
-userServiceServicer = userService.UserServiceServicer
-
+accountServiceServicer = accountService.AccountServiceServicer
 
 # message = messaging.Message(
 #     android=messaging.AndroidConfig(
