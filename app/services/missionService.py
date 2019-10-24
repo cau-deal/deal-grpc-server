@@ -163,13 +163,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     # mission type is not all
 
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
+                        query = (MissionModel.join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id)).select()
                                 .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
                                 & MissionModel.id >= _offset & MissionModel.mission_type == mission_type)
                                 .limit(amount))
                     # mission type is all
                     else:
-                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
+                        query = (MissionModel.join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id)).select()
                                 .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
                                 & MissionModel.id >= _offset)
                                 .limit(amount))
@@ -177,14 +177,14 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 else:
                     # mission type is not all
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
+                        query = (MissionModel.join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id)).select()
                                 .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
                                 & MissionModel.id >= _offset & MissionModel.mission_type == mission_type
                                 & (MissionModel.title ** keyword | MissionModel.contents ** keyword))
                                 .limit(amount))
                     # mission type is all
                     else:
-                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
+                        query = (MissionModel.join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id)).select()
                                 .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
                                 & MissionModel.id >= _offset & (MissionModel.title ** keyword | MissionModel.contents ** keyword))
                                 .limit(amount))
