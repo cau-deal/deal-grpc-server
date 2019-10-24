@@ -159,6 +159,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 # Keyword NOT Exist
                 if _query_type == NO_KEY_WORD:
                     # mission type is not all
+                    """
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
@@ -185,7 +186,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                 .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
                                 & MissionModel.id >= _offset & (MissionModel.title ** keyword | MissionModel.contents ** keyword))
                                 .limit(amount))
-
+"""
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission"
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
