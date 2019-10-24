@@ -14,6 +14,9 @@ from protos.CommonResult_pb2 import *
 
 import datetime
 
+# for bank auth rest api
+import requests
+
 
 class AccountServiceServicer(AccountServiceServicer, metaclass=ServicerMeta):
 
@@ -22,8 +25,8 @@ class AccountServiceServicer(AccountServiceServicer, metaclass=ServicerMeta):
         account = request.account
 
         account_num = account.account_num
-        name = account.name
         bank = account.bank
+        account_holder_info = account.account_holder_info
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown Account Auth Result"
@@ -37,6 +40,31 @@ class AccountServiceServicer(AccountServiceServicer, metaclass=ServicerMeta):
             BANK.KAKAO: "090",
             BANK.WOORI: "020",
         }
+
+        headers = {
+                    'Content-Type': 'application/json; charset=UTF-8',
+                    "Authorization": "Bearer 08e28d74-664a-4cd8-91da-4a1b38a9aaea"
+                }
+        now_time = datetime.datetime.now()
+        now_time_str = now_time.strftime("%Y%m%d%H%M%S")
+        params = {
+            "bank_code_std": BANK_ENUM[bank],
+            "account_num": account_num,
+            "account_holder_info": account_holder_info,
+            "tran_dtime": now_time_str,
+        }
+
+        response = requests.post(
+            url='https://openapi.open-platform.or.kr/inquiry/real_name',
+            headers = headers,
+            params = params2,
+        )
+
+        print(params2)
+        print(headers)
+
+        print(response)
+
 
         db = pwdb.database
 
