@@ -145,6 +145,10 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
                     created_at=datetime.datetime.now(),
                     contents=contents,
                 )
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful accuse"
+
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
