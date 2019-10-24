@@ -1,4 +1,5 @@
 from google.auth.transport import grpc
+from peewee import JOIN
 from sea.servicer import ServicerMeta
 
 from app.decorators import verified
@@ -17,6 +18,7 @@ from protos.Data_pb2 import *
 
 from protos.MissionService_pb2 import *
 from protos.MissionService_pb2_grpc import *
+
 
 import datetime
 
@@ -54,7 +56,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         db = pwdb.database
         # Return Mission Response default
         result_code = ResultCode.UNKNOWN_RESULT_CODE
-        result_message = "Unknown Register mission"
+        result_message = "Unknown Register Mission"
         register_mission_result = RegisterMissionResult.UNKNOWN_REGISTER_MISSION_RESULT
 
         #ENUM Mission Type
@@ -128,59 +130,67 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SearchMission(self, request, context):
-        # Mission Obj
-        ms = request.mission
+        mission_protoes = []
 
         # Mission Obj parsing
-        mission_type = ms.mission_type
-        keyword = ms.keyword
-        mission_page = ms.mission_page
+        mission_type = request.mission_type
+        keyword = request.keyword
+        mission_page = request.mission_page
 
         mission_page_mode = mission_page.mission_page
-
         _offset = mission_page._offset
         amount = mission_page.amount
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
-        result_message = "Unknown"
+        result_message = "Unknown Search Mission"
         search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
 
         NO_KEY_WORD = 1
         YES_KEY_WORD= 2
 
-        if len(keyword)==0:
+        if len(keyword) == 0:
             _query_type = NO_KEY_WORD
         else:
             _query_type = YES_KEY_WORD
+            keyword = "%" + keyword + "%"
 
+        if mission_page_mode == MissionPageMode.INITAILIZE_MISSION_PAGE:
+            _offset = 0
 
         db = pwdb.database
         with db.atomic as transaction:
             try:
+                MEI = MissionExplanationImage.alias()
+                MEIT = MissionExplanationImageType.alias()
                 # Keyword NOT Exist
                 if _query_type == NO_KEY_WORD:
-                    # mission type, _offset, keyword
-                    query = (Mission
-                    .select(Mission.id, Mission.title, Mission.price_of_package, Mission.deadline, Mission.summary, \
-                        MissionExplanationImage.url.alias('url'), Mission.created_at.alias('created_at'), \
-                        Mission.state) 
-                    .join(MissionExplanationImage)
-                    .where(
-                        (Mission.mission_type == mission_type) &
-                        (Mission.id > _offset) &
-                        (Mission.id > MissionExplanationImage.id) &
-                        (MissionExplanationImage.image_type == 1)
-                        .order_by(SQL('id').desc())
-                        .limt(10)))
-
-                else :
-                    # mission_type, _offset, keyw, keyw
-                    cursor = db.execute_sql(
-                        'SELECT mission.id AS id, title, mission_type, price_of_package, deadline, summary, \
-                            url AS thumbnail_url, mission.created_at AS created_at, mission.state AS state \
-                        FROM mission, mission_explanation_image WHERE (mission_type = ? AND mission.id > ? AND mission.id = mission_explanation_image.mission_id AND mission_explanation_image.image_type = 1 AND (title LIKE ? OR contents LIKE ?)) ORDER BY id DESC LIMIT 10;'
-                        ,(mission_type, _offset, keyword, keyword),
-                    )
+                    # mission type is not all
+                    if mission_type != MissionType.ALL_MISSION_TYPE:
+                        query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                                .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+                                & Mission.id >= _offset & Mission.mission_type == mission_type)
+                                .limit(amount))
+                    # mission type is all
+                    else:
+                        query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                                .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+                                & Mission.id >= _offset)
+                                .limit(amount))
+                # keyword exist
+                else:
+                    # mission type is not all
+                    if mission_type != MissionType.ALL_MISSION_TYPE:
+                        query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                                .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+                                & Mission.id >= _offset & Mission.mission_type == mission_type
+                                & (Mission.title ** keyword | Mission.contents ** keyword))
+                                .limit(amount))
+                    # mission type is all
+                    else:
+                        query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                                .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+                                & Mission.id >= _offset & (Mission.title ** keyword | Mission.contents ** keyword))
+                                .limit(amount))
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission"
@@ -192,21 +202,19 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e)
                 search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
 
-            misson_protoes = []
-
-            # id, title, ms_type, price_of_package, deadline, summary, url, created_at, state,
-            for row in cursor:
-                misson_protoes.append(
+            # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
+            for row in query:
+                mission_protoes.append(
                     MissionProto(
-                        mission_id = row[0],
-                        title = row[1],
-                        mission_type = row[2],
-                        price_of_package = row[3],
-                        deadline = row[4],
-                        summary = row[5],
-                        mission_state = row[8],
-                        created_at = row[7],
-                        thumbnail_url = row[6],                        
+                        mission_id=row.id,
+                        title=row.title,
+                        mission_type=row.mission_type,
+                        price_of_package=row.price_of_package,
+                        deadline=row.deadline,
+                        summary=row.summary,
+                        mission_state=row.mission_state,
+                        created_at=row.created_at,
+                        thumbnail_url=row.url,
                     )
                 )
 
@@ -216,7 +224,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 message=result_message
             ),
             search_mission_result=search_mission_result,
-            mission_protoes = mission_protoes,
+            mission_protoes=mission_protoes,
         )
 
     @verified
@@ -226,15 +234,16 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         db = pwdb.database
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
-        result_message = "Unknown"
+        result_message = "Unknown Search Mission With Id"
         search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
 
         with db.atomic as transaction:
             try:
+                query = Mission.select().where(Mission.id == mission_id)
+
                 result_code = ResultCode.SUCCESS
-                result_message = "Successful Search Mission"
+                result_message = "Successful Search Mission With Id"
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
-                result = Mission.select().where(Mission.id == mission_id)
 
             except Exception as e:
                 transaction.rollback()
@@ -247,19 +256,90 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_code=result_code,
                 message=result_message
             ),
-            search_mission_result = search_mission_result,
-            mission = result,
+            search_mission_result=search_mission_result,
+            mission=query,
         )
 
     @verified
-    def SearchMissionReleventMe(self, request, context):
-        pass
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+    def SearchMissionRelevantMe(self, request, context):
+        mission_protoes = []
+
+        relevant_type = request.relevant_type
+        mission_page = request.mission_page
+
+        mission_page_mode = mission_page.mission_page_mode
+        _offset = mission_page._offset
+        amount = mission_page.amount
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Search Mission Relevant me"
+        search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
+
+        if mission_page_mode == MissionPageMode.INITAILIZE_MISSION_PAGE:
+            _offset = 0
+
+        db = pwdb.database
+        with db.atomic as transaction:
+            try:
+                MEI = MissionExplanationImage.alias()
+                MEIT = MissionExplanationImageType.alias()
+
+                # work mission
+                if relevant_type == RelevantType.REGISTER_RELEVANT_TYPE:
+                    query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                            .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+                                & Mission.id >= _offset & Mission.register_email == context.login_email)
+                            .limit(amount))
+
+                # register mission
+                else:
+                    mission_ids = (ConductMission.select(ConductMission.mission_id)
+                                   .where(ConductMission.worker_email == context.login_email))
+                    # WHERE value 'In' clause
+                    query = (Mission.select().join(MEI, JOIN.LEFT_OUTER, on=(Mission.id == MEI.mission_id))
+                            .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+                                & Mission.id >= _offset & Mission.id << mission_ids)
+                            .limit(amount))
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful Search Mission"
+                search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
+
+            # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
+            for row in query:
+                mission_protoes.append(
+                    MissionProto(
+                        mission_id=row.id,
+                        title=row.title,
+                        mission_type=row.mission_type,
+                        price_of_package=row.price_of_package,
+                        deadline=row.deadline,
+                        summary=row.summary,
+                        mission_state=row.mission_state,
+                        created_at=row.created_at,
+                        thumbnail_url=row.url,
+                    )
+                )
+
+        return SearchMissionResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message
+            ),
+            search_mission_result=search_mission_result,
+            mission_protoes=mission_protoes,
+        )
 
     @verified
     def GetAssignedMission(self, request, context):
+        # 아직 구현 완료 아님
+
         mission_id = request.mission_id
 
         db = pwdb.database
