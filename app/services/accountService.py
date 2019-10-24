@@ -44,7 +44,7 @@ class AccountServiceServicer(AccountServiceServicer, metaclass=ServicerMeta):
             try:
                 ins_res = AccountAuthentication \
                     .create(
-                    user_eamil=context.login_email,
+                    user_email=context.login_email,
                     account_num=account_num,
                     name=name,
                     bank=BANK_ENUM[bank],
