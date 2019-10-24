@@ -210,7 +210,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         price_of_package=row.price_of_package,
                         deadline=row.deadline,
                         summary=row.summary,
-                        mission_state=row.mission_state,
+                        mission_state=row.state,
                         created_at=row.created_at,
                         thumbnail_url=row.url,
                     )
