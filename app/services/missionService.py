@@ -27,33 +27,29 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
     @verified
     def RegisterMission(self, request, context):
         # Mission Obj
-        ms = request.mission
+        mission = request.mission
 
         # Mission Obj parsing
-        title = ms.title
-        contents = ms.contents
-        mission_type = ms.mission_type
-        data_type = ms.data_type
-        unit_package = ms.unit_package
-        price_of_package = ms.price_of_package
-        deadline = ms.deadline
+        title = mission.title
+        contents = mission.contents
+        mission_type = mission.mission_type
+        data_type = mission.data_type
+        unit_package = mission.unit_package
+        price_of_package = mission.price_of_package
+        deadline = mission.deadline
 
-        d_year = deadline.year
-        d_month = deadline.month
-        d_day = deadline.day
-        d_hour = deadline.hour
-        d_min = deadline.min
-        d_sec = deadline.sec
+        deadline_datetime = datetime.datetime(year=deadline.year, month=deadline.month, day=deadline.day,
+                                     hour=deadline.hour, minute=deadline.min, second=deadline.sec),
 
-        order_package_quantity = ms.order_package_quantity
-        summary = ms.summary
-        contact_clause = ms.contact_clause
-        specification = ms.specification
-        mission_explanation_images = ms.mission_explanation_images
-        mission_state = ms.mission_state
+        order_package_quantity = mission.order_package_quantity
+        summary = mission.summary
+        contact_clause = mission.contact_clause
+        specification = mission.specification
+        mission_explanation_images = mission.mission_explanation_images
 
         # Database Obj
         db = pwdb.database
+
         # Return Mission Response default
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown Register Mission"
@@ -67,7 +63,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             MissionType.PROCESS_MISSION_TYPE: 3,
         }
 
-        #ENUM DataType
+        #ENUM Data Type
         DATA_TYPE = {
             DataType.UNKNOWN_DATA_TYPE: 0,
             DataType.IMAGE: 1,
@@ -75,6 +71,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             DataType.SURVEY: 3,
         }
 
+        #ENUM Mission State
         MISSION_STATE = {
             MissionState.UNKNOWN_MISSION_STATE: 0,
             MissionState.DURING_MISSION: 1,
@@ -85,6 +82,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
+                """
                 Mission.create(
                     register_email=context.login_email,
                     title=title,
@@ -95,12 +93,28 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     unit_package=unit_package,
                     price_of_package=price_of_package,
                     order_package_quantity=order_package_quantity,
-                    deadline=datetime.datetime(year=d_year, month=d_month, day=d_day,
-                                               hour=d_hour, minute=d_min, second=d_sec),
+                    deadline=deadline_datetime,
                     created_at=datetime.datetime.now(),
-                    #summary=summary,
-                    #contact_clause=contact_clause,
-                    #specification=specification,
+                    summary=summary,
+                    contact_clause=contact_clause,
+                    specification=specification,
+                )
+                """
+                Mission.create(
+                    register_mission_result="grpc_test@test.com",
+                    title=" ",
+                    contents=" ",
+                    mission_type=1,
+                    data_type=1,
+                    state=1,
+                    unit_package=1,
+                    price_of_package=1,
+                    order_package_quantity=1,
+                    deadline=datetime.datetime.now(),
+                    created_at=datetime.datetime.now(),
+                    summary=" ",
+                    contact_clause=" ",
+                    specification=" ",
                 )
                 
                 # Registered Mission Tuple print
