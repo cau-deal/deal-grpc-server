@@ -8,7 +8,7 @@ DEBUG = True
 TIMEZONE = "Asia/Seoul"
 
 GRPC_HOST = "0.0.0.0"
-GRPC_PORT = 9093
+GRPC_PORT = 9092
 
 GRPC_PRIVATE_KEY_PATH = '/home/ubuntu/newdocker/server.key'
 GRPC_CERT_CHAIN_PATH = '/home/ubuntu/newdocker/server.crt'
