@@ -100,7 +100,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 )
                 """
 
-                MissionModel.select().where(Mission.user_email=="grpc_test@test.com")
+                MissionModel.select().where()
 
                 """
                 Mission.create(
