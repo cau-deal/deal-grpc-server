@@ -12,6 +12,9 @@ from protos.CommonResult_pb2 import ResultCode, CommonResult
 from protos.Data_pb2 import MissionExplanationImageType
 from protos.Data_pb2 import MissionExplanationImage
 
+from protos.Datetime_pb2 import Datetime
+from protos.Data_pb2 import *
+
 from protos.MissionService_pb2 import *
 from protos.MissionService_pb2_grpc import *
 
@@ -25,7 +28,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         ms = request.mission
 
         # Mission Obj parsing
-        mission_id = 0
         title = ms.title
         contents = ms.contents
         mission_type = ms.mission_type
@@ -33,53 +35,74 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         unit_package = ms.unit_package
         price_of_package = ms.price_of_package
         deadline = ms.deadline
+
+        d_year = deadline.year
+        d_month= deadline.month
+        d_day  = deadline.day
+        d_hour = deadline.hour
+        d_min = deadline.min
+        d_sec = deadline.sec
+
         order_package_quantity = ms.order_package_quantity
         summary = ms.summary
         contact_clause = ms.contact_clause
         specification = ms.specification
         mission_explanation_images = ms.mission_explanation_images
         mission_state = ms.mission_state
-        created_at = ms.created_at
 
         # Database Obj
         db = pwdb.database
-
         # Return Mission Response default
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown"
         register_mission_result = RegisterMissionResult.UNKNOWN_REGISTER_MISSION_RESULT
 
-        # JWT.decode()
+        #ENUM Mission Type
+        MISSION_TYPE = {
+            MissionType.UNKNOWN_MISSION_TYPE: 0,
+            MissionType.ALL_MISSION_TYPE: 1,
+            MissionType.COLLECT_MISSION_TYPE: 2,
+            MissionType.PROCESS_MISSION_TYPE: 3,
+        }
+
+        #ENUM DataType
+        DATA_TYPE = {
+            DataType.UNKNOWN_DATA_TYPE : 0,
+            DataType.IMAGE : 1,
+            DataType.SOUND : 2,
+            DataType.SURVEY : 3,
+        }
+
+        MISSION_STATE = {
+            MissionState.UNKNOWN_MISSION_STATE : 0,
+            MissionState.DURING_MISSION : 1,
+            MissionState.SOLD_OUT : 2,
+            MissionState.WATING_CONFIRM_PURCHASE : 3,
+            MissionState.COMPLETE_MISSION : 4,
+        }
+
+        #ENUM MissionState
 
         with db.atomic() as transaction:
             try:
-                query = Mission.create(
+                Mission.create(
                     register_email=context.login_email,
                     title=title,
                     contents=contents,
                     mission_type=mission_type,
-                    data_type=data_type,
+                    data_type=DATA_TYPE[data_type],
                     unit_package=unit_package,
                     price_of_package=price_of_package,
-                    deadline=deadline,
+                    deadline=datetime.datetime(year=d_year,month=d_month,day=d_day,hour=d_hour,minute=d_min,second=d_sec),
                     order_package_quantity=order_package_quantity,
                     summary=summary,
                     contact_clause=contact_clause,
                     specification=specification,
-                    mission_explanation_images=mission_explanation_images,
-                    mission_state=mission_state,
-                    created_at=created_at,
+                    state=MISSION_STATE[mission_state],
+                    created_at=datetime.datetime.now(),
                 )
                 
                 # Registered Mission Tuple print
-                print(query)
-
-                for images in mission_explanation_images:
-                    MissionExplanationImage.create(
-                        image_type=MissionExplanationImageType.UNKNOWN_MISSION_EXPLANATION_IMAGE_TYPE,
-                        url=images.url,
-                    )
-
                 result_code = ResultCode.SUCCESS
                 result_message = "Register Mission Success"
                 register_mission_result = RegisterMissionResult.SUCCESS_REGISTER_MISSION_RESULT

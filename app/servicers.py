@@ -1,4 +1,4 @@
-from app.services import authService, dealService, missionService, phoneService, userService
+from app.services import authService, dealService, missionService, phoneService, userService, accountService
 
 AuthServiceServicer = authService.AuthServiceServicer
 UserServiceServicer = userService.UserServiceServicer

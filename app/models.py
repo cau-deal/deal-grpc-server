@@ -33,19 +33,20 @@ class JWTToken(pwdb.Model):
 
 class Mission(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
-    register_email = peewee.CharField(max_length=64, null=False)
-    title = peewee.CharField(max_length=255, null=False)
+    register_email = peewee.ForeignKeyField(User, column_name='register_email')
+    title = peewee.CharField()
     contents = peewee.TextField()
     mission_type = peewee.IntegerField()
     data_type = peewee.IntegerField()
     state = peewee.IntegerField(default=0)
     unit_package = peewee.IntegerField()
-    order_package_quantitiy = peewee.IntegerField()
+    price_of_package = peewee.IntegerField()
+    order_package_quantity = peewee.IntegerField()
     deadline = peewee.DateTimeField()
-    created_at = peewee.DateTimeField()
-    summary = peewee.CharField(max_length=255, null=True)
-    contact_clause = peewee.TextField(null=True)
-    specification = peewee.TextField(null=True)
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    summary = peewee.CharField()
+    contact_clause = peewee.TextField()
+    specification = peewee.TextField()
 
     class Meta:
         db_table = 'mission'
