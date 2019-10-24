@@ -89,6 +89,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     contents=contents,
                     mission_type=MISSION_TYPE[mission_type],
                     data_type=DATA_TYPE[data_type],
+                    state=MISSION_STATE[MissionState.DURING_MISSION],
                     unit_package=unit_package,
                     price_of_package=price_of_package,
                     order_package_quantity=order_package_quantity,
@@ -97,6 +98,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     summary=summary,
                     contact_clause=contact_clause,
                     specification=specification,
+                    created_at=datetime.datetime.now(),
                 )
                 
                 # Registered Mission Tuple print
@@ -112,7 +114,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                 str(mission_type) + "  " + str(DATA_TYPE[data_type]) + "  " + str(unit_package) + "  "+\
                                 str(price_of_package) + "  " + str(datetime.datetime(year=d_year,month=d_month,day=d_day,hour=d_hour,minute=d_min,second=d_sec)) \
                                      + "  " + str(order_package_quantity) + "  " + summary + "  " + contact_clause + "  " \
-                                     + specification + "  " + str(MISSION_STATE[mission_state]) + "  " + str(datetime.datetime.now())
+                                     + specification + "  " + str(MISSION_STATE[mission_state]) + "  " + str(datetime.datetime.now()) + "  " \
+                + str(type(datetime.datetime(year=d_year,month=d_month,day=d_day,hour=d_hour,minute=d_min,second=d_sec))) + " " \
+                + str(type(datetime.datetime.now()))
                 result_message = error_message
                 register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
