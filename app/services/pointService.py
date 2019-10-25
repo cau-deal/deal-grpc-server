@@ -84,10 +84,10 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             point_histories = []
 
             POINT_ALTER_REASON = {
-                PointAlterReason.UNKNOWN_POINT: 0,
+                PointAlterReason.UNKNOWN_POINT_ALTER_REASON: 0,
                 PointAlterReason.DEPOSIT: 1,
                 PointAlterReason.WITHDRAW: 2,
-                PointAlterReason.COMPLETE_MISSION: 3,
+                PointAlterReason.COMPLETED_MISSION: 3,
                 PointAlterReason.REQUEST_MISSION: 4,
                 PointAlterReason.PLUS_EVENT: 5,
                 PointAlterReason.MINUS_EVENT: 6,
@@ -164,10 +164,10 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             point_histories = []
 
             POINT_ALTER_REASON = {
-                PointAlterReason.UNKNOWN_POINT: 0,
+                PointAlterReason.UNKNOWN_POINT_ALTER_REASON: 0,
                 PointAlterReason.DEPOSIT: 1,
                 PointAlterReason.WITHDRAW: 2,
-                PointAlterReason.COMPLETE_MISSION: 3,
+                PointAlterReason.COMPLETED_MISSION: 3,
                 PointAlterReason.REQUEST_MISSION: 4,
                 PointAlterReason.PLUS_EVENT: 5,
                 PointAlterReason.MINUS_EVENT: 6,
