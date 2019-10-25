@@ -46,8 +46,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 result_message = "Look up balance success"
 
                 message = result_message
-                for sample in total_deposit:
-                    message += " " + str(sample.total) + " " + str(type(sample.total))
+                for row in total_deposit.tuples():
+                    message += " " + str(row)
                 print(message)
 
             except Exception as e:
