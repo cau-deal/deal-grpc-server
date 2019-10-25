@@ -19,7 +19,7 @@ from peewee import fn
 
 import datetime
 
-class SPointerServicer(object):
+class SPointerServicer():
     def sLookUpBalance(email):
         balance = 0
 
