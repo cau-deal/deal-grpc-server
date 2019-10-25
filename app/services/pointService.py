@@ -316,6 +316,11 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
+                balance = sPointServicer.sLookUpBalance(context.login_email)
+
+                if balance - val < 0:
+                    raise Exception("Insufficiency point balance")
+
                 WithdrawPoint.create(
                     user_email=context.login_email,
                     val=val,
