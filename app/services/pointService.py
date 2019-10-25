@@ -253,6 +253,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown Deposit"
+        deposit_result = DEPOSIT_RESULT[DepositResult.UNKNOWN_DEPOSIT_TYPE]
 
         db = pwdb.database
 
@@ -282,8 +283,45 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             deposit_result=deposit_result,
         )
 
-        return
-
     @verified
     def Withdraw(self, request, context):
-        return
+        withdraw = request.withdraw
+
+        val = withdraw.val
+
+        WITHDRAW_RESULT = {
+            WithdrawResult.UNKNOWN_WITHDRAW_RESUTL: 0,
+            WithdrawResult.SUCCESS_WITHDRAW_RESULT: 1,
+            WithdrawResult.FAIL_WITHDRAW_RESULT: 2,
+        }
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Withdraw"
+        withdraw_result = WITHDRAW_RESULT[WithdrawResult.UNKNOWN_WITHDRAW_RESUTL]
+
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                WithdrawPoint.create(
+                    user_email=context.login_email,
+                    val=val,
+                )
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Withdraw success"
+                withdraw_result = WITHDRAW_RESULT[WithdrawResult.SUCCESS_WITHDRAW_RESULT]
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                withdraw_result = WITHDRAW_RESULT[WithdrawResult.FAIL_WITHDRAW_RESULT]
+
+        return DepositResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            withdraw_result=withdraw_result,
+        )
