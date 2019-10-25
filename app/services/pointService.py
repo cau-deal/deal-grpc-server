@@ -72,7 +72,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             balance=int(balance),
         )
         """
-    def sLookUpBalance(email):
+    def sLookUpBalance(self, request, context):
         balance = 0
 
         db = pwdb.database
@@ -112,7 +112,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                balance = self.sLookUpBalance(context.login_email)
+                balance = self.sLookUpBalance(self, request, context)
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success"
