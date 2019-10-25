@@ -232,7 +232,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown Deposit"
-        deposit_result = DEPOSIT_RESULT[DepositResult.UNKNOWN_DEPOSIT_TYPE]
+        deposit_result = DEPOSIT_RESULT[DepositResult.UNKNOWN_DEPOSIT_RESULT]
 
         db = pwdb.database
 
