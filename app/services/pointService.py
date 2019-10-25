@@ -90,7 +90,6 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up plus history success"
 
-                """
                 for row in query_deposit:
                     point_histories.append(
                         PointHistory(
@@ -117,7 +116,6 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                             created_at=row.created_at,
                         )
                     )
-                """
 
                 # 버그 예상 지점
                 #point_histories.sort(key=PointHistory.created_at, reverse=True)
