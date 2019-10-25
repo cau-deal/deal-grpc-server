@@ -41,6 +41,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                                  .where(TransferPoint.sender_email == context.login_email))
 
                 balance = total_deposit + total_receive - total_withdraw - total_send
+                total_send.sum
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success"
