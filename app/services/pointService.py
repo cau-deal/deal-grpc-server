@@ -31,44 +31,42 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                total_deposit = (DepositPoint.select(fn.Sum(DepositPoint.val).alias('total'))
+                total_deposit_query = (DepositPoint.select(fn.Sum(DepositPoint.val).alias('total'))
                                  .where(DepositPoint.user_email == context.login_email))
-                total_withdraw = (WithdrawPoint.select(fn.Sum(WithdrawPoint.val))
+                total_withdraw_query = (WithdrawPoint.select(fn.Sum(WithdrawPoint.val))
                                  .where(WithdrawPoint.user_email == context.login_email))
-                total_receive = (TransferPoint.select(fn.Sum(TransferPoint.val))
+                total_receive_query = (TransferPoint.select(fn.Sum(TransferPoint.val))
                                  .where(TransferPoint.receiver_email == context.login_email))
-                total_send = (TransferPoint.select(fn.Sum(TransferPoint.val))
+                total_send_query = (TransferPoint.select(fn.Sum(TransferPoint.val))
                                  .where(TransferPoint.sender_email == context.login_email))
 
-                #balance = total_deposit + total_receive - total_withdraw - total_send
+                balance = 0
+
+                for row in total_deposit_query:
+                    balance += row.total
+                for row in total_withdraw_query:
+                    balance -= row.total
+                for row in total_receive_query:
+                    balance += row.total
+                for row in total_send_query:
+                    balance -= row.total
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success"
 
-                message = result_message
-                for row in total_deposit:
-                    message += " " + str(total_deposit)
-                    message += " " + str(type(total_deposit))
-                    message += " " + str(row)
-                    message += " " + str(type(row))
-                    message += " " + str(row.total)
-                    message += " " + str(type(row.total))
-                print(message)
-
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                #result_message = str(e)
-                message += str(e)
+                result_message = str(e)
                 print("EXCEPTION: " + str(e))
 
         return LookUpBalanceResponse(
             result=CommonResult(
                 result_code=result_code,
                 #message=result_message + "   " + str(total_deposit.total),
-                message=message,
+                message=result_message,
             ),
-            balance=0,
+            balance=balance,
         )
 
     @verified
