@@ -1,3 +1,5 @@
+from operator import itemgetter
+
 from peewee import Database
 from sea.servicer import ServicerMeta
 
@@ -117,7 +119,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                         }
                     )
 
-                tmp_point_histories.sort(key=PointHistory.created_at, reverse=True)
+                tmp_point_histories.sort(key=itemgetter('created_at'), reverse=True)
 
 #                created_at = Datetime(year=c.year, month=c.month, day=c.day,
 #                                      hour=c.hour, min=c.minute, sec=c.second)
