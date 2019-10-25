@@ -92,29 +92,29 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
                 for row in query_deposit:
                     tmp_point_histories.append(
-                        PointHistory(
-                            val=row.val,
-                            point_alter_reason=POINT_ALTER_REASON[PointAlterReason.DEPOSIT],
-                            created_at=row.created_at,
-                        )
+                        {
+                        'val': row.val,
+                        'point_alter_reason' : POINT_ALTER_REASON[PointAlterReason.DEPOSIT],
+                        'created_at' : row.created_at
+                        }
                     )
 
                 for row in query_get_work_point:
                     tmp_point_histories.append(
-                        PointHistory(
-                            val=row.val,
-                            point_alter_reason=POINT_ALTER_REASON[PointAlterReason.COMPLETE_MISSION],
-                            created_at=row.created_at,
-                        )
+                        {
+                            'val': row.val,
+                            'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.COMPLETE_MISSION],
+                            'created_at': row.created_at
+                        }
                     )
 
                 for row in query_get_event_point:
                     tmp_point_histories.append(
-                        PointHistory(
-                            val=row.val,
-                            point_alter_reason=POINT_ALTER_REASON[PointAlterReason.PLUS_EVENT],
-                            created_at=row.created_at,
-                        )
+                        {
+                            'val': row.val,
+                            'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.PLUS_EVENT],
+                            'created_at': row.created_at
+                        }
                     )
 
                 tmp_point_histories.sort(key=PointHistory.created_at, reverse=True)
