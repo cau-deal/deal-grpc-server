@@ -3,7 +3,6 @@ from peewee import fn
 from app.extensions import pwdb
 from app.models import DepositPoint, WithdrawPoint, TransferPoint
 
-
 class SPointerServicer:
     def sLookUpBalance(email):
         balance = 0
