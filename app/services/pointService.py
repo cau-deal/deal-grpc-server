@@ -20,7 +20,7 @@ from peewee import fn
 import datetime
 
 
-class PhoneServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
+class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def LookUpBalance(self, request, context):
