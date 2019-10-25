@@ -44,12 +44,15 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
                 for row in total_deposit_query:
                     balance += row.total
+                tmp = ""
                 for row in total_withdraw_query:
-                    balance -= row.total
-                for row in total_receive_query:
-                    balance += row.total
-                for row in total_send_query:
-                    balance -= row.total
+                    tmp = str(row) + "  " + str(type(row))
+                #for row in total_withdraw_query:
+                #    balance -= row.total
+                #for row in total_receive_query:
+                #    balance += row.total
+                #for row in total_send_query:
+                #    balance -= row.total
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success"
