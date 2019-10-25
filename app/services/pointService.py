@@ -121,11 +121,22 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
                 tmp_point_histories.sort(key=itemgetter('created_at'), reverse=True)
 
+                for row in tmp_point_histories:
+                    c = row['created_at']
+                    point_histories.append(
+                        PointHistory(
+                            val=row['val'],
+                            point_alter_reason=row['point_alter_reason'],
+                            created_at=Datetime(year=c.year, month=c.month, day=c.day,
+                                                hour=c.hour, min=c.minute, sec=c.second)
+                        )
+                    )
+
 #                created_at = Datetime(year=c.year, month=c.month, day=c.day,
 #                                      hour=c.hour, min=c.minute, sec=c.second)
 
                 # 버그 예상 지점
-                point_histories.sort(key=PointHistory.created_at, reverse=True)
+                #point_histories.sort(key=PointHistory.created_at, reverse=True)
 
             except Exception as e:
                 transaction.rollback()
