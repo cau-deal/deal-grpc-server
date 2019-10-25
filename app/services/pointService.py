@@ -47,8 +47,9 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
                 message = result_message
                 for row in total_deposit:
-                    message += "  " + str(type(total_deposit))
+                    message += " " + str(type(total_deposit))
                     message += " " + str(type(row))
+                    message += " " + str(type(total_deposit.total))
                     message += " " + str(type(row.total))
                 print(message)
 
