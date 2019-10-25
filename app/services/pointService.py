@@ -227,8 +227,10 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def Deposit(self, request, context):
-        val = request.val
-        deposit_type = request.deposit_type
+        deposit = request.deposit
+
+        val = deposit.val
+        deposit_type = deposit.deposit_type
 
         DEPOSIT_TYPE = {
             DepositType.UNKNOWN_DEPOSIT_TYPE: 0,
@@ -252,7 +254,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 DepositPoint.create(
                     user_email=context.login_email,
                     val=val,
-                    kind=deposit_type,
+                    kind=DEPOSIT_TYPE[deposit_type],
                 )
 
                 result_code = ResultCode.SUCCESS
