@@ -31,13 +31,13 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                total_deposit = (DepositPoint.select(fn.Sum(DepositPoint.val).alias('sum'))
+                total_deposit = (DepositPoint.select(fn.Sum(DepositPoint.val))
                                  .where(DepositPoint.user_email == context.login_email))
-                total_withdraw = (WithdrawPoint.select(fn.Sum(WithdrawPoint.val).alias('sum'))
+                total_withdraw = (WithdrawPoint.select(fn.Sum(WithdrawPoint.val))
                                  .where(WithdrawPoint.user_email == context.login_email))
-                total_receive = (TransferPoint.select(fn.Sum(TransferPoint.val).alias('sum'))
+                total_receive = (TransferPoint.select(fn.Sum(TransferPoint.val))
                                  .where(TransferPoint.receiver_email == context.login_email))
-                total_send = (TransferPoint.select(fn.Sum(TransferPoint.val).alias('sum'))
+                total_send = (TransferPoint.select(fn.Sum(TransferPoint.val))
                                  .where(TransferPoint.sender_email == context.login_email))
 
                 balance = total_deposit + total_receive - total_withdraw - total_send
@@ -48,13 +48,13 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e) + "   " + str(total_deposit.sum)
+                result_message = str(e) + "   " + str(total_deposit)
                 print("EXCEPTION: " + str(e))
 
         return LookUpBalanceResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + "   " + str(total_deposit.sum),
+                message=result_message + "   " + str(total_deposit),
             ),
             balance=0,
         )
