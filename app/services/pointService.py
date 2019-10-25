@@ -107,6 +107,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown Look up balance Result"
 
+        balance = 0
+
         db = pwdb.database
 
         with db.atomic() as transaction:
