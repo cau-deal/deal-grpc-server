@@ -47,7 +47,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
                 message = result_message
                 for sample in total_deposit:
-                    message += sample.total
+                    message += " " + str(sample.total) + " " + str(type(sample.total))
+                print(message)
 
             except Exception as e:
                 transaction.rollback()
