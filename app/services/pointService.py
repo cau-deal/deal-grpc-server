@@ -136,7 +136,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 result_code=result_code,
                 message=result_message,
             ),
-            point_histories=point_histories,
+            #point_histories=point_histories,
         )
 
     @verified
