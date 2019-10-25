@@ -68,6 +68,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             PointAlterReason.MINUS_EVENT: 6,
         }
 
+        point_histories = []
+
         db = pwdb.database
 
         with db.atomic() as transaction:
@@ -84,8 +86,6 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up plus history success"
-
-                point_histories = []
 
                 for row in query_deposit:
                     point_histories.append(
