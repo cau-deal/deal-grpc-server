@@ -40,7 +40,10 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 total_send = (TransferPoint.select(fn.Sum(TransferPoint.val))
                                  .where(TransferPoint.sender_email == context.login_email))
 
-                balance = total_deposit + total_receive - total_withdraw - total_send
+                #balance = total_deposit + total_receive - total_withdraw - total_send
+
+                for row in total_deposit.tuples():
+                    print(row)
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success"
