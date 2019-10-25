@@ -115,7 +115,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                balance = sPointServicer.sLookUpBalance(context.login_email)
+                email = context.login_email
+                balance = sPointServicer.sLookUpBalance(email)
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success"
@@ -123,7 +124,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e)
+                result_message = str(e) + str(type(context.login_email))
                 print("EXCEPTION: " + str(e))
 
         return LookUpBalanceResponse(
