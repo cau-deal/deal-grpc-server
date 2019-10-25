@@ -45,16 +45,21 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success"
 
+                message = result_message
+                for sample in total_deposit:
+                    message += sample.total
+
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e) + "   " + str(total_deposit.total)
+                result_message = str(e)
                 print("EXCEPTION: " + str(e))
 
         return LookUpBalanceResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + "   " + str(total_deposit[0].total),
+                #message=result_message + "   " + str(total_deposit.total),
+                message=message,
             ),
             balance=0,
         )
