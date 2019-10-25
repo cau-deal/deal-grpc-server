@@ -55,12 +55,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                     if row.total != None:
                         balance -= row.total
 
-                tmp = ""
-                for row in total_withdraw_query:
-                    tmp = "  "  + str(row) + "  " + str(type(row)) + "  " + str(row.total)
-
                 result_code = ResultCode.SUCCESS
-                result_message = "Look up balance success" + tmp
+                result_message = "Look up balance success"
 
             except Exception as e:
                 transaction.rollback()
@@ -71,7 +67,6 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
         return LookUpBalanceResponse(
             result=CommonResult(
                 result_code=result_code,
-                #message=result_message + "   " + str(total_deposit.total),
                 message=result_message,
             ),
             balance=int(balance),
