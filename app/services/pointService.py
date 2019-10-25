@@ -40,21 +40,24 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 total_send = (TransferPoint.select(fn.Sum(TransferPoint.val))
                                  .where(TransferPoint.sender_email == context.login_email))
 
+                balance = total_deposit + total_receive - total_withdraw - total_send
+
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success"
 
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e)
+                result_message = str(e) + "   " + str(type(total_deposit)) + "   " + str(type(total_withdraw)) \
+                                 + "   " + str(type(total_receive)) + "   " + str(type(total_send))
                 print("EXCEPTION: " + str(e))
 
         return LookUpBalanceResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + "   " + str(type(total_deposit)),
+                message=result_message,
             ),
-            balance=int(total_deposit + total_receive - total_withdraw - total_send),
+            balance=balance,
         )
 
     @verified
