@@ -46,7 +46,9 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 result_message = "Look up balance success"
 
                 message = result_message
-                for row in total_deposit.tuples():
+                for row in total_deposit:
+                    message += "  " + str(type(total_deposit))
+                    message += " " + str(type(row))
                     message += " " + str(type(row.total))
                 print(message)
 
