@@ -53,7 +53,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e)
+                #result_message = str(e)
+                message += str(e)
                 print("EXCEPTION: " + str(e))
 
         return LookUpBalanceResponse(
