@@ -74,7 +74,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                from_day = datetime.now() - datetime.timedelta(days=last_days)
+                from_day = datetime.datetime.now() - datetime.timedelta(days=last_days)
                 query_deposit = (DepositPoint.select(DepositPoint.val, DepositPoint.created_at)
                          .where(DepositPoint.user_email==context.login_email and DepositPoint.created_at >= from_day))
                 query_get_work_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
