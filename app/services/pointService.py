@@ -77,7 +77,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 now = datetime.datetime.now()
                 from_day = datetime.datetime(year=now.year, month=now.month, day=now.day - last_days,
                                     hour=now.hour, minute=now.minute, second=now.second)
-                """
+
                 query_deposit = (DepositPoint.select(DepositPoint.val, DepositPoint.created_at)
                          .where(DepositPoint.user_email==context.login_email and DepositPoint.created_at >= from_day))
                 query_get_work_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
@@ -86,7 +86,6 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 query_get_event_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
                          .where(TransferPoint.receiver_email==context.login_email
                                 and TransferPoint.created_at >= from_day and TransferPoint.mission_id.is_null(True)))
-                """
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up plus history success"
