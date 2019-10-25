@@ -58,6 +58,16 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown Look up plus history Result"
 
+        POINT_ALTER_REASON = {
+            PointAlterReason.UNKNOWN_POINT_ALTER_REASON: 0,
+            PointAlterReason.DEPOSIT: 1,
+            PointAlterReason.WITHDRAW: 2,
+            PointAlterReason.COMPLETED_MISSION: 3,
+            PointAlterReason.REQUEST_MISSION: 4,
+            PointAlterReason.PLUS_EVENT: 5,
+            PointAlterReason.MINUS_EVENT: 6,
+        }
+
         db = pwdb.database
 
         with db.atomic() as transaction:
@@ -75,53 +85,43 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up plus history success"
 
+                point_histories = []
+
+                for row in query_deposit:
+                    point_histories.append(
+                        PointHistory(
+                            val=row.val,
+                            point_alter_reason=POINT_ALTER_REASON[PointAlterReason.DEPOSIT],
+                            created_at=row.created_at,
+                        )
+                    )
+
+                for row in query_get_work_point:
+                    point_histories.append(
+                        PointHistory(
+                            val=row.val,
+                            point_alter_reason=POINT_ALTER_REASON[PointAlterReason.COMPLETE_MISSION],
+                            created_at=row.created_at,
+                        )
+                    )
+
+                for row in query_get_event_point:
+                    point_histories.append(
+                        PointHistory(
+                            val=row.val,
+                            point_alter_reason=POINT_ALTER_REASON[PointAlterReason.PLUS_EVENT],
+                            created_at=row.created_at,
+                        )
+                    )
+
+                # 버그 예상 지점
+                point_histories.sort(key=PointHistory.created_at, reverse=True)
+
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
                 result_message = str(e)
                 print("EXCEPTION: " + str(e))
-
-            point_histories = []
-
-            POINT_ALTER_REASON = {
-                PointAlterReason.UNKNOWN_POINT_ALTER_REASON: 0,
-                PointAlterReason.DEPOSIT: 1,
-                PointAlterReason.WITHDRAW: 2,
-                PointAlterReason.COMPLETED_MISSION: 3,
-                PointAlterReason.REQUEST_MISSION: 4,
-                PointAlterReason.PLUS_EVENT: 5,
-                PointAlterReason.MINUS_EVENT: 6,
-            }
-
-            for row in query_deposit:
-                point_histories.append(
-                    PointHistory(
-                        val=row.val,
-                        point_alter_reason=POINT_ALTER_REASON[PointAlterReason.DEPOSIT],
-                        created_at=row.created_at,
-                    )
-                )
-
-            for row in query_get_work_point:
-                point_histories.append(
-                    PointHistory(
-                        val=row.val,
-                        point_alter_reason=POINT_ALTER_REASON[PointAlterReason.COMPLETE_MISSION],
-                        created_at=row.created_at,
-                    )
-                )
-
-            for row in query_deposit:
-                point_histories.append(
-                    PointHistory(
-                        val=row.val,
-                        point_alter_reason=POINT_ALTER_REASON[PointAlterReason.PLUS_EVENT],
-                        created_at=row.created_at,
-                    )
-                )
-
-            # 버그 예상 지점
-            point_histories.sort(key=PointHistory.created_at, reverse=True)
 
         return LookUpBalanceResponse(
             result=CommonResult(
