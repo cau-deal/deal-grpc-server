@@ -318,7 +318,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e)
                 withdraw_result = WITHDRAW_RESULT[WithdrawResult.FAIL_WITHDRAW_RESULT]
 
-        return DepositResponse(
+        return WithdrawResponse(
             result=CommonResult(
                 result_code=result_code,
                 message=result_message,
