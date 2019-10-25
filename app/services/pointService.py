@@ -123,7 +123,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e)
                 print("EXCEPTION: " + str(e))
 
-        return LookUpBalanceResponse(
+        return LookUpPointHistoryResponse(
             result=CommonResult(
                 result_code=result_code,
                 message=result_message,
