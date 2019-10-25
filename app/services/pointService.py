@@ -81,12 +81,12 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                                     hour=now.hour, minute=now.minute, second=now.second)
 
                 query_deposit = (DepositPoint.select(DepositPoint.val, DepositPoint.created_at)
-                         .where(DepositPoint.user_email==context.login_email and DepositPoint.created_at >= from_day))
+                         .where(DepositPoint.user_email == context.login_email and DepositPoint.created_at >= from_day))
                 query_get_work_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
-                         .where(TransferPoint.receiver_email==context.login_email
+                         .where(TransferPoint.receiver_email == context.login_email
                                 and TransferPoint.created_at >= from_day and TransferPoint.mission_id.is_null(False)))
                 query_get_event_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
-                         .where(TransferPoint.receiver_email==context.login_email
+                         .where(TransferPoint.receiver_email == context.login_email
                                 and TransferPoint.created_at >= from_day and TransferPoint.mission_id.is_null(True)))
 
                 result_code = ResultCode.SUCCESS
@@ -95,9 +95,9 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 for row in query_deposit:
                     tmp_point_histories.append(
                         {
-                        'val': row.val,
-                        'point_alter_reason' : POINT_ALTER_REASON[PointAlterReason.DEPOSIT],
-                        'created_at' : row.created_at
+                            'val': row.val,
+                            'point_alter_reason' : POINT_ALTER_REASON[PointAlterReason.DEPOSIT],
+                            'created_at' : row.created_at
                         }
                     )
 
@@ -132,12 +132,6 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                         )
                     )
 
-#                created_at = Datetime(year=c.year, month=c.month, day=c.day,
-#                                      hour=c.hour, min=c.minute, sec=c.second)
-
-                # 버그 예상 지점
-                #point_histories.sort(key=PointHistory.created_at, reverse=True)
-
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
@@ -154,6 +148,100 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def LookUpMinusPointHistory(self, request, context):
+        last_days = request.last_days
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Look up minus history Result"
+
+        POINT_ALTER_REASON = {
+            PointAlterReason.UNKNOWN_POINT_ALTER_REASON: 0,
+            PointAlterReason.DEPOSIT: 1,
+            PointAlterReason.WITHDRAW: 2,
+            PointAlterReason.COMPLETED_MISSION: 3,
+            PointAlterReason.REQUEST_MISSION: 4,
+            PointAlterReason.PLUS_EVENT: 5,
+            PointAlterReason.MINUS_EVENT: 6,
+        }
+
+        tmp_point_histories = []
+        point_histories = []
+
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                now = datetime.datetime.now()
+                from_day = datetime.datetime(year=now.year, month=now.month, day=now.day - last_days,
+                                             hour=now.hour, minute=now.minute, second=now.second)
+
+                query_withdraw = (WithdrawPoint.select(WithdrawPoint.val, WithdrawPoint.created_at)
+                        .where(WithdrawPoint.user_email == context.login_email and WithdrawPoint.created_at >= from_day))
+                query_cost_request_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
+                        .where(TransferPoint.sender_email == context.login_email
+                                and TransferPoint.created_at >= from_day and TransferPoint.mission_id.is_null(False)))
+                query_cost_event_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
+                        .where(TransferPoint.sender_email == context.login_email
+                                and TransferPoint.created_at >= from_day and TransferPoint.mission_id.is_null(True)))
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Look up minus history success"
+
+                for row in query_withdraw:
+                    tmp_point_histories.append(
+                        {
+                            'val': row.val,
+                            'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.WITHDRAW],
+                            'created_at': row.created_at
+                        }
+                    )
+
+                for row in query_cost_request_point:
+                    tmp_point_histories.append(
+                        {
+                            'val': row.val,
+                            'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.REQUEST_MISSION],
+                            'created_at': row.created_at
+                        }
+                    )
+
+                for row in query_cost_event_point:
+                    tmp_point_histories.append(
+                        {
+                            'val': row.val,
+                            'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.MINUS_EVENT],
+                            'created_at': row.created_at
+                        }
+                    )
+
+                tmp_point_histories.sort(key=itemgetter('created_at'), reverse=True)
+
+                for row in tmp_point_histories:
+                    c = row['created_at']
+                    point_histories.append(
+                        PointHistory(
+                            val=row['val'],
+                            point_alter_reason=row['point_alter_reason'],
+                            created_at=Datetime(year=c.year, month=c.month, day=c.day,
+                                                hour=c.hour, min=c.minute, sec=c.second)
+                        )
+                    )
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                print("EXCEPTION: " + str(e))
+
+        return LookUpPointHistoryResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            point_histories=point_histories,
+        )
+
+        ###############################################################################################################
+        """
         last_days = request.last_days
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
@@ -231,6 +319,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             ),
             point_histories=point_histories,
         )
+        """
 
     @verified
     def Deposit(self, request, context):
