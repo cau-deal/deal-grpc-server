@@ -8,6 +8,7 @@ from app.extensions_db import sPointServicer
 from app.models import DepositPoint
 from app.models import WithdrawPoint
 from app.models import TransferPoint
+from protos.Datetime_pb2 import Datetime
 
 from protos.PointService_pb2 import *
 from protos.PointService_pb2_grpc import *
@@ -15,8 +16,6 @@ from protos.PointService_pb2_grpc import *
 from protos.Date_pb2 import *
 
 from protos.CommonResult_pb2 import *
-
-from peewee import fn
 
 import datetime
 
@@ -91,29 +90,35 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 result_message = "Look up plus history success"
 
                 for row in query_deposit:
+                    c = row.created_at
                     point_histories.append(
                         PointHistory(
                             val=row.val,
                             point_alter_reason=POINT_ALTER_REASON[PointAlterReason.DEPOSIT],
-                            created_at=row.created_at,
+                            created_at=Datetime(year=c.year, month=c.month, day=c.day,
+                                                hour=c.hour, min=c.minute, sec=c.second),
                         )
                     )
 
                 for row in query_get_work_point:
+                    c = row.created_at
                     point_histories.append(
                         PointHistory(
                             val=row.val,
                             point_alter_reason=POINT_ALTER_REASON[PointAlterReason.COMPLETE_MISSION],
-                            created_at=row.created_at,
+                            created_at=Datetime(year=c.year, month=c.month, day=c.day,
+                                                hour=c.hour, min=c.minute, sec=c.second),
                         )
                     )
 
                 for row in query_get_event_point:
+                    c = row.created_at
                     point_histories.append(
                         PointHistory(
                             val=row.val,
                             point_alter_reason=POINT_ALTER_REASON[PointAlterReason.PLUS_EVENT],
-                            created_at=row.created_at,
+                            created_at=Datetime(year=c.year, month=c.month, day=c.day,
+                                                hour=c.hour, min=c.minute, sec=c.second),
                         )
                     )
 
