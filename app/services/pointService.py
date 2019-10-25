@@ -67,6 +67,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             PointAlterReason.MINUS_EVENT: 6,
         }
 
+        tmp_point_histories = []
         point_histories = []
 
         db = pwdb.database
@@ -90,37 +91,36 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 result_message = "Look up plus history success"
 
                 for row in query_deposit:
-                    c = row.created_at
-                    point_histories.append(
+                    tmp_point_histories.append(
                         PointHistory(
                             val=row.val,
                             point_alter_reason=POINT_ALTER_REASON[PointAlterReason.DEPOSIT],
-                            created_at=Datetime(year=c.year, month=c.month, day=c.day,
-                                                hour=c.hour, min=c.minute, sec=c.second),
+                            created_at=row.created_at,
                         )
                     )
 
                 for row in query_get_work_point:
-                    c = row.created_at
-                    point_histories.append(
+                    tmp_point_histories.append(
                         PointHistory(
                             val=row.val,
                             point_alter_reason=POINT_ALTER_REASON[PointAlterReason.COMPLETE_MISSION],
-                            created_at=Datetime(year=c.year, month=c.month, day=c.day,
-                                                hour=c.hour, min=c.minute, sec=c.second),
+                            created_at=row.created_at,
                         )
                     )
 
                 for row in query_get_event_point:
-                    c = row.created_at
-                    point_histories.append(
+                    tmp_point_histories.append(
                         PointHistory(
                             val=row.val,
                             point_alter_reason=POINT_ALTER_REASON[PointAlterReason.PLUS_EVENT],
-                            created_at=Datetime(year=c.year, month=c.month, day=c.day,
-                                                hour=c.hour, min=c.minute, sec=c.second),
+                            created_at=row.created_at,
                         )
                     )
+
+                tmp_point_histories.sort(key=PointHistory.created_at, reverse=True)
+
+#                created_at = Datetime(year=c.year, month=c.month, day=c.day,
+#                                      hour=c.hour, min=c.minute, sec=c.second)
 
                 # 버그 예상 지점
                 point_histories.sort(key=PointHistory.created_at, reverse=True)
