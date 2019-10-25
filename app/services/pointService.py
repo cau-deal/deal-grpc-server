@@ -2,7 +2,7 @@ from peewee import Database
 from sea.servicer import ServicerMeta
 
 from app.decorators import verified, unverified
-from app.extensions import pwdb, SPointServicer
+from app.extensions import pwdb
 
 from app.models import DepositPoint
 from app.models import WithdrawPoint
