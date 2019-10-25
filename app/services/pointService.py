@@ -31,6 +31,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
+                """
                 total_deposit = (DepositPoint.select(fn.Sum(DepositPoint.val))
                                  .where(DepositPoint.user_email==context.login_email)).scalar()
                 total_withdraw = (WithdrawPoint.select(fn.Sum(WithdrawPoint.val))
@@ -39,6 +40,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                                  .where(TransferPoint.receiver_email==context.login_email)).scalar()
                 total_send = (TransferPoint.select(fn.Sum(TransferPoint.val))
                                  .where(TransferPoint.sender_email==context.login_email)).scalar()
+                """
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success"
