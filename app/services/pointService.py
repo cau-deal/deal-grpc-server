@@ -47,7 +47,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
                 message = result_message
                 for row in total_deposit.tuples():
-                    message += " " + str(row)
+                    message += " " + str(type(row.total))
                 print(message)
 
             except Exception as e:
