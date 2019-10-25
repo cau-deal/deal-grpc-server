@@ -69,7 +69,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 #message=result_message + "   " + str(total_deposit.total),
                 message=result_message,
             ),
-            balance=balance,
+            balance=int(balance),
         )
 
     @verified
