@@ -123,7 +123,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                     )
 
                 # 버그 예상 지점
-                #point_histories.sort(key=PointHistory.created_at, reverse=True)
+                point_histories.sort(key=PointHistory.created_at, reverse=True)
 
             except Exception as e:
                 transaction.rollback()
