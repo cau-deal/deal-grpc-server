@@ -2,7 +2,7 @@ from peewee import Database
 from sea.servicer import ServicerMeta
 
 from app.decorators import verified, unverified
-from app.extensions import JWT, pwdb, EmailSender
+from app.extensions import JWT, pwdb, EmailSender, SPointServicer
 
 from app.models import DepositPoint
 from app.models import WithdrawPoint
@@ -18,7 +18,6 @@ from protos.CommonResult_pb2 import *
 from peewee import fn
 
 import datetime
-
 
 class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
     """
@@ -43,16 +42,16 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 balance = 0
 
                 for row in total_deposit_query:
-                    if row.total != None:
+                    if row.total is not None:
                         balance += row.total
                 for row in total_withdraw_query:
-                    if row.total != None:
+                    if row.total is not None:
                         balance -= row.total
                 for row in total_receive_query:
-                    if row.total != None:
+                    if row.total is not None:
                         balance += row.total
                 for row in total_send_query:
-                    if row.total != None:
+                    if row.total is not None:
                         balance -= row.total
 
                 result_code = ResultCode.SUCCESS
@@ -72,34 +71,6 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             balance=int(balance),
         )
         """
-    def sLookUpBalance(self, request, context):
-        balance = 0
-
-        db = pwdb.database
-
-        total_deposit_query = (DepositPoint.select(fn.Sum(DepositPoint.val).alias('total'))
-                                 .where(DepositPoint.user_email == email))
-        total_withdraw_query = (WithdrawPoint.select(fn.Sum(WithdrawPoint.val).alias('total'))
-                                 .where(WithdrawPoint.user_email == email))
-        total_receive_query = (TransferPoint.select(fn.Sum(TransferPoint.val).alias('total'))
-                                 .where(TransferPoint.receiver_email == email))
-        total_send_query = (TransferPoint.select(fn.Sum(TransferPoint.val).alias('total'))
-                                 .where(TransferPoint.sender_email == email))
-
-        for row in total_deposit_query:
-            if row.total != None:
-                balance += row.total
-        for row in total_withdraw_query:
-            if row.total != None:
-                balance -= row.total
-        for row in total_receive_query:
-            if row.total != None:
-                balance += row.total
-        for row in total_send_query:
-            if row.total != None:
-                balance -= row.total
-
-        return int(balance)
 
     @verified
     def LookUpBalance(self, request, context):
@@ -112,7 +83,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                balance = self.sLookUpBalance(self, request, context)
+                balance = SPointServicer.sLookUpBalance(context.login_email)
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success"

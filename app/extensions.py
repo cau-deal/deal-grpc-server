@@ -8,6 +8,7 @@ from firebase_admin import credentials
 
 from extensions.jwt import JWT
 from extensions.emailSender import EmailSender
+from extensions.spointServicer import SPointerServicer
 
 pwdb = Peeweext()
 
@@ -16,3 +17,4 @@ firebase = firebase_admin.initialize_app(firebase_cred)
 
 JWT = JWT()
 EmailSender = EmailSender()  # todo 계정정보 파일로 빼자
+SPointServicer = SPointerServicer()
