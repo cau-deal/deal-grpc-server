@@ -32,13 +32,13 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
         with db.atomic() as transaction:
             try:
                 total_deposit = (DepositPoint.select(fn.Sum(DepositPoint.val))
-                                 .where(DepositPoint.user_email==context.login_email))
+                                 .where(DepositPoint.user_email == context.login_email))
                 total_withdraw = (WithdrawPoint.select(fn.Sum(WithdrawPoint.val))
-                                 .where(WithdrawPoint.user_email==context.login_email))
+                                 .where(WithdrawPoint.user_email == context.login_email))
                 total_receive = (TransferPoint.select(fn.Sum(TransferPoint.val))
-                                 .where(TransferPoint.receiver_email==context.login_email))
+                                 .where(TransferPoint.receiver_email == context.login_email))
                 total_send = (TransferPoint.select(fn.Sum(TransferPoint.val))
-                                 .where(TransferPoint.sender_email==context.login_email))
+                                 .where(TransferPoint.sender_email == context.login_email))
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success"
@@ -52,10 +52,9 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
         return LookUpBalanceResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + "  " + type(total_deposit),
+                message=result_message,
             ),
-            #balance=total_deposit + total_receive - total_withdraw - total_send,
-            balance=0,
+            balance=int(total_deposit.sum + total_receive.sum - total_withdraw.sum - total_send.sum),
         )
 
     @verified
