@@ -54,7 +54,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
         return LookUpBalanceResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + "   " + str(total_deposit.total),
+                message=result_message + "   " + str(total_deposit[0].total),
             ),
             balance=0,
         )
