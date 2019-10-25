@@ -43,16 +43,21 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 balance = 0
 
                 for row in total_deposit_query:
-                    balance += row.total
+                    if row.total != None:
+                        balance += row.total
+                for row in total_withdraw_query:
+                    if row.total != None:
+                        balance -= row.total
+                for row in total_receive_query:
+                    if row.total != None:
+                        balance += row.total
+                for row in total_send_query:
+                    if row.total != None:
+                        balance -= row.total
+
                 tmp = ""
                 for row in total_withdraw_query:
                     tmp = "  "  + str(row) + "  " + str(type(row)) + "  " + str(row.total)
-                #for row in total_withdraw_query:
-                #    balance -= row.total
-                #for row in total_receive_query:
-                #    balance += row.total
-                #for row in total_send_query:
-                #    balance -= row.total
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success" + tmp
