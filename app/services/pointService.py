@@ -76,7 +76,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             try:
                 now = datetime.datetime.now()
                 from_day = datetime(year=now.year, month=now.month, day=now.day - last_days,
-                                    hour=now.hour, min=now.min, sec=now.sec)
+                                    hour=now.hour, min=now.min, second=now.second)
                 query_deposit = (DepositPoint.select(DepositPoint.val, DepositPoint.created_at)
                          .where(DepositPoint.user_email==context.login_email and DepositPoint.created_at >= from_day))
                 query_get_work_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
