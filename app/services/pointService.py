@@ -227,6 +227,52 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def Deposit(self, request, context):
+        val = request.val
+        deposit_type = request.deposit_type
+
+        DEPOSIT_TYPE = {
+            DepositType.UNKNOWN_DEPOSIT_TYPE: 0,
+            DepositType.DEPOSIT_WITHOUT_BANKBOOK: 1,
+            DepositType.KAKAO_PAY: 2,
+        }
+
+        DEPOSIT_RESULT = {
+            DepositResult.UNKNOWN_DEPOSIT_RESULT: 0,
+            DepositResult.SUCCESS_DEPOSIT_RESULT: 1,
+            DepositResult.FAIL_DEPOSIT_RESULT: 2,
+        }
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Deposit"
+
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                DepositPoint.create(
+                    user_email=context.login_email,
+                    val=val,
+                    kind=deposit_type,
+                )
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Deposit success"
+                deposit_result = DEPOSIT_RESULT[DepositResult.SUCCESS_DEPOSIT_RESULT]
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                deposit_result = DEPOSIT_RESULT[DepositResult.FAIL_DEPOSIT_RESULT]
+
+        return DepositResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            deposit_result=deposit_result,
+        )
+
         return
 
     @verified
