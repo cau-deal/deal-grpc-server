@@ -20,7 +20,10 @@ from peewee import fn
 import datetime
 
 class SPointerServicer():
-    def sLookUpBalance(email):
+    def __init__(self):
+        pass
+
+    def sLookUpBalance(self, email):
         balance = 0
 
         db = pwdb.database
@@ -115,8 +118,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                email = context.login_email
-                balance = sPointServicer.sLookUpBalance(email)
+                balance = sPointServicer.sLookUpBalance(context.login_email)
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up balance success"
