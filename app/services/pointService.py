@@ -33,11 +33,11 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             try:
                 total_deposit_query = (DepositPoint.select(fn.Sum(DepositPoint.val).alias('total'))
                                  .where(DepositPoint.user_email == context.login_email))
-                total_withdraw_query = (WithdrawPoint.select(fn.Sum(WithdrawPoint.val))
+                total_withdraw_query = (WithdrawPoint.select(fn.Sum(WithdrawPoint.val).alias('total'))
                                  .where(WithdrawPoint.user_email == context.login_email))
-                total_receive_query = (TransferPoint.select(fn.Sum(TransferPoint.val))
+                total_receive_query = (TransferPoint.select(fn.Sum(TransferPoint.val).alias('total'))
                                  .where(TransferPoint.receiver_email == context.login_email))
-                total_send_query = (TransferPoint.select(fn.Sum(TransferPoint.val))
+                total_send_query = (TransferPoint.select(fn.Sum(TransferPoint.val).alias('total'))
                                  .where(TransferPoint.sender_email == context.login_email))
 
                 balance = 0
