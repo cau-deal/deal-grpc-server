@@ -46,7 +46,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                     balance += row.total
                 tmp = ""
                 for row in total_withdraw_query:
-                    tmp = str(row) + "  " + str(type(row))
+                    tmp = "  "  + str(row) + "  " + str(type(row))
                 #for row in total_withdraw_query:
                 #    balance -= row.total
                 #for row in total_receive_query:
@@ -55,7 +55,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 #    balance -= row.total
 
                 result_code = ResultCode.SUCCESS
-                result_message = "Look up balance success"
+                result_message = "Look up balance success" + tmp
 
             except Exception as e:
                 transaction.rollback()
