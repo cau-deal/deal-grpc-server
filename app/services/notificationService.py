@@ -137,6 +137,8 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
                         )
                     )
 
+                push_lists.reverse()
+
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
