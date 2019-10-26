@@ -296,7 +296,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
             for row in query:
                 b = row.beginning
-                result_message += " " + str(type(b)) + "   " + str(b) + "   " + str(type(row)) + "  " + str(type(row.beginning))
                 c = row.created_at
                 d = row.deadline
                 mission_protoes.append(
@@ -309,7 +308,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         summary=row.summary,
                         mission_state=row.state,
                         created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
-                        #beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
+                        beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
                         thumbnail_url=row.thumb_url.url,
                     )
                 )
