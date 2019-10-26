@@ -306,7 +306,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = "Successful Search Mission" + "   " + str(query)
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
 
-                for row in query.dict():
+                for row in query.dicts():
                     result_message += "  " + str(row)
 
             except Exception as e:
