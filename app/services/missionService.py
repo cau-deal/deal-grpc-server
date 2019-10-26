@@ -412,7 +412,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         db = pwdb.database
         with db.atomic() as transaction:
             try:
-                MEI = MissionExplanationImage.alias()
+                MEI = MissionExplanationImageModel.alias()
 
                 query = (MissionModel
                          .select(MissionModel, MEI.url)
