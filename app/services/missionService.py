@@ -148,7 +148,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 mission_id = 0
                 for row in query:
-                    mission_id = row.mission_id
+                    mission_id = row.id
 
                 # 잔액 차감(운영자에게 돈이 지불된다)
                 sPointServicer.givePoint(context.login_email, root_email, val, mission_id)
@@ -177,8 +177,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         return RegisterMissionResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + str(mission.mission_id) + "  " + str(data_type) + "  " + str(type(data_type)) +
-                        " mission_id :  " + str(mission_id)
+                message=result_message + " mission_id :  " + str(mission_id)
             ),
             register_mission_result=register_mission_result
         )
