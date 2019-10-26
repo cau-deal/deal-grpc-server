@@ -157,7 +157,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e) + " transaction1 error - mission_id :  " + str(mission_id)
                 register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
-        if result_code != ResultCode.UNKNOWN_RESULT_CODE:
+        if result_code == ResultCode.UNKNOWN_RESULT_CODE:
             with db.atomic() as transaction:
                 try:
                     # 이미지가 있으면 저장
