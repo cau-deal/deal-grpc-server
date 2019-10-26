@@ -5,7 +5,7 @@ from app.decorators import verified
 from app.extensions import pwdb
 from app.models import NoticeModel, User, PushLog
 from protos.CommonResult_pb2 import ResultCode, CommonResult
-from protos.NotificationService_pb2 import PostNoticeResponse
+from protos.NotificationService_pb2 import PostNoticeResponse, ReadPushResponse, CountNoReadPushResponse
 from protos.NotificationService_pb2_grpc import NotificationServiceServicer
 
 
@@ -81,11 +81,12 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
                 result_message = str(e)
                 print("EXCEPTION: " + str(e))
 
-        return PostNoticeResponse(
+        return CountNoReadPushResponse(
             result=CommonResult(
                 result_code=result_code,
                 message=result_message,
             ),
+            count=count,
         )
 
     @verified
@@ -94,5 +95,34 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
 
     @verified
     def ReadPush(self, request, context):
-        pass
+        push_id = request.push_id
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown read push Result"
+
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                query = (PushLog.update(is_read=True).where(PushLog.id == push_id).execute())
+
+                if query == 0:
+                    print("UPDATE ERROR")
+                    raise Exception("read push UPDATE ERROR")
+
+                result_code = ResultCode.SUCCESS
+                result_message = "read push success"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                print("EXCEPTION: " + str(e))
+
+        return ReadPushResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+        )
 
