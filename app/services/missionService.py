@@ -107,7 +107,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 if balance < val:
                     raise Exception("Insufficiency balance")
 
-                if beginning_datetime < datetime.datetime.now():
+                if today_register is False and (beginning_datetime < datetime.datetime.now()):
                     raise Exception("Invalid beginning")
 
                 # 미션 시작 날짜가 오늘과 같으면 바로 진행 중으로 등록
