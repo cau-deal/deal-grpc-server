@@ -2,7 +2,8 @@ from peewee import JOIN
 from sea.servicer import ServicerMeta
 
 from app.decorators import verified
-from app.extensions import pwdb
+from app.extensions import pwdb, root_email
+from app.extensions_db import sPointServicer
 
 from app.models import MissionModel
 from app.models import ConductMission
@@ -79,29 +80,89 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             MissionState.SOLD_OUT: 2,
             MissionState.WATING_CONFIRM_PURCHASE: 3,
             MissionState.COMPLETE_MISSION: 4,
+            MissionState.WATRING_REGISTER: 5,
         }
+
+        #ENUM Mission Explanation Image Type
+        MISSION_EXPLANATION_IMAGE_TYPE = {
+            MissionExplanationImageType.UNKNOWN_MISSION_EXPLANATION_IMAGE_TYPE: 0,
+            MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE: 1,
+            MissionExplanationImageType.BACKGROUND_MISSION_EXPLANATION_IMAGE_TYPE: 2,
+            MissionExplanationImageType.MAIN_TEXT_MISSION_EXPLANATION_IMAGE_TYPE: 3,
+        }
+
+        now = datetime.datetime.now()
+        today_register = False
+
+        if now.year == beginning.year and now.month == beginning.month and now.day == beginning.day:
+            today_register = True
 
         with db.atomic() as transaction:
             try:
-                MissionModel.create(
-                    register_email=context.login_email,
-                    title=title,
-                    contents=contents,
-                    mission_type=MISSION_TYPE[mission_type],
-                    data_type=DATA_TYPE[data_type],
-                    state=MISSION_STATE[MissionState.DURING_MISSION],
-                    unit_package=unit_package,
-                    price_of_package=price_of_package,
-                    order_package_quantity=order_package_quantity,
-                    beginning=beginning_datetime,
-                    deadline=deadline_datetime,
-                    created_at=datetime.datetime.now(),
-                    summary=summary,
-                    contact_clause=contact_clause,
-                    specification=specification,
-                )
+                # 잔액 확인 후, 미션 등록 가능 여부 판단
+                balance = sPointServicer.sLookUpBalance(context.login_email)
+                val = price_of_package * order_package_quantity
 
-                # Registered Mission Tuple print
+                if balance < val:
+                    raise Exception("Insufficiency balance")
+
+                # 미션 시작 날짜가 오늘과 같으면 바로 진행 중으로 등록
+                if today_register:
+                    query = MissionModel.create(
+                        register_email=context.login_email,
+                        title=title,
+                        contents=contents,
+                        mission_type=MISSION_TYPE[mission_type],
+                        data_type=DATA_TYPE[data_type],
+                        state=MISSION_STATE[MissionState.DURING_MISSION],
+                        unit_package=unit_package,
+                        price_of_package=price_of_package,
+                        order_package_quantity=order_package_quantity,
+                        beginning=beginning_datetime,
+                        deadline=deadline_datetime,
+                        created_at=datetime.datetime.now(),
+                        summary=summary,
+                        contact_clause=contact_clause,
+                        specification=specification,
+                    )
+                # 미션 시작 날짜가 오늘과 다르면 등록대기로 등록
+                else:
+                    query = MissionModel.create(
+                        register_email=context.login_email,
+                        title=title,
+                        contents=contents,
+                        mission_type=MISSION_TYPE[mission_type],
+                        data_type=DATA_TYPE[data_type],
+                        state=MISSION_STATE[MissionState.WATRING_REGISTER],
+                        unit_package=unit_package,
+                        price_of_package=price_of_package,
+                        order_package_quantity=order_package_quantity,
+                        beginning=beginning_datetime,
+                        deadline=deadline_datetime,
+                        created_at=datetime.datetime.now(),
+                        summary=summary,
+                        contact_clause=contact_clause,
+                        specification=specification,
+                    )
+
+                mission_id = 0
+                for row in query:
+                    mission_id = row.mission_id
+
+                # 잔액 차감(운영자에게 돈이 지불된다)
+                sPointServicer.givePoint(context.login_email, root_email, val, mission_id)
+
+                # 이미지가 있으면 저장
+                for mission_explanation_image in mission_explanation_images:
+                    url = mission_explanation_image.url
+                    type = mission_explanation_image.type
+
+                    MissionExplanationImage.create(
+                        mission_id=mission_id,
+                        image_type=MISSION_EXPLANATION_IMAGE_TYPE[type],
+                        url=url,
+                    )
+
                 result_code = ResultCode.SUCCESS
                 result_message = "Register Mission Success"
                 register_mission_result = RegisterMissionResult.SUCCESS_REGISTER_MISSION_RESULT
@@ -109,18 +170,14 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                #result_message = str(e)
-                error_message = str(e) + "  " + context.login_email + "  " + title + "  " + contents + "  " + \
-                                str(mission_type) + "  " + str(DATA_TYPE[data_type]) + "  " + str(unit_package) + "  "+\
-                                str(price_of_package) + "  " + "  " + str(beginning) + "  " + str(deadline) + "  " + str(order_package_quantity) + "  " + summary + \
-                                "  " + contact_clause + "  " + specification + "  " + "  " + str(datetime.datetime.now()) + "  "
-                result_message = error_message
+                result_message = str(e) + " mission_id :  " + str(mission_id)
                 register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
         return RegisterMissionResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + str(mission.mission_id) + "  " + str(data_type) + "  " + str(type(data_type))
+                message=result_message + str(mission.mission_id) + "  " + str(data_type) + "  " + str(type(data_type)) +
+                        " mission_id :  " + str(mission_id)
             ),
             register_mission_result=register_mission_result
         )
