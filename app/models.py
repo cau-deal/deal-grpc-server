@@ -31,19 +31,20 @@ class JWTToken(pwdb.Model):
         db_table = "jwt_token"
 
 
-class Mission(pwdb.Model):
+class MissionModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
-    register_email = peewee.CharField(max_length=64, null=False)
-    title = peewee.CharField(max_length=255, null=False)
+    register_email = peewee.ForeignKeyField(User, column_name='register_email')
+    title = peewee.CharField()
     contents = peewee.TextField()
     mission_type = peewee.IntegerField()
     data_type = peewee.IntegerField()
-    state = peewee.IntegerField(default=0)
+    state = peewee.IntegerField(default=1)
     unit_package = peewee.IntegerField()
-    order_package_quantitiy = peewee.IntegerField()
+    price_of_package = peewee.IntegerField()
+    order_package_quantity = peewee.IntegerField()
     deadline = peewee.DateTimeField()
-    created_at = peewee.DateTimeField()
-    summary = peewee.CharField(max_length=255, null=True)
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    summary = peewee.CharField(null=True)
     contact_clause = peewee.TextField(null=True)
     specification = peewee.TextField(null=True)
 
@@ -53,8 +54,8 @@ class Mission(pwdb.Model):
 
 class ConductMission(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
-    worker_email = peewee.CharField()
-    mission_id = peewee.IntegerField()
+    worker_email = peewee.ForeignKeyField(User, column_name='worker_email')
+    mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
     state = peewee.IntegerField()
     deadline = peewee.DateTimeField()
     created_at = peewee.DateTimeField()
@@ -64,12 +65,12 @@ class ConductMission(pwdb.Model):
         db_table = 'conduct_mission'
 
 
-class MissionExplanationImage(pwdb.Model):
+class MissionExplanationImageModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
-    mission_id = peewee.IntegerField()
+    mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
     image_type = peewee.IntegerField()
     url = peewee.CharField()
-    created_at = peewee.DateTimeField()
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
 
     class Meta:
         db_table = 'mission_explanation_image'
@@ -93,7 +94,7 @@ class InquiryModel(pwdb.Model):
 class AccuseModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
     user_email = peewee.ForeignKeyField(User, column_name='user_email')
-    mission_id = peewee.ForeignKeyField(Mission, column_name='mission_id')
+    mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
     is_complete = peewee.BooleanField()
     category = peewee.CharField()
     created_at = peewee.DateTimeField()
