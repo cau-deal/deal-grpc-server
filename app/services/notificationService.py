@@ -69,7 +69,7 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
         with db.atomic() as transaction:
             try:
                 query = (PushLog.select(fn.count(PushLog.id).alias('count'))
-                         .where((PushLog.receiver_email == context.login_email) & (not PushLog.is_read)))
+                         .where((PushLog.receiver_email == context.login_email) & (PushLog.is_read == False)))
 
                 for row in query:
                     count = row.count
