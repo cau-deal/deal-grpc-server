@@ -160,7 +160,7 @@ class TransferPoint(pwdb.Model):
     class Meta:
         db_table = 'transfer_point'
 
-class Notice(pwdb.Model):
+class NoticeModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
     title = peewee.CharField()
     content = peewee.TextField()
