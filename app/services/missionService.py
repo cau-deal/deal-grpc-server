@@ -245,7 +245,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (MissionModel
                                  .select(MissionModel.id.alias('id'), MissionModel.title.alias('title'),
-                                         MissionModel.mission_type.alias('mission_typy'),
+                                         MissionModel.mission_type.alias('mission_type'),
                                          MissionModel.price_of_package.alias('price_of_package'),
                                          MissionModel.deadline.alias('deadline'),
                                          MissionModel.summary.alias('summary'),
@@ -254,9 +254,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                          MEI.url.alias('url'),
                                          MissionModel.beginning.alias('beginning'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
-                                 .where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
+                                 .where((MissionModel.id >= _offset) & (MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-                                       & (MissionModel.id >= _offset & MissionModel.mission_type == MISSION_TYPE[mission_type]))
+                                       & (MissionModel.mission_type == MISSION_TYPE[mission_type]))
                                  .limit(amount))
 
 #                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
@@ -309,7 +309,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 #                                .limit(amount))
 
                 result_code = ResultCode.SUCCESS
-                result_message = "Successful Search Mission" + str(query)
+                result_message = "Successful Search Mission" + str(query.size())
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
 
             except Exception as e:
