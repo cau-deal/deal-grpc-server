@@ -1,10 +1,5 @@
-<<<<<<< HEAD
 from app.services import authService, dealService, missionService, phoneService, userService, accountService, \
     pointService, notificationService
-
-=======
-from app.services import authService, dealService, missionService, phoneService, userService, accountService
->>>>>>> feature/MissionService
 
 AuthServiceServicer = authService.AuthServiceServicer
 UserServiceServicer = userService.UserServiceServicer
