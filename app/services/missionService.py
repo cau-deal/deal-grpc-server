@@ -1,4 +1,4 @@
-from peewee import JOIN
+from peewee import JOIN, fn
 from sea.servicer import ServicerMeta
 
 from app.decorators import verified
@@ -612,4 +612,44 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def CountFetchMission(self, request, context):
-        pass
+        db = pwdb.database
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Count Fetch mission"
+
+        count = 0
+
+        with db.atomic() as transaction:
+            try:
+                query_mission = (MissionModel.select(fn.count(MissionModel.id)).alias('count')
+                                 .where((MissionModel.state == DURING_MISSION) | (MissionModel.state == DURING_MISSION)
+                                        | (MissionModel.state == WATING_CONFIRM_PURCHASE) | (MissionModel.state == WATRING_REGISTER)
+                                        & (MissionModel.register_email == context.login_email)))
+
+                for row in query_mission:
+                    count += row.count
+
+                query_conduct_mission = (ConductMission.select(fn.count(ConductMission.id)).alias('count')
+                                         .where((ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE)
+                                                & (ConductMission.state == WAITING_VERIFICATION_CONDUCT_MISSION_STATE)
+                                                & (ConductMission.state == DURING_VERIFICATION_CONDUCT_MISSION_STATE)
+                                                * (ConductMission.worker_email == context.login_email)))
+
+                for row in query_conduct_mission:
+                    count += row.count
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful Count Fetch mission"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+            return CountFetchMissionResponse(
+                result=CommonResult(
+                    result_code=result_code,
+                    message=result_message,
+                ),
+                val=count,
+            )
