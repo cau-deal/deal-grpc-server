@@ -156,11 +156,11 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 # 이미지가 있으면 저장
                 for mission_explanation_image in mission_explanation_images:
                     url = mission_explanation_image.url
-                    type = mission_explanation_image.type
+                    image_type = mission_explanation_image.type
 
                     MissionExplanationImage.create(
                         mission_id=mission_id,
-                        image_type=MISSION_EXPLANATION_IMAGE_TYPE[type],
+                        image_type=MISSION_EXPLANATION_IMAGE_TYPE[image_type],
                         url=url,
                     )
 
