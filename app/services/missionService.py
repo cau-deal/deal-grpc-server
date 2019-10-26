@@ -42,8 +42,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         beginning = mission.beginning
         deadline_datetime = datetime.datetime(year=deadline.year, month=deadline.month, day=deadline.day,
                                      hour=deadline.hour, minute=deadline.min, second=deadline.sec)
-        beginning_datetime = datetime.datetime(year=beginning.year, month=beginning.month, day=beginning.day,
-                                     hour=beginning.hour, minute=beginning.min, second=beginning.sec)
+        beginning_datetime = datetime.datetime(year=beginning.year, month=beginning.month, day=beginning.day, hour=beginning.hour, minute=beginning.min, second=beginning.sec)
         summary = mission.summary
         contact_clause = mission.contact_clause
         specification = mission.specification
