@@ -77,8 +77,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
         with db.atomic() as transaction:
             try:
                 now = datetime.datetime.now()
-                from_day = datetime.datetime(year=now.year, month=now.month, day=now.day - last_days,
-                                    hour=now.hour, minute=now.minute, second=now.second)
+                from_day = datetime.datetime(year=now.year, month=now.month, day=now.day, hour=now.hour,
+                                             minute=now.minute, second=now.second) - datetime.timedelta(days=last_days)
 
                 query_deposit = (DepositPoint.select(DepositPoint.val, DepositPoint.created_at)
                          .where(DepositPoint.user_email == context.login_email and DepositPoint.created_at >= from_day))
