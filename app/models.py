@@ -129,3 +129,62 @@ class AccountAuthentication(pwdb.Model):
 
     class Meta:
         db_table = 'account_authentication'
+
+# Point
+class WithdrawPoint(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    user_email = peewee.ForeignKeyField(User, column_name='user_email')
+    val = peewee.IntegerField()
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+
+    class Meta:
+        db_table = 'withdraw_point'
+
+class DepositPoint(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    user_email = peewee.ForeignKeyField(User, column_name='user_email')
+    val = peewee.IntegerField()
+    kind = peewee.IntegerField()
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+
+    class Meta:
+        db_table = 'deposit_point'
+
+class TransferPoint(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    sender_email = peewee.ForeignKeyField(User, column_name='sender_email')
+    receiver_email = peewee.ForeignKeyField(User, column_name='receiver_email')
+    val = peewee.IntegerField()
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id', null=True)
+
+    class Meta:
+        db_table = 'transfer_point'
+
+class NoticeModel(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    title = peewee.CharField()
+    content = peewee.TextField()
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+
+    class Meta:
+        db_table = 'notice'
+
+class PushLog(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    receiver_email = peewee.ForeignKeyField(User, column_name='receiver_email')
+    content = peewee.TextField()
+    is_read = peewee.BooleanField(default=False)
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+
+    class Meta:
+        db_table = 'push_log'
+
+class FCM(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    user_email = peewee.ForeignKeyField(User, column_name='user_email')
+    fcm_key = peewee.CharField()
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+
+    class Meta:
+        db_table = 'fcm'
