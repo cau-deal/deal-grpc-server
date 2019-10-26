@@ -154,7 +154,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e) + " mission_id :  " + str(mission_id)
+                result_message = str(e) + " part1 error - mission_id :  " + str(mission_id)
                 register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
             try:
@@ -176,7 +176,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e) + " mission_id :  " + str(mission_id)
+                result_message = str(e) + " part2 error - mission_id :  " + str(mission_id)
                 register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
         return RegisterMissionResponse(
