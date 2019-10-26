@@ -149,8 +149,15 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 mission_id = query.id
 
                 # 잔액 차감(운영자에게 돈이 지불된다)
-                sPointServicer.givePoint(context.login_email, root_email, val, mission_id)
+                sPointServicer.givePoint(context.login_email, root_email, val, 0)
 
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e) + " mission_id :  " + str(mission_id)
+                register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+
+            try:
                 # 이미지가 있으면 저장
                 for mission_explanation_image in mission_explanation_images:
                     url = mission_explanation_image.url
