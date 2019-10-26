@@ -347,7 +347,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         MissionExplanationImageModel(
                             url=row.url,
                             mission_id=mission_id,
-                            type=row.type,
+                            type=row.image_type,
                         )
                     )
 
