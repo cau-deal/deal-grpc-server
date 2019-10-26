@@ -41,7 +41,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e) + str(type(context.login_email))
+                result_message = str(e)
                 print("EXCEPTION: " + str(e))
 
         return LookUpBalanceResponse(
