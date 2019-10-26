@@ -3,12 +3,14 @@ from sea.servicer import ServicerMeta
 
 from app.decorators import verified
 from app.extensions import pwdb
-from app.models import NoticeModel, User, PushLog
+from app.models import NoticeModel, User, PushLog, FCMModel
 
 from protos.CommonResult_pb2 import *
 from protos.Datetime_pb2 import *
 from protos.NotificationService_pb2 import *
 from protos.NotificationService_pb2_grpc import *
+
+import datetime
 
 
 class NotificationServiceServicer(NotificationServiceServicer, metaclass=ServicerMeta):
@@ -33,6 +35,10 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
                 )
 
                 user_query = User.select()
+
+                # FCM Key
+
+
 
                 # 모든 사용자에게 push를 보내는 부분(지금은 db 저장만 수행)
                 for row in user_query:
@@ -186,3 +192,35 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
             ),
         )
 
+    @verified
+    def TransmitFCM(self, request, context):
+        fcm_key = request.fcm.fcm_key
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown read push Result"
+
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                FCMModel.create(
+                    user_email = context.login_email,
+                    fcm_key = fcm_key,
+                    created_at = datetime.datetime.now()
+                )
+
+                result_code = ResultCode.SUCCESS
+                result_message = "FCM Key register success"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                print("EXCEPTION: " + str(e))
+
+        return TransmitFCMResponse(
+            result = CommonResult(
+                result_code = result_code,
+                message = result_message,
+            ),
+        )
