@@ -146,9 +146,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         specification=specification,
                     )
 
-                mission_id = 0
-                for row in query:
-                    mission_id = row.id
+                mission_id = query.id
 
                 # 잔액 차감(운영자에게 돈이 지불된다)
                 sPointServicer.givePoint(context.login_email, root_email, val, mission_id)
