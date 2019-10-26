@@ -342,3 +342,34 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             ),
             withdraw_result=withdraw_result,
         )
+
+    @verified
+    def LookUpEarnForADay(self, request, context):
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Look up Earn For A Day Result"
+
+        val = 0
+
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                val = sPointServicer.sLookUpBalanceForADay(context.login_email)
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Look up Earn For A Day success"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                print("EXCEPTION: " + str(e))
+
+        return LookUpEarnForADayResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            val=val,
+        )
+
