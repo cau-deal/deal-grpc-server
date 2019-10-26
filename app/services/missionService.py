@@ -252,56 +252,36 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                        & (MissionModel.mission_type == MISSION_TYPE[mission_type]))
                                  .limit(amount))
-                    """
-#                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
-#                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-#                                & MissionModel.id >= _offset & MissionModel.mission_type == mission_type)
-#                                .limit(amount))
                     # mission type is all
                     else:
-                        query = (MissionModel.select()
-                                 .join(MEI)
-                                 .where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
-                                (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-                                       & (MissionModel.id >= _offset))
+                        query = (MissionModel
+                                 .select(MissionModel, MEI.url)
+                                 .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
+                                 .where((MissionModel.id >= _offset) & (MissionModel.id >= _offset) &
+                                (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
                                  .limit(amount))
-
-#                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
-#                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-#                                & MissionModel.id >= _offset)
-#                                .limit(amount))
                 # keyword exist
                 else:
                     # mission type is not all
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (MissionModel.select()
-                                 .join(MEI)
-                                 .where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
+                        query = (MissionModel
+                                 .select(MissionModel, MEI.url)
+                                 .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
+                                 .where((MissionModel.id >= _offset) & (MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-                                       & (MissionModel.id >= _offset & MissionModel.mission_type == mission_type)
-                                       & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
+                                       & (MissionModel.mission_type == MISSION_TYPE[mission_type])
+                                        & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
                                  .limit(amount))
-
-#                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
-#                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-#                                & MissionModel.id >= _offset & MissionModel.mission_type == mission_type
-#                                & (MissionModel.title ** keyword | MissionModel.contents ** keyword))
-#                                .limit(amount))
                     # mission type is all
                     else:
-                        query = (MissionModel.select()
-                                 .join(MEI)
-                                 .where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
+                        query = (MissionModel
+                                 .select(MissionModel, MEI.url)
+                                 .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
+                                 .where((MissionModel.id >= _offset) & (MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-                                       & (MissionModel.id >= _offset)
-                                       & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
+                                        & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
                                  .limit(amount))
 
-#                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
-#                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-#                                & MissionModel.id >= _offset & (MissionModel.title ** keyword | MissionModel.contents ** keyword))
-#                                .limit(amount))
-                """
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission"
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
@@ -332,7 +312,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         mission_state=row.state,
                         created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
                         beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
-                        #thumbnail_url=row.url,
+                        thumbnail_url=row.thumb_url.url,
                     )
                 )
 
