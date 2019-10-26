@@ -331,7 +331,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         summary=row.summary,
                         mission_state=row.state,
                         created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
-                        beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
+                        #beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
                         # thumbnail_url=row.url,
                     )
                 )
