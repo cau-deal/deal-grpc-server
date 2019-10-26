@@ -621,7 +621,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                query_mission = (MissionModel.select(fn.count(MissionModel.id)).alias('count')
+                query_mission = (MissionModel.select(fn.count(MissionModel.id).alias('count'))
                                  .where((MissionModel.state == DURING_MISSION) | (MissionModel.state == DURING_MISSION)
                                         | (MissionModel.state == WATING_CONFIRM_PURCHASE) | (MissionModel.state == WATRING_REGISTER)
                                         & (MissionModel.register_email == context.login_email)))
@@ -629,7 +629,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 for row in query_mission:
                     count += row.count
 
-                query_conduct_mission = (ConductMission.select(fn.count(ConductMission.id)).alias('count')
+                query_conduct_mission = (ConductMission.select(fn.count(ConductMission.id).alias('count'))
                                          .where((ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE)
                                                 & (ConductMission.state == WAITING_VERIFICATION_CONDUCT_MISSION_STATE)
                                                 & (ConductMission.state == DURING_VERIFICATION_CONDUCT_MISSION_STATE)
