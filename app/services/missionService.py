@@ -120,7 +120,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         return RegisterMissionResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + str(mission.mission_id) + "  " + str(mission.mission_state) + "  " + str(type(mission.created_at))
+                message=result_message + str(mission.mission_id) + "  " + str(data_type) + "  " + str(type(data_type))
             ),
             register_mission_result=register_mission_result
         )
