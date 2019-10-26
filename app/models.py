@@ -159,3 +159,31 @@ class TransferPoint(pwdb.Model):
 
     class Meta:
         db_table = 'transfer_point'
+
+class Notice(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    title = peewee.CharField()
+    content = peewee.TextField()
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+
+    class Meta:
+        db_table = 'notice'
+
+class PushLog(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    receiver_email = peewee.ForeignKeyField(User, column_name='receiver_email')
+    content = peewee.TextField()
+    is_read = peewee.BooleanField(default=False)
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+
+    class Meta:
+        db_table = 'push_log'
+
+class FCM(pwdb):
+    id = peewee.IntegerField(primary_key=True)
+    user_email = peewee.ForeignKeyField(User, column_name='user_email')
+    fcm_key = peewee.CharField()
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+
+    class Meta:
+        db_table = 'fcm'
