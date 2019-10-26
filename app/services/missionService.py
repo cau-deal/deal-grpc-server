@@ -246,13 +246,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (MissionModel
-                                 .select(MissionModel, MEI.url.alias('url'))
+                                 .select(MissionModel, MEI.url)
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
                                  .where((MissionModel.id >= _offset) & (MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                        & (MissionModel.mission_type == MISSION_TYPE[mission_type]))
                                  .limit(amount))
-
+                    """
 #                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
 #                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
 #                                & MissionModel.id >= _offset & MissionModel.mission_type == mission_type)
@@ -301,7 +301,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 #                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
 #                                & MissionModel.id >= _offset & (MissionModel.title ** keyword | MissionModel.contents ** keyword))
 #                                .limit(amount))
-
+                """
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission"
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
