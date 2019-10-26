@@ -309,7 +309,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 #                                .limit(amount))
 
                 result_code = ResultCode.SUCCESS
-                result_message = "Successful Search Mission"
+                result_message = "Successful Search Mission" + str(query)
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
 
             except Exception as e:
