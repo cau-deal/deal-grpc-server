@@ -330,9 +330,49 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         result_message = "Unknown Search Mission With Id"
         search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
 
+        mission = Mission()
+
         with db.atomic() as transaction:
             try:
-                query = MissionModel.select().where(MissionModel.id == mission_id)
+                MEI = MissionExplanationImageModel.alias()
+
+                query_mission = (MissionModel.select().where(MissionModel.id == mission_id))
+
+                query_mission_explanation_image = (MEI.select().where(MEI.mission_id == mission_id))
+
+                mission_explanation_images = []
+
+                for row in query_mission_explanation_image:
+                    mission_explanation_images.append(
+                        MissionExplanationImageModel(
+                            url=row.url,
+                            mission_id=mission_id,
+                            type=row.type,
+                        )
+                    )
+
+                for row in query_mission:
+                    b = row.beginning
+                    c = row.created_at
+                    d = row.deadline
+                    mission = Mission(
+                        mission_id=row.mission_id,
+                        title=row.title,
+                        contents=row.content,
+                        mission_type=row.mission_type,
+                        data_type=row.data_type,
+                        unit_package=row.unit_package,
+                        price_of_package=row.price_of_package,
+                        deadline=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute, sec=d.second),
+                        order_package_quantity=row.order_package_quantity,
+                        summary=row.summary,
+                        contact_clause=row.contact_clause,
+                        specification=row.specification,
+                        mission_explanation_images=mission_explanation_images,
+                        mission_state=row.state,
+                        created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
+                        beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
+                    )
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission With Id"
@@ -350,7 +390,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 message=result_message
             ),
             search_mission_result=search_mission_result,
-            mission=query,
+            mission=mission,
         )
 
     @verified
