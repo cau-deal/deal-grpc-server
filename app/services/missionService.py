@@ -304,8 +304,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = "Successful Search Mission"
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
 
-                for row in query:
-                    result_message += "  " + str(row.url)
+                #for row in query:
+                #    result_message += "  " + str(row.url)
 
             except Exception as e:
                 transaction.rollback()
