@@ -538,29 +538,32 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def GetAssignedMission(self, request, context):
-        # 아직 구현 완료 아님
-
         mission_id = request.mission_id
 
         db = pwdb.database
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
-        result_message = "Unknown"
+        result_message = "Unknown get assigned mission"
         assign_mission_result = AssignMissionResult.UNKNOWN_ASSIGN_MISSION_RESULT
 
         with db.atomic() as transaction:
             try:
-                # TODO 유효한 상태인지 확인할것
+                # @TODO: 할당 받을 수 있는 상태인지 살펴보기
+                #query_mission = MissionModel.select().where(MissionModel.id == mission_id)
 
+                #mission = MissionModel
+                #for row in query_mission:
+                #    mission = row
+
+                # 받을 수 있다고 가정하고, 정상 시나리오만 구현 진행. 예외 처리는 나중에
                 ConductMission.create(
-                    worker_email = context.login_email,
-                    mission_id = mission_id,
-                    state = ConductMissionState.UNKNOWN_CONDUCT_MISSION_STATE,
-                    deadline = datetime.datetime.now() + datetime.timedelta(days=1.0),
-                    created_at = datetime.datetime.now(),
-                    complete_datetime = datetime.datetime.now() + datetime.timedelta(days=1.0),
+                    worker_email=context.login_email,
+                    mission_id=mission_id,
+                    deadline=datetime.datetime.now() + datetime.timedelta(days=1),
                 )
 
+                # 미션 받은 뒤, 후처리도 나중에
+                """
                 #GetAssignedMission-2
                 cntval = ConductMission.select().count().where(
                     (ConductMission.mission_id == mission_id)
@@ -573,9 +576,10 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 if ms.order_package_quantity >= cntval:
                     Mission.update(state=MissionState.SOLD_OUT).where(Mission.id == mission_id).execute()
+                """
 
                 result_code = ResultCode.SUCCESS
-                result_message = "GetAssigned Mission Complete"
+                result_message = "Successful Get Assigned Mission"
                 assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
 
             except Exception as e:
@@ -587,7 +591,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             return GetAssignedMissionResponse(
                 result=CommonResult(
                     result_code=result_code,
-                    message = result_message,
+                    message=result_message,
                 ),
                 assign_mission_result=assign_mission_result,
             )

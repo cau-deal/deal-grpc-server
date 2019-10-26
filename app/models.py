@@ -57,10 +57,10 @@ class ConductMission(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
     worker_email = peewee.ForeignKeyField(User, column_name='worker_email')
     mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
-    state = peewee.IntegerField()
+    state = peewee.IntegerField(default=1)
     deadline = peewee.DateTimeField()
-    created_at = peewee.DateTimeField()
-    complete_datetime = peewee.DateTimeField()
+    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    complete_datetime = peewee.DateTimeField(null=True)
 
     class Meta:
         db_table = 'conduct_mission'
