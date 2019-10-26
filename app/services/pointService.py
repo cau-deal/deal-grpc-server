@@ -82,9 +82,11 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
                 query_deposit = (DepositPoint.select(DepositPoint.val, DepositPoint.created_at)
                          .where(DepositPoint.user_email == context.login_email & DepositPoint.created_at >= from_day))
+
                 query_get_work_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
                          .where(TransferPoint.receiver_email == context.login_email
                                 & TransferPoint.created_at >= from_day & TransferPoint.mission_id.is_null(False)))
+
                 query_get_event_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
                          .where(TransferPoint.receiver_email == context.login_email
                                 & TransferPoint.created_at >= from_day & TransferPoint.mission_id.is_null(True)))
@@ -132,7 +134,10 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up plus history success"
 
-                result_message += str(query_get_event_point)
+                if query_get_event_point is None:
+                    result_message += " None"
+                else:
+                    result_message += str(query_get_event_point)
 
             except Exception as e:
                 transaction.rollback()
