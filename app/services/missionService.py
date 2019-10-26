@@ -344,7 +344,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 for row in query_mission_explanation_image:
                     mission_explanation_images.append(
-                        MissionExplanationImageModel(
+                        MissionExplanationImage(
                             url=row.url,
                             mission_id=mission_id,
                             type=row.image_type,
