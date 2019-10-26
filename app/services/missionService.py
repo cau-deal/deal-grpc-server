@@ -306,8 +306,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = "Successful Search Mission" + "   " + str(query)
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
 
-                #for row in query:
-                #    result_message += "  " + str(row.url)
+                for row in query.dict():
+                    result_message += "  " + str(row)
 
             except Exception as e:
                 transaction.rollback()
@@ -332,7 +332,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         mission_state=row.state,
                         created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
                         beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
-                        thumbnail_url=row.url,
+                        #thumbnail_url=row.url,
                     )
                 )
 
