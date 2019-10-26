@@ -244,7 +244,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (MissionModel
-                                 .select(MissionModel, MEI).join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
+                                 .select(MissionModel, MissionExplanationImageModel)
+                                 .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
                                  .where((MissionModel.id >= _offset) & (MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                        & (MissionModel.mission_type == MISSION_TYPE[mission_type]))
@@ -304,7 +305,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
 
                 for row in query:
-                    result_message += "  " + str(row.MEI.url)
+                    result_message += "  " + str(row.url)
 
             except Exception as e:
                 transaction.rollback()
