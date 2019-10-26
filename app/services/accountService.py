@@ -16,7 +16,8 @@ import datetime
 
 # for bank auth rest api
 import requests
-
+import random
+import json
 
 class AccountServiceServicer(AccountServiceServicer, metaclass=ServicerMeta):
 
@@ -41,30 +42,65 @@ class AccountServiceServicer(AccountServiceServicer, metaclass=ServicerMeta):
             BANK.WOORI: "020",
         }
 
-        headers = {
+        BANK_STR = {
+            BANK.UNKNOWN_BANK: "UNKNOWN",
+            BANK.NH: "NH",
+            BANK.IBK: "IBK",
+            BANK.KB: "KB",
+            BANK.KAKAO: "KAKAO",
+            BANK.WOORI: "WOORI",
+        }
+
+        token_params = {
+            'client_id' : 'l7xx8ca825b7e1f740ee8a3445df4dbb5a6a',
+            'client_secret': '02c98c8dc8344477992e8de6686e9e46',
+            'scope': 'oob',
+            'grant_type' : 'client_credentials'
+        }
+
+        token_headers = {
+            'Content-Type': 'application/json; charset=UTF-8'
+        }
+
+        token_responses = requests.post(
+            url='https://testapi.open-platform.or.kr/oauth/2.0/token',
+            params = token_params,
+            headers = token_headers,
+        ).json()
+
+        access_token = token_responses['access_token']
+
+        inq_headers = {
                     'Content-Type': 'application/json; charset=UTF-8',
-                    "Authorization": "Bearer 08e28d74-664a-4cd8-91da-4a1b38a9aaea"
-                }
+                    "Authorization": "Bearer " + access_token,
+        }
+
+        # parameter data generate
         now_time = datetime.datetime.now()
         now_time_str = now_time.strftime("%Y%m%d%H%M%S")
-        params = {
+
+        # bank_tran_id generate
+        LENGTH = 9
+        string_pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+        tran_id = token_responses['client_use_code'] + "U"
+        for i in range(LENGTH):
+            tran_id += random.choice(string_pool)
+
+
+        inq_params = {
+            "bank_tran_id":tran_id,
             "bank_code_std": BANK_ENUM[bank],
             "account_num": account_num,
             "account_holder_info": account_holder_info,
+            "account_holder_info_type":" ",
             "tran_dtime": now_time_str,
         }
-
-        response = requests.post(
-            url='https://openapi.open-platform.or.kr/inquiry/real_name',
-            headers = headers,
-            params = params2,
-        )
-
-        print(params2)
-        print(headers)
-
-        print(response)
-
+        # Realname Inquiry Response
+        real_name_response = requests.post(
+            url='https://testapi.open-platform.or.kr/v2.0/inquiry/real_name',
+            headers = inq_headers,
+            data = json.dumps(inq_params)
+        ).json()
 
         db = pwdb.database
 
@@ -74,8 +110,9 @@ class AccountServiceServicer(AccountServiceServicer, metaclass=ServicerMeta):
                     .create(
                     user_email=context.login_email,
                     account_num=account_num,
-                    name=name,
-                    bank=BANK_ENUM[bank],
+                    name=real_name_response['account_holder_name'],
+                    bank=BANK_STR[bank],
+                    created_at = datetime.datetime.now(),
                 )
 
                 if ins_res == 0:

@@ -105,4 +105,7 @@ ENV/
 .mypy_cache/
 
 # protos
-protos/
+protos
+
+# configs/default/__init__.py
+configs/default/__init.py
