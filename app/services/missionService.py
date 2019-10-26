@@ -296,7 +296,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
             for row in query:
                 b = row.beginning
-                result_message += " " + str(type(b)) + "   " + str(b) + "   " + str(row)
+                result_message += " " + str(type(b)) + "   " + str(b) + "   " + str(type(row)) + "  " + str(type(row.beginning))
                 c = row.created_at
                 d = row.deadline
                 mission_protoes.append(
