@@ -81,15 +81,15 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                                              minute=now.minute, second=now.second) - datetime.timedelta(days=last_days)
 
                 query_deposit = (DepositPoint.select(DepositPoint.val, DepositPoint.created_at)
-                         .where(DepositPoint.user_email == context.login_email & DepositPoint.created_at >= from_day))
+                         .where((DepositPoint.user_email == context.login_email) & (DepositPoint.created_at >= from_day)))
 
                 query_get_work_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
-                         .where(TransferPoint.receiver_email == context.login_email
-                                & TransferPoint.created_at >= from_day & TransferPoint.mission_id.is_null(False)))
+                         .where((TransferPoint.receiver_email == context.login_email)
+                                & (TransferPoint.created_at >= from_day) & (TransferPoint.mission_id.is_null(False))))
 
                 query_get_event_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
-                         .where(TransferPoint.receiver_email == context.login_email
-                                & TransferPoint.created_at >= from_day & TransferPoint.mission_id.is_null(True)))
+                         .where((TransferPoint.receiver_email == context.login_email)
+                                & (TransferPoint.created_at >= from_day) & (TransferPoint.mission_id.is_null(True))))
 
                 for row in query_deposit:
                     tmp_point_histories.append(
@@ -133,11 +133,6 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up plus history success"
-
-                if query_get_event_point is None:
-                    result_message += " None"
-                else:
-                    result_message += str(query_get_event_point)
 
             except Exception as e:
                 transaction.rollback()
