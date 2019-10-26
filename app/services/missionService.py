@@ -317,7 +317,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
             # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
 
-            for row in query.naive():
+            for row in query:
                 b = row.beginning
                 c = row.created_at
                 d = row.deadline
