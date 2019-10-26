@@ -294,8 +294,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
             # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
 
-            query.reverse()
-
             for row in query:
                 b = row.beginning
                 c = row.created_at
@@ -314,6 +312,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         thumbnail_url=row.thumb_url.url,
                     )
                 )
+
+            mission_protoes.reverse()
 
         return SearchMissionResponse(
             result=CommonResult(
