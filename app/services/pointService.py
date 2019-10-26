@@ -132,7 +132,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up plus history success"
 
-                result_message += query_get_event_point
+                result_message += str(query_get_event_point)
 
             except Exception as e:
                 transaction.rollback()
