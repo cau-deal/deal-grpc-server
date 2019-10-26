@@ -90,6 +90,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             MissionExplanationImageType.BACKGROUND_MISSION_EXPLANATION_IMAGE_TYPE: 2,
             MissionExplanationImageType.MAIN_TEXT_MISSION_EXPLANATION_IMAGE_TYPE: 3,
         }
+        mission_id = 0
 
         now = datetime.datetime.now()
         today_register = False
