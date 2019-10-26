@@ -244,7 +244,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (MissionModel
-                                 .select(MissionModel, MissionExplanationImageModel)
+                                 .selectn(MissionModel, MissionExplanationImageModel)
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
                                  .where((MissionModel.id >= _offset) & (MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
