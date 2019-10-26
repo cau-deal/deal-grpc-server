@@ -224,6 +224,14 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         if mission_page_mode == MissionPageMode.INITIALIZE_MISSION_PAGE:
             _offset = 0
 
+        #ENUM Mission Type
+        MISSION_TYPE = {
+            MissionType.UNKNOWN_MISSION_TYPE: 0,
+            MissionType.ALL_MISSION_TYPE: 1,
+            MissionType.COLLECT_MISSION_TYPE: 2,
+            MissionType.PROCESS_MISSION_TYPE: 3,
+        }
+
         db = pwdb.database
 
         with db.atomic() as transaction:
@@ -245,10 +253,10 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                          MissionModel.created_at.alias('created_at'),
                                          MEI.url.alias('url'),
                                          MissionModel.beginning.alias('beginning'))
-                                 .join(MEI)
+                                 .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
                                  .where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-                                       & (MissionModel.id >= _offset & MissionModel.mission_type == mission_type))
+                                       & (MissionModel.id >= _offset & MissionModel.mission_type == MISSION_TYPE[mission_type]))
                                  .limit(amount))
 
 #                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
