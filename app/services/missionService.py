@@ -246,7 +246,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (MissionModel
-                                 .select()
+                                 .select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
                                  .where((MissionModel.id >= _offset) & (MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
@@ -317,7 +317,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
             # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
 
-            for row in query:
+            for row in query.naive():
                 b = row.beginning
                 c = row.created_at
                 d = row.deadline
@@ -332,7 +332,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         mission_state=row.state,
                         created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
                         beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
-                        # thumbnail_url=row.url,
+                        thumbnail_url=row.url,
                     )
                 )
 
