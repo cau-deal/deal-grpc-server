@@ -86,7 +86,7 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
         return CountNoReadPushResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message,
+                message=result_message + str(query),
             ),
             count=count,
         )
