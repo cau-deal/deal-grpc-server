@@ -156,7 +156,7 @@ class TransferPoint(pwdb.Model):
     receiver_email = peewee.ForeignKeyField(User, column_name='receiver_email')
     val = peewee.IntegerField()
     created_at = peewee.DateTimeField(default=datetime.datetime.now())
-    mission_id = peewee.ForeignKeyField(Mission, column_name='mission_id', null=True)
+    mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id', null=True)
 
     class Meta:
         db_table = 'transfer_point'
