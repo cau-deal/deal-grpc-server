@@ -86,7 +86,7 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
         return CountNoReadPushResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + str(query),
+                message=result_message,
             ),
             count=count,
         )
@@ -113,10 +113,10 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
             try:
                 if is_read_push_type == IS_READ_PUSH_TYPE[IsReadPushType.NOT_READ_IS_READ_PUSH_TYPE]:
                     query = (PushLog.select().where((PushLog.receiver_email == context.login_email) &
-                                                    (not PushLog.is_read)))
+                                                    (PushLog.is_read == False)))
                 elif is_read_push_type == IS_READ_PUSH_TYPE[IsReadPushType.READ_IS_READ_PUSH_TYPE]:
                     query = (PushLog.select().where((PushLog.receiver_email == context.login_email) &
-                                                    (PushLog.is_read)))
+                                                    (PushLog.is_read == True)))
                 elif is_read_push_type == IS_READ_PUSH_TYPE[IsReadPushType.ALL_IS_READ_PUSH_TYPE]:
                     query = (PushLog.select().where((PushLog.receiver_email == context.login_email)))
                 else:
