@@ -89,9 +89,6 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                          .where(TransferPoint.receiver_email == context.login_email
                                 & TransferPoint.created_at >= from_day & TransferPoint.mission_id.is_null(True)))
 
-                result_code = ResultCode.SUCCESS
-                result_message = "Look up plus history success"
-
                 for row in query_deposit:
                     tmp_point_histories.append(
                         {
@@ -131,6 +128,11 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                                                 hour=c.hour, min=c.minute, sec=c.second)
                         )
                     )
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Look up plus history success"
+
+                result_message += query_get_event_point
 
             except Exception as e:
                 transaction.rollback()
@@ -183,9 +185,6 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                         .where(TransferPoint.sender_email == context.login_email
                                 & TransferPoint.created_at >= from_day & TransferPoint.mission_id.is_null(True)))
 
-                result_code = ResultCode.SUCCESS
-                result_message = "Look up minus history success"
-
                 for row in query_withdraw:
                     tmp_point_histories.append(
                         {
@@ -225,6 +224,9 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                                                 hour=c.hour, min=c.minute, sec=c.second)
                         )
                     )
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Look up minus history success"
 
             except Exception as e:
                 transaction.rollback()
