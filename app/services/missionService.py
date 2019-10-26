@@ -235,8 +235,18 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     # mission type is not all
 
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (MissionModel.select().join(MEI).
-                                 where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
+                        query = (MissionModel
+                                 .select(MissionModel.id.alias('id'), MissionModel.title.alias('title'),
+                                         MissionModel.mission_type.alias('mission_typy'),
+                                         MissionModel.price_of_package.alias('price_of_package'),
+                                         MissionModel.deadline.alias('deadline'),
+                                         MissionModel.summary.alias('summary'),
+                                         MissionModel.state.alias('state'),
+                                         MissionModel.created_at.alias('created_at'),
+                                         MEI.url.alias('url'),
+                                         MissionModel.beginning.alias('beginning'))
+                                 .join(MEI)
+                                 .where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                        & (MissionModel.id >= _offset & MissionModel.mission_type == mission_type))
                                  .limit(amount))
@@ -247,8 +257,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 #                                .limit(amount))
                     # mission type is all
                     else:
-                        query = (MissionModel.select().join(MEI).
-                                 where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
+                        query = (MissionModel.select()
+                                 .join(MEI)
+                                 .where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                        & (MissionModel.id >= _offset))
                                  .limit(amount))
@@ -261,8 +272,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 else:
                     # mission type is not all
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (MissionModel.select().join(MEI).
-                                 where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
+                        query = (MissionModel.select()
+                                 .join(MEI)
+                                 .where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                        & (MissionModel.id >= _offset & MissionModel.mission_type == mission_type)
                                        & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
@@ -275,8 +287,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 #                                .limit(amount))
                     # mission type is all
                     else:
-                        query = (MissionModel.select().join(MEI).
-                                 where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
+                        query = (MissionModel.select()
+                                 .join(MEI)
+                                 .where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                        & (MissionModel.id >= _offset)
                                        & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
