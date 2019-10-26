@@ -81,13 +81,13 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                                              minute=now.minute, second=now.second) - datetime.timedelta(days=last_days)
 
                 query_deposit = (DepositPoint.select(DepositPoint.val, DepositPoint.created_at)
-                         .where(DepositPoint.user_email == context.login_email and DepositPoint.created_at >= from_day))
+                         .where(DepositPoint.user_email == context.login_email & DepositPoint.created_at >= from_day))
                 query_get_work_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
                          .where(TransferPoint.receiver_email == context.login_email
-                                and TransferPoint.created_at >= from_day and TransferPoint.mission_id.is_null(False)))
+                                & TransferPoint.created_at >= from_day & TransferPoint.mission_id.is_null(False)))
                 query_get_event_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
                          .where(TransferPoint.receiver_email == context.login_email
-                                and TransferPoint.created_at >= from_day and TransferPoint.mission_id.is_null(True)))
+                                & TransferPoint.created_at >= from_day & TransferPoint.mission_id.is_null(True)))
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up plus history success"
@@ -96,7 +96,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                     tmp_point_histories.append(
                         {
                             'val': row.val,
-                            'point_alter_reason' : POINT_ALTER_REASON[PointAlterReason.DEPOSIT],
+                            'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.DEPOSIT],
                             'created_at' : row.created_at
                         }
                     )
@@ -171,17 +171,17 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
         with db.atomic() as transaction:
             try:
                 now = datetime.datetime.now()
-                from_day = datetime.datetime(year=now.year, month=now.month, day=now.day - last_days,
-                                             hour=now.hour, minute=now.minute, second=now.second)
+                from_day = datetime.datetime(year=now.year, month=now.month, day=now.day, hour=now.hour,
+                                             minute=now.minute, second=now.second) - datetime.timedelta(days=last_days)
 
                 query_withdraw = (WithdrawPoint.select(WithdrawPoint.val, WithdrawPoint.created_at)
-                        .where(WithdrawPoint.user_email == context.login_email and WithdrawPoint.created_at >= from_day))
+                        .where(WithdrawPoint.user_email == context.login_email & WithdrawPoint.created_at >= from_day))
                 query_cost_request_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
                         .where(TransferPoint.sender_email == context.login_email
-                                and TransferPoint.created_at >= from_day and TransferPoint.mission_id.is_null(False)))
+                                & TransferPoint.created_at >= from_day & TransferPoint.mission_id.is_null(False)))
                 query_cost_event_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
                         .where(TransferPoint.sender_email == context.login_email
-                                and TransferPoint.created_at >= from_day and TransferPoint.mission_id.is_null(True)))
+                                & TransferPoint.created_at >= from_day & TransferPoint.mission_id.is_null(True)))
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Look up minus history success"
