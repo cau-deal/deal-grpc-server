@@ -393,10 +393,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         )
 
     @verified
-    def SearchMissionRelevantMe(self, request, context):
+    def SearchRegisterMissionRelevantMe(self, request, context):
         mission_protoes = []
 
-        relevant_type = request.relevant_type
         mission_page = request.mission_page
 
         mission_page_mode = mission_page.mission_page_mode
@@ -414,27 +413,37 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         with db.atomic() as transaction:
             try:
                 MEI = MissionExplanationImage.alias()
-                MEIT = MissionExplanationImageType.alias()
 
-                # work mission
-                if relevant_type == RelevantType.REGISTER_RELEVANT_TYPE:
-                    query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
-                            .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                & MissionModel.id >= _offset & MissionModel.register_email == context.login_email)
-                            .limit(amount))
+                query = (MissionModel
+                         .select(MissionModel, MEI.url)
+                         .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
+                         .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
+                                & (MissionModel.register_email == context.login_email))
+                         .offset(_offset).limit(amount))
 
-                # register mission
-                else:
-                    mission_ids = (ConductMission.select(ConductMission.mission_id)
-                                   .where(ConductMission.worker_email == context.login_email))
-                    # WHERE value 'In' clause
-                    query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
-                            .where(MEI.image_type == MEIT.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                & MissionModel.id >= _offset & MissionModel.id << mission_ids)
-                            .limit(amount))
+                for row in query:
+                    b = row.beginning
+                    c = row.created_at
+                    d = row.deadline
+                    mission_protoes.append(
+                        MissionProto(
+                            mission_id=row.id,
+                            title=row.title,
+                            mission_type=row.mission_type,
+                            price_of_package=row.price_of_package,
+                            deadline=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute, sec=d.second),
+                            summary=row.summary,
+                            mission_state=row.state,
+                            created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
+                            beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
+                            thumbnail_url=row.thumb_url.url,
+                        )
+                    )
+
+                mission_protoes.reverse()
 
                 result_code = ResultCode.SUCCESS
-                result_message = "Successful Search Mission"
+                result_message = "Successful Search Mission Relevant me"
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
 
             except Exception as e:
@@ -443,23 +452,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e)
                 search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
 
-            # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
-            for row in query:
-                mission_protoes.append(
-                    MissionProto(
-                        mission_id=row.id,
-                        title=row.title,
-                        mission_type=row.mission_type,
-                        price_of_package=row.price_of_package,
-                        deadline=row.deadline,
-                        summary=row.summary,
-                        mission_state=row.mission_state,
-                        created_at=row.created_at,
-                        thumbnail_url=row.url,
-                    )
-                )
-
-        return SearchMissionResponse(
+        return SearchRegisterMissionRelevantMeResponse(
             result=CommonResult(
                 result_code=result_code,
                 message=result_message
@@ -467,6 +460,12 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             search_mission_result=search_mission_result,
             mission_protoes=mission_protoes,
         )
+
+    @verified
+    def SearchConductMissionRelevantMe(self, request, context):
+        pass
+
+
 
     @verified
     def GetAssignedMission(self, request, context):
@@ -537,3 +536,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
+
+    @verified
+    def CountFetchMission(self, request, context):
+        pass
