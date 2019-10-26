@@ -459,6 +459,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SearchConductMissionRelevantMe(self, request, context):
+        # record 집어넣고 테스트 필요
         conduct_mission_protoes = []
 
         mission_page = request.mission_page
