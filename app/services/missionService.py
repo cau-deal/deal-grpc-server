@@ -335,7 +335,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         with db.atomic() as transaction:
             try:
                 MEI = MissionExplanationImageModel.alias()
-
                 query_mission = (MissionModel.select().where(MissionModel.id == mission_id))
 
                 query_mission_explanation_image = (MEI.select().where(MEI.mission_id == mission_id))
