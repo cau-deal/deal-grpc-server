@@ -42,6 +42,7 @@ class MissionModel(pwdb.Model):
     unit_package = peewee.IntegerField()
     price_of_package = peewee.IntegerField()
     order_package_quantity = peewee.IntegerField()
+    beginning = peewee.DateTimeField()
     deadline = peewee.DateTimeField()
     created_at = peewee.DateTimeField(default=datetime.datetime.now())
     summary = peewee.CharField(null=True)
