@@ -36,12 +36,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         data_type = mission.data_type
         unit_package = mission.unit_package
         price_of_package = mission.price_of_package
+        order_package_quantity = mission.order_package_quantity
         deadline = mission.deadline
-
+        beginning = mission.beginning
         deadline_datetime = datetime.datetime(year=deadline.year, month=deadline.month, day=deadline.day,
                                      hour=deadline.hour, minute=deadline.min, second=deadline.sec)
-
-        order_package_quantity = mission.order_package_quantity
+        beginning_datetime = datetime.datetime(year=beginning.year, month=beginning.month, day=beginning.day,
+                                     hour=beginning.hour, minute=beginning.min, second=beginning.sec)
         summary = mission.summary
         contact_clause = mission.contact_clause
         specification = mission.specification
@@ -92,6 +93,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     unit_package=unit_package,
                     price_of_package=price_of_package,
                     order_package_quantity=order_package_quantity,
+                    beginning=beginning_datetime,
                     deadline=deadline_datetime,
                     created_at=datetime.datetime.now(),
                     summary=summary,
@@ -110,7 +112,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 #result_message = str(e)
                 error_message = str(e) + "  " + context.login_email + "  " + title + "  " + contents + "  " + \
                                 str(mission_type) + "  " + str(DATA_TYPE[data_type]) + "  " + str(unit_package) + "  "+\
-                                str(price_of_package) + "  " + str(deadline) + "  " + str(order_package_quantity) + "  " + summary + \
+                                str(price_of_package) + "  " + "  " + str(beginning) + "  " + str(deadline) + "  " + str(order_package_quantity) + "  " + summary + \
                                 "  " + contact_clause + "  " + specification + "  " + "  " + str(datetime.datetime.now()) + "  "
                 result_message = error_message
                 register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
