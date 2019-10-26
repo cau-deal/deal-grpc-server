@@ -157,28 +157,29 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e) + " transaction1 error - mission_id :  " + str(mission_id)
                 register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
-        with db.atomic() as transaction:
-            try:
-                # 이미지가 있으면 저장
-                for mission_explanation_image in mission_explanation_images:
-                    url = mission_explanation_image.url
-                    image_type = mission_explanation_image.type
+        if result_code != ResultCode.Error:
+            with db.atomic() as transaction:
+                try:
+                    # 이미지가 있으면 저장
+                    for mission_explanation_image in mission_explanation_images:
+                        url = mission_explanation_image.url
+                        image_type = mission_explanation_image.type
 
-                    MissionExplanationImage.create(
-                        mission_id=mission_id,
-                        image_type=MISSION_EXPLANATION_IMAGE_TYPE[image_type],
-                        url=url,
-                    )
+                        MissionExplanationImageModel.create(
+                            mission_id=mission_id,
+                            image_type=MISSION_EXPLANATION_IMAGE_TYPE[image_type],
+                            url=url,
+                        )
 
-                result_code = ResultCode.SUCCESS
-                result_message = "Register Mission Success"
-                register_mission_result = RegisterMissionResult.SUCCESS_REGISTER_MISSION_RESULT
+                    result_code = ResultCode.SUCCESS
+                    result_message = "Register Mission Success"
+                    register_mission_result = RegisterMissionResult.SUCCESS_REGISTER_MISSION_RESULT
 
-            except Exception as e:
-                transaction.rollback()
-                result_code = ResultCode.ERROR
-                result_message = str(e) + " transaction2 error - mission_id :  " + str(mission_id)
-                register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                except Exception as e:
+                    transaction.rollback()
+                    result_code = ResultCode.ERROR
+                    result_message = str(e) + " transaction2 error - mission_id :  " + str(mission_id)
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
         return RegisterMissionResponse(
             result=CommonResult(
