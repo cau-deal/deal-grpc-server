@@ -401,7 +401,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         amount = mission_page.amount
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
-        result_message = "Unknown Search Mission Relevant me"
+        result_message = "Unknown Search Register Mission Relevant me"
         search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
 
         if mission_page_mode == MissionPageMode.INITIALIZE_MISSION_PAGE:
@@ -439,7 +439,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     )
 
                 result_code = ResultCode.SUCCESS
-                result_message = "Successful Search Mission Relevant me"
+                result_message = "Successful Search Register Mission Relevant me"
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
 
             except Exception as e:
@@ -459,7 +459,79 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SearchConductMissionRelevantMe(self, request, context):
-        pass
+        conduct_mission_protoes = []
+
+        mission_page = request.mission_page
+
+        mission_page_mode = mission_page.mission_page_mode
+        _offset = mission_page._offset
+        amount = mission_page.amount
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Search Conduct Mission Relevant me"
+        search_mission_result = SearchMissionResult.UNKNOWN_SEARCH_MISSION_RESULT
+
+        if mission_page_mode == MissionPageMode.INITIALIZE_MISSION_PAGE:
+            _offset = 0
+
+        db = pwdb.database
+        with db.atomic() as transaction:
+            try:
+                mission_ids = (ConductMission.select(ConductMission.mission_id)
+                               .where(ConductMission.worker_email == context.login_email))
+
+                CM = ConductMission.alias()
+                MEI = MissionExplanationImageModel.alias()
+
+                query = (MissionModel
+                         .select(MissionModel, CM.state, MEI.url)
+                         .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
+                         .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
+                                & MissionModel.id << mission_ids)
+                         .join(CM, attr='conduct')
+                         .where((MissionModel.id == CM.mission_id) & (CM.worker_email == context.login_email))
+                         .offset(_offset).limit(amount))
+
+                for row in query:
+                    b = row.beginning
+                    c = row.created_at
+                    d = row.deadline
+                    conduct_mission_protoes.append(
+                        ConductMissionProto(
+                            mission_id=row.id,
+                            title=row.title,
+                            mission_type=row.mission_type,
+                            price_of_package=row.price_of_package,
+                            deadline=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute,
+                                              sec=d.second),
+                            summary=row.summary,
+                            conduct_mission_state=row.conduct.state,
+                            created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute,
+                                                sec=c.second),
+                            beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute,
+                                               sec=b.second),
+                            thumbnail_url=row.thumb_url.url,
+                        )
+                    )
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful Search Conduct Mission Relevant me"
+                search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
+
+        return SearchRegisterMissionRelevantMeResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message
+            ),
+            search_mission_result=search_mission_result,
+            conduct_mission_protoes=conduct_mission_protoes,
+        )
 
 
 
