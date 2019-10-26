@@ -110,6 +110,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 if today_register is False and (beginning_datetime < datetime.datetime.now()):
                     raise Exception("Invalid beginning")
 
+                if deadline_datetime < datetime.datetime.now():
+                    raise Exception("Invalid deadline")
+
                 # 미션 시작 날짜가 오늘과 같으면 바로 진행 중으로 등록
                 if today_register:
                     query = MissionModel.create(
