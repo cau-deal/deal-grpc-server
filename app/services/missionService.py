@@ -248,7 +248,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         query = (MissionModel
                                  .select(MissionModel, MEI.url)
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                                 .where((MissionModel.id >= _offset) & (MissionModel.id >= _offset) &
+                                 .where((MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                        & (MissionModel.mission_type == MISSION_TYPE[mission_type]))
                                  .limit(amount))
@@ -257,7 +257,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         query = (MissionModel
                                  .select(MissionModel, MEI.url)
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                                 .where((MissionModel.id >= _offset) & (MissionModel.id >= _offset) &
+                                 .where((MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
                                  .limit(amount))
                 # keyword exist
@@ -267,7 +267,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         query = (MissionModel
                                  .select(MissionModel, MEI.url)
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                                 .where((MissionModel.id >= _offset) & (MissionModel.id >= _offset) &
+                                 .where((MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                        & (MissionModel.mission_type == MISSION_TYPE[mission_type])
                                         & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
@@ -277,7 +277,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         query = (MissionModel
                                  .select(MissionModel, MEI.url)
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                                 .where((MissionModel.id >= _offset) & (MissionModel.id >= _offset) &
+                                 .where((MissionModel.id >= _offset) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                         & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
                                  .limit(amount))
