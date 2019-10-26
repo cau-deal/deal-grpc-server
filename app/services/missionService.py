@@ -304,7 +304,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
 
                 for row in query:
-                    for x in row.tuples():
+                    for x in row:
                         result_message += "   " + str(x)
 
             except Exception as e:
