@@ -235,31 +235,57 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     # mission type is not all
 
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
-                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                & MissionModel.id >= _offset & MissionModel.mission_type == mission_type)
-                                .limit(amount))
+                        query = (MissionModel.select().join(MEI).
+                                 where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
+                                (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
+                                       & (MissionModel.id >= _offset & MissionModel.mission_type == mission_type))
+                                 .limit(amount))
+
+#                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
+#                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+#                                & MissionModel.id >= _offset & MissionModel.mission_type == mission_type)
+#                                .limit(amount))
                     # mission type is all
                     else:
-                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
-                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                & MissionModel.id >= _offset)
-                                .limit(amount))
+                        query = (MissionModel.select().join(MEI).
+                                 where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
+                                (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
+                                       & (MissionModel.id >= _offset))
+                                 .limit(amount))
+
+#                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
+#                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+#                                & MissionModel.id >= _offset)
+#                                .limit(amount))
                 # keyword exist
                 else:
                     # mission type is not all
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
-                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                & MissionModel.id >= _offset & MissionModel.mission_type == mission_type
-                                & (MissionModel.title ** keyword | MissionModel.contents ** keyword))
-                                .limit(amount))
+                        query = (MissionModel.select().join(MEI).
+                                 where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
+                                (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
+                                       & (MissionModel.id >= _offset & MissionModel.mission_type == mission_type)
+                                       & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
+                                 .limit(amount))
+
+#                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
+#                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+#                                & MissionModel.id >= _offset & MissionModel.mission_type == mission_type
+#                                & (MissionModel.title ** keyword | MissionModel.contents ** keyword))
+#                                .limit(amount))
                     # mission type is all
                     else:
-                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
-                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                & MissionModel.id >= _offset & (MissionModel.title ** keyword | MissionModel.contents ** keyword))
-                                .limit(amount))
+                        query = (MissionModel.select().join(MEI).
+                                 where((MissionModel.id == MEI.mission_id) & (MissionModel.id >= _offset) &
+                                (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
+                                       & (MissionModel.id >= _offset)
+                                       & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
+                                 .limit(amount))
+
+#                        query = (MissionModel.select().join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id))
+#                                .where(MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+#                                & MissionModel.id >= _offset & (MissionModel.title ** keyword | MissionModel.contents ** keyword))
+#                                .limit(amount))
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission"
@@ -274,21 +300,23 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
 
             for row in query:
-                d = row.created_at
+                b = row.beginning
+                c = row.created_at
+                d = row.deadline
                 mission_protoes.append(
                     MissionProto(
                         mission_id=row.id,
                         title=row.title,
                         mission_type=row.mission_type,
                         price_of_package=row.price_of_package,
-                        deadline=row.deadline,
+                        deadline=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute, sec=d.second),
                         summary=row.summary,
                         mission_state=row.state,
-                        created_at=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute, sec=d.second),
-                        #thumbnail_url=row.url,
+                        created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
+                        thumbnail_url=row.url,
+                        beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second)
                     )
                 )
-
 
         return SearchMissionResponse(
             result=CommonResult(
