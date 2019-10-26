@@ -1,5 +1,6 @@
 from app.services import authService, dealService, missionService, phoneService, userService, accountService, pointService
 
+
 AuthServiceServicer = authService.AuthServiceServicer
 UserServiceServicer = userService.UserServiceServicer
 dealServiceServicer = dealService.DealServiceServicer
