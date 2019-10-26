@@ -41,7 +41,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e) + str(type(context.login_email))
+                result_message = str(e)
                 print("EXCEPTION: " + str(e))
 
         return LookUpBalanceResponse(
@@ -177,13 +177,15 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                                              minute=now.minute, second=now.second) - datetime.timedelta(days=last_days)
 
                 query_withdraw = (WithdrawPoint.select(WithdrawPoint.val, WithdrawPoint.created_at)
-                        .where(WithdrawPoint.user_email == context.login_email & WithdrawPoint.created_at >= from_day))
+                        .where((WithdrawPoint.user_email == context.login_email) & (WithdrawPoint.created_at >= from_day)))
+
                 query_cost_request_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
-                        .where(TransferPoint.sender_email == context.login_email
-                                & TransferPoint.created_at >= from_day & TransferPoint.mission_id.is_null(False)))
+                        .where((TransferPoint.sender_email == context.login_email)
+                                & (TransferPoint.created_at >= from_day) & (TransferPoint.mission_id.is_null(False))))
+
                 query_cost_event_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
-                        .where(TransferPoint.sender_email == context.login_email
-                                & TransferPoint.created_at >= from_day & TransferPoint.mission_id.is_null(True)))
+                        .where((TransferPoint.sender_email == context.login_email)
+                                & (TransferPoint.created_at >= from_day) & (TransferPoint.mission_id.is_null(True))))
 
                 for row in query_withdraw:
                     tmp_point_histories.append(
