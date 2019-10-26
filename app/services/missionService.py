@@ -309,8 +309,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     )
                 )
 
-            mission_protoes.reverse()
-
         return SearchMissionResponse(
             result=CommonResult(
                 result_code=result_code,
@@ -439,8 +437,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                             thumbnail_url=row.thumb_url.url,
                         )
                     )
-
-                mission_protoes.reverse()
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission Relevant me"
