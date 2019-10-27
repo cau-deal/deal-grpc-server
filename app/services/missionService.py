@@ -613,7 +613,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
     @verified
     def CountFetchMission(self, request, context):
         db = pwdb.database
-
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown Count Fetch mission"
 
