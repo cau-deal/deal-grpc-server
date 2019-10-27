@@ -679,15 +679,15 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                     s += str(user_query.get()) + str(register_email) + "  " + user_name
 
+                    row = user_query.get()
 
-                    for row in user_query.dicts():
-                        profile = Profile(
-                            email=register_email,
-                            level=row['level'],
-                            state=row['state'],
-                            role=row['role'],
-                            profile_photo_url=row['profile_photo_url'],
-                            name=user_name,
+                    profile = Profile(
+                        email=register_email,
+                        level=row.level,
+                        state=row.state,
+                        role=row.role,
+                        profile_photo_url=row.profile_photo_url,
+                        name=user_name,
                     )
 
                     result_code = ResultCode.SUCCESS
