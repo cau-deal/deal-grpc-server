@@ -673,7 +673,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     register_email_query = (MissionModel.select().where(MissionModel.id == mission_id))
 
                     for row in register_email_query:
-                        register_email = row.register_email
+                        register_email = str(row.register_email)
 
                     user_query = (User.select().where(User.email == register_email))
                     user_name_query = (PhoneAuthentication.select().where(PhoneAuthentication.user_email == register_email))
@@ -681,10 +681,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     for row in user_query.dicts():
                         s += str(row) + "  " + str(register_email)
 
-                    """
-                    for row in user_name_query.dicts:
-                        user_name = row.name
-
+                    for row in user_name_query.dicts():
+                        user_name = row['name']
                     
                     for row in user_query.dicts():
                         profile = Profile(
@@ -695,7 +693,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                             profile_photo_url=row['profile_photo_url'],
                             name=user_name,
                     )
-                    """
 
                     result_code = ResultCode.SUCCESS
                     result_message = "Successful get mission owner Mission"
