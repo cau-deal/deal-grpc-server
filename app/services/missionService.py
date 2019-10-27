@@ -498,25 +498,25 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 for row in query.dicts():
                     s += "  " + str(type(row)) + "  " + str(row)
 
-                for row in query:
-                    b = row.beginning
-                    c = row.created_at
-                    d = row.deadline
+                for row in query.dicts():
+                    b = row['beginning']
+                    c = row['created_at']
+                    d = row['deadline']
                     conduct_mission_protoes.append(
                         ConductMissionProto(
-                            mission_id=row.id,
-                            title=row.title,
-                            mission_type=row.mission_type,
-                            price_of_package=row.price_of_package,
+                            mission_id=row['id'],
+                            title=row['title'],
+                            mission_type=row['mission_type'],
+                            price_of_package=row['price_of_package'],
                             deadline=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute,
                                               sec=d.second),
-                            summary=row.summary,
-                            conduct_mission_state=row.conduct_state,
+                            summary=row['summary'],
+                            conduct_mission_state=row['conduct_state'],
                             created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute,
                                                 sec=c.second),
                             beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute,
                                                sec=b.second),
-                            thumbnail_url=row.thumb_url.url,
+                            thumbnail_url=row['url'],
                         )
                     )
 
@@ -533,7 +533,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         return SearchConductMissionRelevantMeResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message
+                message=result_message + s
             ),
             search_mission_result=search_mission_result,
             conduct_mission_protoes=conduct_mission_protoes,
