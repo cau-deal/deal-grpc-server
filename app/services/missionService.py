@@ -671,7 +671,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     for row in register_email_query.dicts():
                         register_email = row['register_email']
 
-                    """
                     user_query = (User.select().where(User.email == register_email))
 
                     user_name_query = (PhoneAuthentication.select().where(PhoneAuthentication.user_email == register_email))
@@ -680,16 +679,14 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         user_name = row['name']
 
                     for row in user_query.dicts():
-                        pass
-                    profile = Profile(
-                        email=register_email,
-                        level=row['level'],
-                        state=row['state'],
-                        role=row['role'],
-                        profile_photo_url=row['profile_photo_url'],
-                        name=user_name,
+                        profile = Profile(
+                            email=register_email,
+                            level=row['level'],
+                            state=row['state'],
+                            role=row['role'],
+                            profile_photo_url=row['profile_photo_url'],
+                            name=user_name,
                     )
-                    """
 
                     result_code = ResultCode.SUCCESS
                     result_message = "Successful get mission owner Mission"
@@ -698,13 +695,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 except Exception as e:
                     transaction.rollback()
                     result_code = ResultCode.ERROR
-                    result_message = str(e) + " " + str(register_email_query)
+                    result_message = str(e) + " " + user_name
                     assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
                 return GetMissionOwnerInfoResponse(
                     result=CommonResult(
                         result_code=result_code,
-                        message=result_message + " " + str(register_email_query),
+                        message=result_message + " " + user_name,
                     ),
                     register_profile=profile,
                 )
