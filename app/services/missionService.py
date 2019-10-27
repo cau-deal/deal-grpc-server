@@ -668,6 +668,11 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 try:
                     register_email_query = (MissionModel.select(MissionModel.register_email).where(MissionModel.id == mission_id))
 
+                    for row in register_email_query:
+                        s += "  " + str(type(row.register_email)) + "  " + str(row.register_email)
+
+                    """
+
                     register_email = register_email_query.get().register_email
 
                     user_query = (User.select().where(User.email == register_email))
@@ -676,8 +681,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                        .where(PhoneAuthentication.user_email == register_email))
 
                     user_name = user_name_query.get().name
-
-                    s += str(user_query.get()) + str(register_email) + "  " + user_name
 
                     row = user_query.get()
 
@@ -689,6 +692,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         profile_photo_url=row.profile_photo_url,
                         name=user_name,
                     )
+                    """
 
                     result_code = ResultCode.SUCCESS
                     result_message = "Successful get mission owner Mission"
