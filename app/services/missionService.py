@@ -248,15 +248,16 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         query = (MissionModel
                                  .select(MissionModel, MEI.url)
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                                 .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-                                       & (MissionModel.mission_type == MISSION_TYPE[mission_type]))
+                                 .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+                                       | MEI.url is not None) & (MissionModel.mission_type == MISSION_TYPE[mission_type]))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
                         query = (MissionModel
                                  .select(MissionModel, MEI.url)
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                                 .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
+                                 .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+                                         | MEI.url is not None))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                 # keyword exist
                 else:
