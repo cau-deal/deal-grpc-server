@@ -290,22 +290,22 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
             # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
 
-            for row in query:
-                b = row.beginning
-                c = row.created_at
-                d = row.deadline
+            for row in query.dicts():
+                b = row['beginning']
+                c = row['created_at']
+                d = row['deadline']
                 mission_protoes.append(
                     MissionProto(
-                        mission_id=row.id,
-                        title=row.title,
-                        mission_type=row.mission_type,
-                        price_of_package=row.price_of_package,
+                        mission_id=row['id'],
+                        title=row['title'],
+                        mission_type=row['mission_type'],
+                        price_of_package=row['price_of_package'],
                         deadline=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute, sec=d.second),
-                        summary=row.summary,
-                        mission_state=row.state,
+                        summary=row['summary'],
+                        mission_state=row['state'],
                         created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
                         beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
-                        thumbnail_url=row.thumb_url.url,
+                        thumbnail_url=row['url'],
                     )
                 )
 
@@ -420,21 +420,21 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                          .order_by(MissionModel.id).desc().offset(_offset).limit(amount))
 
                 for row in query:
-                    b = row.beginning
-                    c = row.created_at
-                    d = row.deadline
+                    b = row['beginning']
+                    c = row['created_at']
+                    d = row['deadline']
                     mission_protoes.append(
                         MissionProto(
-                            mission_id=row.id,
-                            title=row.title,
-                            mission_type=row.mission_type,
-                            price_of_package=row.price_of_package,
+                            mission_id=row['id'],
+                            title=row['title'],
+                            mission_type=row['mission_type'],
+                            price_of_package=row['price_of_package'],
                             deadline=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute, sec=d.second),
-                            summary=row.summary,
-                            mission_state=row.state,
+                            summary=row['summary'],
+                            mission_state=row['state'],
                             created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
                             beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
-                            thumbnail_url=row.thumb_url.url,
+                            thumbnail_url=row['url'],
                         )
                     )
 
