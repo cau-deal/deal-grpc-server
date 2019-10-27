@@ -618,6 +618,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         result_message = "Unknown Count Fetch mission"
 
         count = 0
+        count1 = 0
+        count2 = 0
 
         with db.atomic() as transaction:
             try:
@@ -627,6 +629,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                         & (MissionModel.register_email == context.login_email)))
 
                 for row in query_mission:
+                    count1 = row.count
                     count += row.count
 
                 query_conduct_mission = (ConductMission.select(fn.count(ConductMission.id).alias('count'))
@@ -637,6 +640,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 for row in query_conduct_mission:
                     count += row.count
+                    coun2 = row.count
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Count Fetch mission"
@@ -649,7 +653,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             return CountFetchMissionResponse(
                 result=CommonResult(
                     result_code=result_code,
-                    message=result_message,
+                    message=result_message + " register mission :  " + str(count1) + "  conduct mission : " + str(count2),
                 ),
                 val=count,
             )
