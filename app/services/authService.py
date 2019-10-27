@@ -12,6 +12,7 @@ from protos.AuthService_pb2 import *
 from protos.AuthService_pb2_grpc import *
 
 from protos.CommonResult_pb2 import *
+from protos.Profile_pb2 import UserState
 
 
 class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
@@ -48,7 +49,7 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
                     user.last_login_datetime = datetime.datetime.now()
                     user.save()
 
-                    if user.state == 1:
+                    if user.state == UserState.BANNED:
                         raise Exception("You are blocked.")
 
                 access_token = JWT.get_access_token(email)
