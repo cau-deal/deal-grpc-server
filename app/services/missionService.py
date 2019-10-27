@@ -640,7 +640,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 for row in query_conduct_mission:
                     count += row.count
-                    coun2 = row.count
+                    count2 = row.count
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Count Fetch mission"
