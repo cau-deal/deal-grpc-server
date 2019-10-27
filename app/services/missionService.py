@@ -475,8 +475,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         if mission_page_mode == MissionPageMode.INITIALIZE_MISSION_PAGE:
             _offset = 0
 
-        s = ""
-
         db = pwdb.database
         with db.atomic() as transaction:
             try:
@@ -494,9 +492,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                 & (MissionModel.id << mission_ids) & (MissionModel.id == CM.mission_id)
                                 & (CM.worker_email == context.login_email))
                          .offset(_offset).limit(amount))
-
-                for row in query.dicts():
-                    s += "  " + str(type(row)) + "  " + str(row)
 
                 for row in query.dicts():
                     b = row['beginning']
@@ -527,13 +522,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e) + s
+                result_message = str(e)
                 search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
 
         return SearchConductMissionRelevantMeResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + s
+                message=result_message
             ),
             search_mission_result=search_mission_result,
             conduct_mission_protoes=conduct_mission_protoes,
