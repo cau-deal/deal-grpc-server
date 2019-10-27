@@ -80,7 +80,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             MissionState.SOLD_OUT: 2,
             MissionState.WATING_CONFIRM_PURCHASE: 3,
             MissionState.COMPLETE_MISSION: 4,
-            MissionState.WATRING_REGISTER: 5,
+            MissionState.WAITING_REGISTER: 5,
         }
 
         #ENUM Mission Explanation Image Type
@@ -140,7 +140,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         contents=contents,
                         mission_type=MISSION_TYPE[mission_type],
                         data_type=DATA_TYPE[data_type],
-                        state=MISSION_STATE[MissionState.WATRING_REGISTER],
+                        state=MISSION_STATE[MissionState.WAITING_REGISTER],
                         unit_package=unit_package,
                         price_of_package=price_of_package,
                         order_package_quantity=order_package_quantity,
@@ -625,7 +625,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             try:
                 query_mission = (MissionModel.select(fn.count(MissionModel.id).alias('count'))
                                  .where((MissionModel.state == DURING_MISSION) | (MissionModel.state == DURING_MISSION)
-                                        | (MissionModel.state == WATING_CONFIRM_PURCHASE) | (MissionModel.state == WATRING_REGISTER)
+                                        | (MissionModel.state == WATING_CONFIRM_PURCHASE) | (MissionModel.state == WAITING_REGISTER)
                                         & (MissionModel.register_email == context.login_email)))
 
                 for row in query_mission:
@@ -634,9 +634,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 query_conduct_mission = (ConductMission.select(fn.count(ConductMission.id).alias('count'))
                                          .where((ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE)
-                                                & (ConductMission.state == WAITING_VERIFICATION_CONDUCT_MISSION_STATE)
-                                                & (ConductMission.state == DURING_VERIFICATION_CONDUCT_MISSION_STATE)
-                                                * (ConductMission.worker_email == context.login_email)))
+                                                | (ConductMission.state == WAITING_VERIFICATION_CONDUCT_MISSION_STATE)
+                                                | (ConductMission.state == DURING_VERIFICATION_CONDUCT_MISSION_STATE)
+                                                & (ConductMission.worker_email == context.login_email)))
 
                 for row in query_conduct_mission:
                     count += row.count
