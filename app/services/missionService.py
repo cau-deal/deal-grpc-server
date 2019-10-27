@@ -535,7 +535,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         )
 
 
-
     @verified
     def GetAssignedMission(self, request, context):
         mission_id = request.mission_id
