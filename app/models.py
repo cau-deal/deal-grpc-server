@@ -181,7 +181,7 @@ class PushLog(pwdb.Model):
     class Meta:
         db_table = 'push_log'
 
-class FCM(pwdb.Model):
+class FCMModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
     user_email = peewee.ForeignKeyField(User, column_name='user_email')
     fcm_key = peewee.CharField()
