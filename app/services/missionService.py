@@ -511,7 +511,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                             deadline=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute,
                                               sec=d.second),
                             summary=row.summary,
-                            conduct_mission_state=row.conduct.state,
+                            conduct_mission_state=row.conduct.conduct_state,
                             created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute,
                                                 sec=c.second),
                             beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute,
