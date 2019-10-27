@@ -234,8 +234,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         db = pwdb.database
 
-        query = MissionModel.select()
-
         s = ""
         with db.atomic() as transaction:
             try:
@@ -279,6 +277,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                         & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
                                  .order_by(MissionModel.id).desc().offset(_offset).limit(amount))
 
+                        for row in query.dicts():
+                            s += " " + str(row) + "  " + str(type(row))
+                            
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission"
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
@@ -289,9 +290,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e)
                 search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
 
-
-            for row in query.dicts():
-                s += " " + str(row) + "  " + str(type(row))
 
             # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
             for row in query.dicts():
