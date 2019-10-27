@@ -234,6 +234,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         db = pwdb.database
 
+        query = MissionModel
+        
         s = ""
         with db.atomic() as transaction:
             try:
