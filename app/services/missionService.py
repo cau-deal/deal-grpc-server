@@ -675,10 +675,11 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 user_name_query = (PhoneAuthentication.select()
                                    .where(PhoneAuthentication.user_email == register_email))
 
+                """
                 for row in user_name_query:
                     s += "  " + str(row) + "  " + str(type(row))
 
-                """
+                
                 for row in user_query:
                     profile = Profile(
                         email=register_email,
