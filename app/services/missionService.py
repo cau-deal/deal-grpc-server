@@ -5,7 +5,7 @@ from app.decorators import verified
 from app.extensions import pwdb, root_email
 from app.extensions_db import sPointServicer
 
-from app.models import MissionModel
+from app.models import MissionModel, User, PhoneAuthentication
 from app.models import ConductMission
 from app.models import MissionExplanationImageModel
 
@@ -22,6 +22,8 @@ from protos.MissionService_pb2_grpc import *
 
 
 import datetime
+
+from protos.Profile_pb2 import Profile
 
 
 class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
@@ -648,3 +650,61 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 ),
                 val=count,
             )
+
+    @verified
+    def GetMissionOwnerInfo(self, request, context):
+        mission_id = request.mission_id
+        db = pwdb.database
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown get mission owner mission"
+
+        profile = Profile()
+
+        with db.atomic() as transaction:
+            with db.atomic() as transaction:
+                try:
+                    register_email = ""
+                    user_name = ""
+                    register_email_query = (MissionModel.select().where(MissionModel.id == mission_id))
+
+                    for row in register_email_query.dicts():
+                        register_email = row['register_email']
+
+                    user_query = (User.select().where(User.email == register_email))
+
+                    user_name_query = (PhoneAuthentication.select().where(PhoneAuthentication.user_email == register_email))
+
+                    for row in user_name_query.dicts():
+                        user_name = row['name']
+
+                    for row in user_query.dicts():
+                        pass
+                    profile = Profile(
+                        email=register_email,
+                        level=row['level'],
+                        state=row['state'],
+                        role=row['role'],
+                        profile_photo_url=row['profile_photo_url'],
+                        name=user_name,
+                    )
+
+                    result_code = ResultCode.SUCCESS
+                    result_message = "Successful Get Assigned Mission"
+                    assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
+
+                except Exception as e:
+                    transaction.rollback()
+                    result_code = ResultCode.ERROR
+                    result_message = str(e)
+                    assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
+
+                return GetAssignedMissionResponse(
+                    result=CommonResult(
+                        result_code=result_code,
+                        message=result_message,
+                    ),
+                    register_profile=profile,
+                )
+
+
