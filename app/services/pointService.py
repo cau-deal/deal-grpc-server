@@ -275,6 +275,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                     user_email=context.login_email,
                     val=val,
                     kind=DEPOSIT_TYPE[deposit_type],
+                    created_at=datetime.datetime.now(),
                 )
 
                 result_code = ResultCode.SUCCESS
@@ -323,6 +324,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 WithdrawPoint.create(
                     user_email=context.login_email,
                     val=val,
+                    created_at=datetime.datetime.now(),
                 )
 
                 result_code = ResultCode.SUCCESS

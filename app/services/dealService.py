@@ -69,8 +69,8 @@ class DealServiceServicer(DealServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def LookUpInquiry(self, request, context):
-
         inquiry_with_answer = []
+
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown LookUpInquiry"
 
