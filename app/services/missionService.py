@@ -236,6 +236,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         query = MissionModel.select()
 
+        s = ""
         with db.atomic() as transaction:
             try:
                 MEI = MissionExplanationImageModel.alias()
@@ -288,8 +289,11 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e)
                 search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
 
-            # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
 
+            for row in query.dicts():
+                s += " " + str(row) + "  " + str(type(row))
+
+            # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
             for row in query.dicts():
                 b = row['beginning']
                 c = row['created_at']
@@ -305,7 +309,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         mission_state=row['state'],
                         created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
                         beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
-                        thumbnail_url=row['url'],
+                        #thumbnail_url=row['url'],
                     )
                 )
 
