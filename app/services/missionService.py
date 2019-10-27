@@ -663,6 +663,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         register_email = ""
         user_name = ""
 
+        s = ""
+
         with db.atomic() as transaction:
             with db.atomic() as transaction:
                 try:
@@ -674,6 +676,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     user_query = (User.select().where(User.email == register_email))
 
                     user_name_query = (PhoneAuthentication.select().where(PhoneAuthentication.user_email == register_email))
+
+                    for row in user_query:
+                        s += str(row) + "  " + register_email
 
                     for row in user_name_query.dicts():
                         user_name = row['name']
@@ -697,13 +702,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 except Exception as e:
                     transaction.rollback()
                     result_code = ResultCode.ERROR
-                    result_message = str(e) + " " + user_name
+                    result_message = str(e) + " " + s
                     assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
                 return GetMissionOwnerInfoResponse(
                     result=CommonResult(
                         result_code=result_code,
-                        message=result_message + " " + user_name,
+                        message=result_message + " " + s,
                     ),
                     register_profile=profile,
                 )
