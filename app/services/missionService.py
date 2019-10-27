@@ -246,14 +246,21 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (MissionModel
-                                 .select(MissionModel, MEI.url)
-                                 .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                                 .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                       | MissionModel.thumb_url.url is None)
-                                        & (MissionModel.mission_type == MISSION_TYPE[mission_type]))
+                                 .select(MissionModel, MEI.url.alias('url'))
+                                 .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
+                                MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE),
+                                       attr='thumb_url')
+                                 .where(MissionModel.mission_type == MISSION_TYPE[mission_type])
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
+                        query = (MissionModel
+                                 .select(MissionModel, MEI.url.alias('url'))
+                                 .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
+                                MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE),
+                                       attr='thumb_url')
+                                 .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
+
                         query = (MissionModel
                                  .select(MissionModel, MEI.url)
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
