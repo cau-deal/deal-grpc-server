@@ -247,30 +247,32 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
-                                MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
+                                    (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
                                  .where(MissionModel.mission_type == MISSION_TYPE[mission_type])
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
-                                MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
+                                (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                 # keyword exist
                 else:
+                    #@TODO: where 절 의도대로 동작 X, 버그 수정해야 함 일단 @depreciate
                     # mission type is not all
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
-                                MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
+                                (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
                                  .where((MissionModel.mission_type == MISSION_TYPE[mission_type])
                                         & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
+                    # @TODO: where 절 의도대로 동작 X, 버그 수정해야 함 일단 @depreciate
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
-                                MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
+                                (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
                                  .where((MissionModel.title ** keyword) | (MissionModel.contents ** keyword))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
 
@@ -407,12 +409,18 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             try:
                 MEI = MissionExplanationImageModel.alias()
 
-                query = (MissionModel
-                         .select(MissionModel, MEI.url)
-                         .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                         .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-                                & (MissionModel.register_email == context.login_email))
+                query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
+                         .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
+                        (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
+                         .where(MissionModel.register_email == context.login_email)
                          .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
+
+#                query = (MissionModel
+#                         .select(MissionModel, MEI.url)
+#                         .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
+#                         .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
+#                                & (MissionModel.register_email == context.login_email))
+#                         .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
 
                 for row in query.dicts():
                     b = row['beginning']
