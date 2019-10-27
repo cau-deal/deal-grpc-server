@@ -699,7 +699,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     result_message = str(e)
                     assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
-                return GetAssignedMissionResponse(
+                return GetMissionOwnerInfoResponse(
                     result=CommonResult(
                         result_code=result_code,
                         message=result_message,
