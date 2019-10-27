@@ -667,10 +667,11 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     register_email = ""
                     user_name = ""
                     register_email_query = (MissionModel.select().where(MissionModel.id == mission_id))
-                    """
+
                     for row in register_email_query.dicts():
                         register_email = row['register_email']
 
+                    """
                     user_query = (User.select().where(User.email == register_email))
 
                     user_name_query = (PhoneAuthentication.select().where(PhoneAuthentication.user_email == register_email))
@@ -703,7 +704,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 return GetMissionOwnerInfoResponse(
                     result=CommonResult(
                         result_code=result_code,
-                        message=result_message,
+                        message=result_message + " " + str(register_email_query),
                     ),
                     register_profile=profile,
                 )
