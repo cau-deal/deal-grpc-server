@@ -418,7 +418,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                 & (MissionModel.register_email == context.login_email))
                          .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
 
-                for row in query:
+                for row in query.dicts():
                     b = row['beginning']
                     c = row['created_at']
                     d = row['deadline']
