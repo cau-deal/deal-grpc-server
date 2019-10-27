@@ -664,49 +664,48 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         s = ""
 
         with db.atomic() as transaction:
-            with db.atomic() as transaction:
-                try:
-                    register_email_query = (MissionModel.select(MissionModel.register_email).where(MissionModel.id == mission_id))
+            try:
+                register_email_query = (MissionModel.select(MissionModel.register_email).where(MissionModel.id == mission_id))
 
-                    for row in register_email_query:
-                        register_email = str(row.register_email)
+                for row in register_email_query:
+                    register_email = str(row.register_email)
 
-                    user_query = (User.select().where(User.email == register_email))
+                user_query = (User.select().where(User.email == register_email))
 
-                    user_name_query = (PhoneAuthentication.select()
-                                       .where(PhoneAuthentication.user_email == register_email))
+                user_name_query = (PhoneAuthentication.select()
+                                   .where(PhoneAuthentication.user_email == register_email))
 
-                    for row in user_name_query:
-                        s += "  " + str(row.name) + "  " + str(type(row.name))
+                for row in user_name_query:
+                    s += "  " + str(row) + "  " + str(type(row))
 
-                    """
-                    for row in user_query:
-                        profile = Profile(
-                            email=register_email,
-                            level=row.level,
-                            state=row.state,
-                            role=row.role,
-                            profile_photo_url=row.profile_photo_url,
-                            name=user_name,
-                    )
-                    """
-
-                    result_code = ResultCode.SUCCESS
-                    result_message = "Successful get mission owner Mission"
-                    assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
-
-                except Exception as e:
-                    transaction.rollback()
-                    result_code = ResultCode.ERROR
-                    result_message = str(e) + " " + s
-                    assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
-
-                return GetMissionOwnerInfoResponse(
-                    result=CommonResult(
-                        result_code=result_code,
-                        message=result_message + " " + s,
-                    ),
-                    register_profile=profile,
+                """
+                for row in user_query:
+                    profile = Profile(
+                        email=register_email,
+                        level=row.level,
+                        state=row.state,
+                        role=row.role,
+                        profile_photo_url=row.profile_photo_url,
+                        name=user_name,
                 )
+                """
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful get mission owner Mission"
+                assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e) + " " + s
+                assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
+
+            return GetMissionOwnerInfoResponse(
+                result=CommonResult(
+                    result_code=result_code,
+                    message=result_message + " " + s,
+                ),
+                register_profile=profile,
+            )
 
 
