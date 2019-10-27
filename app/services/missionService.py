@@ -676,7 +676,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                    .where(PhoneAuthentication.user_email == register_email))
 
                 for row in user_name_query:
-                    s += str(row) + "  " + str(type(row))
+                    s += str(type(row))
+
                 """
                 #for row in user_name_query:
                 #    s += "  " + str(row) + "  " + str(type(row))
