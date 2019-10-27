@@ -11,8 +11,9 @@ from app.models import InquiryModel, User, PhoneAuthentication
 
 import datetime
 
+from protos.Profile_pb2 import Profile, UserState, Role
 from protos.UserService_pb2 import LookUpAuthInfoResponse, AuthInfo, IsAuth, ChangePasswordResult, \
-    ChangePasswordResponse, LookUpUserInfoResponse, Profile, UserState, Role
+    ChangePasswordResponse, LookUpUserInfoResponse
 from protos.UserService_pb2_grpc import UserServiceServicer
 
 
