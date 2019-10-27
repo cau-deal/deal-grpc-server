@@ -415,13 +415,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                          .where(MissionModel.register_email == context.login_email)
                          .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
 
-#                query = (MissionModel
-#                         .select(MissionModel, MEI.url)
-#                         .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-#                         .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-#                                & (MissionModel.register_email == context.login_email))
-#                         .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
-
                 for row in query.dicts():
                     b = row['beginning']
                     c = row['created_at']
