@@ -672,7 +672,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 user_query = (User.select().where(User.email == register_email))
 
-                user_name_query = (PhoneAuthentication.select()
+                user_name_query = (PhoneAuthentication.select(PhoneAuthentication.name)
                                    .where(PhoneAuthentication.user_email == register_email))
 
                 for row in user_name_query.dicts():
