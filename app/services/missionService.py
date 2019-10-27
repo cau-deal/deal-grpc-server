@@ -261,12 +261,12 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                        attr='thumb_url')
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
 
-                        query = (MissionModel
-                                 .select(MissionModel, MEI.url)
-                                 .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                                 .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
-                                         | MissionModel.thumb_url.url is None))
-                                 .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
+#                        query = (MissionModel
+#                                 .select(MissionModel, MEI.url)
+#                                 .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
+#                                 .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE
+#                                         | MissionModel.thumb_url.url is None))
+#                                 .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                 # keyword exist
                 else:
                     # mission type is not all
