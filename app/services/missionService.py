@@ -479,7 +479,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 CM = ConductMission.alias()
                 MEI = MissionExplanationImageModel.alias()
 
-                query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
+                query = (MissionModel.select(MissionModel, CM.state.alias('conduct_state'), MEI.url.alias('url'))
                          .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                         (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
                          .join(CM, on=((MissionModel.id == CM.mission_id) & (CM.worker_email == context.login_email)))
