@@ -667,7 +667,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     register_email = ""
                     user_name = ""
                     register_email_query = (MissionModel.select().where(MissionModel.id == mission_id))
-
+                    """
                     for row in register_email_query.dicts():
                         register_email = row['register_email']
 
@@ -688,15 +688,16 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         profile_photo_url=row['profile_photo_url'],
                         name=user_name,
                     )
+                    """
 
                     result_code = ResultCode.SUCCESS
-                    result_message = "Successful Get Assigned Mission"
+                    result_message = "Successful get mission owner Mission"
                     assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
 
                 except Exception as e:
                     transaction.rollback()
                     result_code = ResultCode.ERROR
-                    result_message = str(e)
+                    result_message = str(e) + " " + str(register_email_query)
                     assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
                 return GetMissionOwnerInfoResponse(
