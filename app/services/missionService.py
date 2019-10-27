@@ -315,7 +315,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         return SearchMissionResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + "  " + str(query)
+                message=result_message + "  " + s
             ),
             search_mission_result=search_mission_result,
             mission_protoes=mission_protoes,
