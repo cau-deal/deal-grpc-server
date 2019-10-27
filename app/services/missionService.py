@@ -661,10 +661,11 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         profile = Profile()
 
-        s = ""
-
         with db.atomic() as transaction:
             try:
+                user_name = ""
+                register_email = ""
+
                 register_email_query = (MissionModel.select(MissionModel.register_email).where(MissionModel.id == mission_id))
 
                 for row in register_email_query:
@@ -676,12 +677,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                    .where(PhoneAuthentication.user_email == register_email))
 
                 for row in user_name_query.dicts():
-                    s += str(type(row['name'])) + "   "  + row['name']
-
-                """
-                #for row in user_name_query:
-                #    s += "  " + str(row) + "  " + str(type(row))
-
+                    user_name = row['name']
                 
                 for row in user_query:
                     profile = Profile(
@@ -692,7 +688,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         profile_photo_url=row.profile_photo_url,
                         name=user_name,
                 )
-                """
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful get mission owner Mission"
@@ -701,13 +696,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e) + " " + s
+                result_message = str(e) + " "
                 assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
             return GetMissionOwnerInfoResponse(
                 result=CommonResult(
                     result_code=result_code,
-                    message=result_message + " " + s,
+                    message=result_message,
                 ),
                 register_profile=profile,
             )
