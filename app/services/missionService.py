@@ -673,24 +673,21 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                     user_query = (User.select().where(User.email == register_email))
 
-                    for row in user_query:
-                        s += " " + str(row.level) + "  " + str(type(row.level))
-
-                    """
                     user_name_query = (PhoneAuthentication.select()
                                        .where(PhoneAuthentication.user_email == register_email))
 
-                    user_name = user_name_query.get().name
+                    for row in user_name_query:
+                        s += "  " + str(row.name) + "  " + str(type(row.name))
 
-                    row = user_query.get()
-
-                    profile = Profile(
-                        email=register_email,
-                        level=row.level,
-                        state=row.state,
-                        role=row.role,
-                        profile_photo_url=row.profile_photo_url,
-                        name=user_name,
+                    """
+                    for row in user_query:
+                        profile = Profile(
+                            email=register_email,
+                            level=row.level,
+                            state=row.state,
+                            role=row.role,
+                            profile_photo_url=row.profile_photo_url,
+                            name=user_name,
                     )
                     """
 
