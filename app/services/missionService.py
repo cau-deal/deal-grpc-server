@@ -496,7 +496,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                          .offset(_offset).limit(amount))
 
                 for row in query.dicts():
-                    s += "  " + str(row)
+                    s += "  " + str(type(row)) + "  " + str(row)
 
                 for row in query:
                     b = row.beginning
