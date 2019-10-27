@@ -666,21 +666,19 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         with db.atomic() as transaction:
             with db.atomic() as transaction:
                 try:
-                    register_email = ""
-                    user_name = ""
+                    register_email_query = (MissionModel.select(MissionModel.register_email).where(MissionModel.id == mission_id))
 
-                    register_email_query = (MissionModel.select().where(MissionModel.id == mission_id))
-
-                    for row in register_email_query:
-                        register_email = str(row.register_email)
+                    register_email = register_email_query.get().register_email
 
                     user_query = (User.select().where(User.email == register_email))
 
-                    user_name_query = (PhoneAuthentication.select().where(PhoneAuthentication.user_email == register_email))
-
-                    s += str(user_query.get()) + str(register_email)
+                    user_name_query = (PhoneAuthentication.select()
+                                       .where(PhoneAuthentication.user_email == register_email))
 
                     user_name = user_name_query.get().name
+
+                    s += str(user_query.get()) + str(register_email) + "  " + user_name
+
 
                     for row in user_query.dicts():
                         profile = Profile(
