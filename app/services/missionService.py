@@ -219,7 +219,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             _query_type = NO_KEY_WORD
         else:
             _query_type = YES_KEY_WORD
-#            keyword = "%" + keyword + "%"
+            keyword = "%" + keyword + "%"
 
         if mission_page_mode == MissionPageMode.INITIALIZE_MISSION_PAGE:
             _offset = 0
@@ -263,29 +263,16 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
-                                 .where(MissionModel.mission_type == MISSION_TYPE[mission_type]
-                                        & ((MissionModel.title.contains(keyword)) | (MissionModel.contents.contains(keyword))))
+                                 .where((MissionModel.mission_type == MISSION_TYPE[mission_type])
+                                        & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
-
-#                        query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
-#                                 .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
-#                                MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
-#                                 .where(MissionModel.mission_type == MISSION_TYPE[mission_type]
-#                                        & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
-#                                 .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
-                                 .where((MissionModel.title.contains(keyword)) | (MissionModel.contents.contains(keyword)))
+                                 .where((MissionModel.title ** keyword) | (MissionModel.contents ** keyword))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
-
-#                        query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
-#                                 .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
-#                                MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
-#                                 .where((MissionModel.title ** keyword) | (MissionModel.contents ** keyword))
-#                                 .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission"
