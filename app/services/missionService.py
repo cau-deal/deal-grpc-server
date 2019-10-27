@@ -245,16 +245,14 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     # mission type is not all
 
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (MissionModel
-                                 .select(MissionModel, MEI.url.alias('url'))
+                        query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
                                  .where(MissionModel.mission_type == MISSION_TYPE[mission_type])
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
-                        query = (MissionModel
-                                 .select(MissionModel, MEI.url.alias('url'))
+                        query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
@@ -262,8 +260,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 else:
                     # mission type is not all
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (MissionModel
-                                 .select(MissionModel, MEI.url.alias('url'))
+                        query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
                                  .where(MissionModel.mission_type == MISSION_TYPE[mission_type]
@@ -271,8 +268,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
-                        query = (MissionModel
-                                 .select(MissionModel, MEI.url.alias('url'))
+                        query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
                                  .where((MissionModel.title ** keyword) | (MissionModel.contents ** keyword))
@@ -311,7 +307,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         return SearchMissionResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message
+                message=result_message + str(query)
             ),
             search_mission_result=search_mission_result,
             mission_protoes=mission_protoes,
