@@ -250,14 +250,14 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
                                  .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                        & (MissionModel.mission_type == MISSION_TYPE[mission_type]))
-                                 .offset(_offset).limit(amount))
+                                 .order_by(MissionModel.id).desc().offset(_offset).limit(amount))
                     # mission type is all
                     else:
                         query = (MissionModel
                                  .select(MissionModel, MEI.url)
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
                                  .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
-                                 .offset(_offset).limit(amount))
+                                 .order_by(MissionModel.id).desc().offset(_offset).limit(amount))
                 # keyword exist
                 else:
                     # mission type is not all
@@ -268,7 +268,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                        & (MissionModel.mission_type == MISSION_TYPE[mission_type])
                                         & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
-                                 .offset(_offset).limit(amount))
+                                 .order_by(MissionModel.id).desc().offset(_offset).limit(amount))
                     # mission type is all
                     else:
                         query = (MissionModel
@@ -276,7 +276,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
                                  .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                         & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
-                                 .offset(_offset).limit(amount))
+                                 .order_by(MissionModel.id).desc().offset(_offset).limit(amount))
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission"
@@ -417,7 +417,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                          .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
                          .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                 & (MissionModel.register_email == context.login_email))
-                         .offset(_offset).limit(amount))
+                         .order_by(MissionModel.id).desc().offset(_offset).limit(amount))
 
                 for row in query:
                     b = row.beginning
@@ -459,7 +459,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SearchConductMissionRelevantMe(self, request, context):
-        # record 집어넣고 테스트 필요
         conduct_mission_protoes = []
 
         mission_page = request.mission_page
@@ -491,7 +490,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                          .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                 & (MissionModel.id << mission_ids) & (MissionModel.id == CM.mission_id)
                                 & (CM.worker_email == context.login_email))
-                         .offset(_offset).limit(amount))
+                         .order_by(MissionModel.id).desc().offset(_offset).limit(amount))
 
                 for row in query.dicts():
                     b = row['beginning']
