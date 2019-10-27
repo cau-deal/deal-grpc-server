@@ -13,8 +13,6 @@ class SPointerServicer():
     def sLookUpBalance(self, email):
         balance = 0
 
-        db = pwdb.database
-
         total_deposit_query = (DepositPoint.select(fn.Sum(DepositPoint.val).alias('total'))
                                  .where(DepositPoint.user_email == email))
         total_withdraw_query = (WithdrawPoint.select(fn.Sum(WithdrawPoint.val).alias('total'))
@@ -59,3 +57,30 @@ class SPointerServicer():
                 balance += row.total
 
         return int(balance)
+
+    def givePoint(self, sender_email, receiver_email, val, mission_id=0):
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                balance = self.sLookUpBalance(sender_email)
+
+                if balance < val:
+                    raise Exception('Insufficiency point')
+
+                if mission_id == 0 or mission_id is None:
+                    TransferPoint.create(
+                        sender_email=sender_email,
+                        receiver_email=receiver_email,
+                        val=val,
+                    )
+                else:
+                    TransferPoint.create(
+                        sender_email=sender_email,
+                        receiver_email=receiver_email,
+                        val=val,
+                        mission_id=mission_id,
+                    )
+            except Exception as e:
+                transaction.rollback()
+                raise Exception(str(e) + '   give point fail')
