@@ -40,11 +40,11 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         order_package_quantity = mission.order_package_quantity
         deadline = mission.deadline
         beginning = mission.beginning
-        raise Exception('' + str(beginning) + "  " + str(type(beginning)))
+        s = ('' + str(beginning) + "  " + str(type(beginning)))
         deadline_datetime = datetime.datetime(year=deadline.year, month=deadline.month, day=deadline.day,
                                      hour=deadline.hour, minute=deadline.min, second=deadline.sec)
-        beginning_datetime = datetime.datetime(year=beginning.year, month=beginning.month, day=beginning.day,
-                                     hour=beginning.hour, minute=beginning.min, second=beginning.sec)
+        #beginning_datetime = datetime.datetime(year=beginning.year, month=beginning.month, day=beginning.day,
+        #                             hour=beginning.hour, minute=beginning.min, second=beginning.sec)
         summary = mission.summary
         contact_clause = mission.contact_clause
         specification = mission.specification
@@ -108,8 +108,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 if balance < val:
                     raise Exception("Insufficiency balance")
 
-                if today_register is False and (beginning_datetime < datetime.datetime.now()):
-                    raise Exception("Invalid beginning")
+                #if today_register is False and (beginning_datetime < datetime.datetime.now()):
+                #    raise Exception("Invalid beginning")
 
                 if deadline_datetime < datetime.datetime.now():
                     raise Exception("Invalid deadline")
@@ -126,7 +126,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         unit_package=unit_package,
                         price_of_package=price_of_package,
                         order_package_quantity=order_package_quantity,
-                        beginning=beginning_datetime,
+                        #beginning=beginning_datetime,
                         deadline=deadline_datetime,
                         created_at=datetime.datetime.now(),
                         summary=summary,
@@ -145,7 +145,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         unit_package=unit_package,
                         price_of_package=price_of_package,
                         order_package_quantity=order_package_quantity,
-                        beginning=beginning_datetime,
+                        #beginning=beginning_datetime,
                         deadline=deadline_datetime,
                         created_at=datetime.datetime.now(),
                         summary=summary,
@@ -185,13 +185,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 except Exception as e:
                     transaction.rollback()
                     result_code = ResultCode.ERROR
-                    result_message = str(e) + " transaction2 error - mission_id :  " + str(mission_id)
+                    result_message = str(e) + " transaction2 error - mission_id :  " + str(mission_id) + s
                     register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
         return RegisterMissionResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + " mission_id :  " + str(mission_id)
+                message=result_message + " mission_id :  " + str(mission_id) + s
             ),
             register_mission_result=register_mission_result
         )
