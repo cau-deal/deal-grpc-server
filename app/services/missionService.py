@@ -660,12 +660,12 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         result_message = "Unknown get mission owner mission"
 
         profile = Profile()
+        register_email = ""
+        user_name = ""
 
         with db.atomic() as transaction:
             with db.atomic() as transaction:
                 try:
-                    register_email = ""
-                    user_name = ""
                     register_email_query = (MissionModel.select().where(MissionModel.id == mission_id))
 
                     for row in register_email_query.dicts():
@@ -678,6 +678,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     for row in user_name_query.dicts():
                         user_name = row['name']
 
+                    """
                     for row in user_query.dicts():
                         profile = Profile(
                             email=register_email,
@@ -687,6 +688,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                             profile_photo_url=row['profile_photo_url'],
                             name=user_name,
                     )
+                    """
 
                     result_code = ResultCode.SUCCESS
                     result_message = "Successful get mission owner Mission"
