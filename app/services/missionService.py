@@ -661,7 +661,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         profile = Profile()
 
-
         s = ""
 
         with db.atomic() as transaction:
@@ -676,14 +675,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         register_email = str(row.register_email)
 
                     user_query = (User.select().where(User.email == register_email))
+
                     user_name_query = (PhoneAuthentication.select().where(PhoneAuthentication.user_email == register_email))
 
-                    for row in user_query.dicts():
-                        s += str(row) + "  " + str(register_email)
+                    s += str(user_query.get()) + str(register_email)
 
-                    for row in user_name_query.dicts():
-                        user_name = row['name']
-                    
+                    user_name = user_name_query.get().name
+
                     for row in user_query.dicts():
                         profile = Profile(
                             email=register_email,
