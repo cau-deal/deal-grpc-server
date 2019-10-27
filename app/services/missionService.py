@@ -250,6 +250,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                        & (MissionModel.mission_type == MISSION_TYPE[mission_type]))
                                  .order_by(MissionModel.id).desc().offset(_offset).limit(amount))
+                        for row in query.dicts():
+                            s += " " + str(row) + "  " + str(type(row))
                     # mission type is all
                     else:
                         query = (MissionModel
@@ -257,6 +259,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
                                  .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
                                  .order_by(MissionModel.id).desc().offset(_offset).limit(amount))
+                        for row in query.dicts():
+                            s += " " + str(row) + "  " + str(type(row))
                 # keyword exist
                 else:
                     # mission type is not all
@@ -268,6 +272,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                        & (MissionModel.mission_type == MISSION_TYPE[mission_type])
                                         & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
                                  .order_by(MissionModel.id).desc().offset(_offset).limit(amount))
+                        for row in query.dicts():
+                            s += " " + str(row) + "  " + str(type(row))
                     # mission type is all
                     else:
                         query = (MissionModel
@@ -276,10 +282,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                         & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
                                  .order_by(MissionModel.id).desc().offset(_offset).limit(amount))
-
                         for row in query.dicts():
                             s += " " + str(row) + "  " + str(type(row))
-                            
+
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission"
                 search_mission_result = SearchMissionResult.SUCCESS_SEARCH_MISSION_RESULT
