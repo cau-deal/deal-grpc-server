@@ -8,7 +8,7 @@ class User(pwdb.Model):
     email = peewee.CharField(primary_key=True)
     password = peewee.CharField()
     level = peewee.IntegerField(default=0)
-    state = peewee.IntegerField(default=0)
+    state = peewee.IntegerField(default=1)
     role = peewee.IntegerField(default=1)
     register_type = peewee.IntegerField(default=0)
     agree_with_terms = peewee.BooleanField(default=False)
@@ -103,7 +103,6 @@ class AccuseModel(pwdb.Model):
 
     class Meta:
         db_table = 'accuse'
-
 
 # PhoneAuth
 class PhoneAuthentication(pwdb.Model):
