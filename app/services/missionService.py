@@ -489,7 +489,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                          .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
                          .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
                                 & MissionModel.id << mission_ids)
-                         .join(CM, on=(MissionModel.id == CM.mission_id), attr='conduct')
+                         .join(CM, JOIN.LEFT_OUTER, on=(MissionModel.id == CM.mission_id), attr='conduct')
                          .where((MissionModel.id == CM.mission_id) & (CM.worker_email == context.login_email))
                          .offset(_offset).limit(amount))
 
