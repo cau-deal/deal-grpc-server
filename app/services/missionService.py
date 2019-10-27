@@ -669,7 +669,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     register_email_query = (MissionModel.select(MissionModel.register_email).where(MissionModel.id == mission_id))
 
                     for row in register_email_query:
-                        s += "  " + str(type(row.register_email)) + "  " + str(row.register_email)
+                        register_email = str(row.register_email)
+                        s += "  " + str(type(row.register_email)) + "  " + str(row.register_email) + "  " + str(type(register_email))
 
                     """
 
