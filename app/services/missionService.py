@@ -550,7 +550,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                # @TODO: 할당 받을 수 있는 상태인지 살펴보기
+                #할당 받을 수 있는 상태인지 확인
                 query_mission = MissionModel.select().where(MissionModel.id == mission_id)
 
                 if query_mission.count() == 0:
@@ -560,18 +560,26 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 if mission.state != DURING_MISSION:
                     raise Exception('Mission state is not DURING_MISSION, now state : ' + MISSION_STATE_STR[mission.state])
+                if mission.register_email == context.login_email:
+                    raise Exception("Can't participate in self")
+                if mission.deadline < datetime.datetime.now():
+                    raise Exception("Expired deadline")
 
                 query_conduct_mission = (ConductMission.select()
-                                         .where((ConductMission.worker_email == context.login_email)
-                                                & (ConductMission.mission_id == mission_id)))
+                         .where((ConductMission.worker_email == context.login_email) &
+                                (ConductMission.mission_id == mission_id))
+                         .order_by((ConductMission.id).desc()))
 
-                #query_mission = MissionModel.select().where(MissionModel.id == mission_id)
+                if query_conduct_mission.count() > 0:
+                    conduct_mission = query_conduct_mission.get()
+                    conduct_mission_state = conduct_mission.state
 
-                #mission = MissionModel
-                #for row in query_mission:
-                #    mission = row
+                    if (conduct_mission_state == DURING_MISSION_CONDUCT_MISSION_STATE
+                        or conduct_mission_state == WAITING_VERIFICATION_CONDUCT_MISSION_STATE
+                            or conduct_mission_state == DURING_VERIFICATION_CONDUCT_MISSION_STATE):
+                        raise Exception('Already assigned this mission, and not yet completed')
 
-                # 받을 수 있다고 가정하고, 정상 시나리오만 구현 진행. 예외 처리는 나중에
+                # 할당 받을 수 있는 경우, 진행.
                 ConductMission.create(
                     worker_email=context.login_email,
                     mission_id=mission_id,
@@ -579,21 +587,18 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     created_at=datetime.datetime.now(),
                 )
 
-                # 미션 받은 뒤, 후처리도 나중에
-                """
-                #GetAssignedMission-2
-                cntval = ConductMission.select().count().where(
-                    (ConductMission.mission_id == mission_id)
-                    & (ConductMission.state <=4)
-                )
+                # 미션 받은 뒤, 후처리
 
-                ms = Mission.select().where(
-                    mission_id == Mission.id
-                )
+                query_conduct_mission = (ConductMission.select()
+                                         .where((ConductMission.mission_id == mission_id)
+                                                & (ConductMission.state != RETURN_VERIFICATION_CONDUCT_MISSION_STATE)
+                                                & (ConductMission.state != FAIL_MISSION_CONDUCT_MISSION_STATE)))
 
-                if ms.order_package_quantity >= cntval:
-                    Mission.update(state=MissionState.SOLD_OUT).where(Mission.id == mission_id).execute()
-                """
+                cnt_conduct_mission = query_conduct_mission.count()
+
+                if mission.order_package_quantity <= cnt_conduct_mission:
+                    mission.state = SOLD_OUT
+                    mission.save()
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Get Assigned Mission"
