@@ -5,7 +5,7 @@ from app.decorators import verified
 from app.extensions import pwdb, root_email
 from app.extensions_db import sPointServicer
 
-from app.models import MissionModel
+from app.models import MissionModel, User, PhoneAuthentication
 from app.models import ConductMission
 from app.models import MissionExplanationImageModel
 
@@ -22,6 +22,8 @@ from protos.MissionService_pb2_grpc import *
 
 
 import datetime
+
+from protos.Profile_pb2 import Profile
 
 
 class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
@@ -175,6 +177,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                             mission_id=mission_id,
                             image_type=MISSION_EXPLANATION_IMAGE_TYPE[image_type],
                             url=url,
+                            created_at=datetime.datetime.now()
                         )
 
                     result_code = ResultCode.SUCCESS
@@ -245,38 +248,34 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     # mission type is not all
 
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (MissionModel
-                                 .select(MissionModel, MEI.url)
-                                 .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                                 .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-                                       & (MissionModel.mission_type == MISSION_TYPE[mission_type]))
-                                 .offset(_offset).limit(amount))
+                        query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
+                                 .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
+                                    (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
+                                 .where(MissionModel.mission_type == MISSION_TYPE[mission_type])
+                                 .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
-                        query = (MissionModel
-                                 .select(MissionModel, MEI.url)
-                                 .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                                 .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE))
-                                 .offset(_offset).limit(amount))
+                        query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
+                                 .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
+                                (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
+                                 .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                 # keyword exist
                 else:
                     # mission type is not all
                     if mission_type != MissionType.ALL_MISSION_TYPE:
-                        query = (MissionModel
-                                 .select(MissionModel, MEI.url)
-                                 .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                                 .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-                                       & (MissionModel.mission_type == MISSION_TYPE[mission_type])
+                        query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
+                                 .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
+                                (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
+                                 .where((MissionModel.mission_type == MISSION_TYPE[mission_type])
                                         & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
-                                 .offset(_offset).limit(amount))
+                                 .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
-                        query = (MissionModel
-                                 .select(MissionModel, MEI.url)
-                                 .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                                 .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-                                        & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
-                                 .offset(_offset).limit(amount))
+                        query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
+                                 .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
+                                (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
+                                 .where((MissionModel.title ** keyword) | (MissionModel.contents ** keyword))
+                                 .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Search Mission"
@@ -289,30 +288,29 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 search_mission_result = SearchMissionResult.FAIL_SEARCH_MISSION_RESULT
 
             # id, title, mission_type, price_of_package, deadline, summary, state, created_at, url
-
-            for row in query:
-                b = row.beginning
-                c = row.created_at
-                d = row.deadline
+            for row in query.dicts():
+                b = row['beginning']
+                c = row['created_at']
+                d = row['deadline']
                 mission_protoes.append(
                     MissionProto(
-                        mission_id=row.id,
-                        title=row.title,
-                        mission_type=row.mission_type,
-                        price_of_package=row.price_of_package,
+                        mission_id=row['id'],
+                        title=row['title'],
+                        mission_type=row['mission_type'],
+                        price_of_package=row['price_of_package'],
                         deadline=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute, sec=d.second),
-                        summary=row.summary,
-                        mission_state=row.state,
+                        summary=row['summary'],
+                        mission_state=row['state'],
                         created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
                         beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
-                        thumbnail_url=row.thumb_url.url,
+                        thumbnail_url=row['url'],
                     )
                 )
 
         return SearchMissionResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + "  " + str(query)
+                message=result_message + str(query)
             ),
             search_mission_result=search_mission_result,
             mission_protoes=mission_protoes,
@@ -412,29 +410,28 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             try:
                 MEI = MissionExplanationImageModel.alias()
 
-                query = (MissionModel
-                         .select(MissionModel, MEI.url)
-                         .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                         .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-                                & (MissionModel.register_email == context.login_email))
-                         .offset(_offset).limit(amount))
+                query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
+                         .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
+                        (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
+                         .where(MissionModel.register_email == context.login_email)
+                         .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
 
-                for row in query:
-                    b = row.beginning
-                    c = row.created_at
-                    d = row.deadline
+                for row in query.dicts():
+                    b = row['beginning']
+                    c = row['created_at']
+                    d = row['deadline']
                     mission_protoes.append(
                         MissionProto(
-                            mission_id=row.id,
-                            title=row.title,
-                            mission_type=row.mission_type,
-                            price_of_package=row.price_of_package,
+                            mission_id=row['id'],
+                            title=row['title'],
+                            mission_type=row['mission_type'],
+                            price_of_package=row['price_of_package'],
                             deadline=Datetime(year=d.year, month=d.month, day=d.day, hour=d.hour, min=d.minute, sec=d.second),
-                            summary=row.summary,
-                            mission_state=row.state,
+                            summary=row['summary'],
+                            mission_state=row['state'],
                             created_at=Datetime(year=c.year, month=c.month, day=c.day, hour=c.hour, min=c.minute, sec=c.second),
                             beginning=Datetime(year=b.year, month=b.month, day=b.day, hour=b.hour, min=b.minute, sec=b.second),
-                            thumbnail_url=row.thumb_url.url,
+                            thumbnail_url=row['url'],
                         )
                     )
 
@@ -459,7 +456,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SearchConductMissionRelevantMe(self, request, context):
-        # record 집어넣고 테스트 필요
         conduct_mission_protoes = []
 
         mission_page = request.mission_page
@@ -484,14 +480,12 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 CM = ConductMission.alias()
                 MEI = MissionExplanationImageModel.alias()
 
-                query = (MissionModel
-                         .select(MissionModel, CM.state.alias('conduct_state'), MEI.url)
-                         .join(MEI, JOIN.LEFT_OUTER, on=(MissionModel.id == MEI.mission_id), attr='thumb_url')
-                         .join(CM, on=(MissionModel.id == CM.mission_id), attr='conduct')
-                         .where((MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)
-                                & (MissionModel.id << mission_ids) & (MissionModel.id == CM.mission_id)
-                                & (CM.worker_email == context.login_email))
-                         .offset(_offset).limit(amount))
+                query = (MissionModel.select(MissionModel, CM.state.alias('conduct_state'), MEI.url.alias('url'))
+                         .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
+                        (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
+                         .join(CM, on=((MissionModel.id == CM.mission_id) & (CM.worker_email == context.login_email)))
+                         .where((MissionModel.id << mission_ids))
+                         .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
 
                 for row in query.dicts():
                     b = row['beginning']
@@ -559,6 +553,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     worker_email=context.login_email,
                     mission_id=mission_id,
                     deadline=datetime.datetime.now() + datetime.timedelta(days=1),
+                    created_at=datetime.datetime.now(),
                 )
 
                 # 미션 받은 뒤, 후처리도 나중에
@@ -654,4 +649,60 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     message=result_message + " register mission :  " + str(count1) + "  conduct mission : " + str(count2),
                 ),
                 val=count,
+            )
+
+    @verified
+    def GetMissionOwnerInfo(self, request, context):
+        mission_id = request.mission_id
+        db = pwdb.database
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown get mission owner mission"
+
+        profile = Profile()
+
+        with db.atomic() as transaction:
+            try:
+                user_name = ""
+                register_email = ""
+
+                register_email_query = (MissionModel.select(MissionModel.register_email).where(MissionModel.id == mission_id))
+
+                for row in register_email_query:
+                    register_email = str(row.register_email)
+
+                user_query = (User.select().where(User.email == register_email))
+
+                user_name_query = (PhoneAuthentication.select(PhoneAuthentication.name.alias('name'))
+                                   .where(PhoneAuthentication.user_email == register_email))
+
+                for row in user_name_query.dicts():
+                    user_name = row['name']
+                
+                for row in user_query:
+                    profile = Profile(
+                        email=register_email,
+                        level=row.level,
+                        state=row.state,
+                        role=row.role,
+                        profile_photo_url=row.profile_photo_url,
+                        name=user_name,
+                )
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful get mission owner Mission"
+                assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e) + " "
+                assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
+
+            return GetMissionOwnerInfoResponse(
+                result=CommonResult(
+                    result_code=result_code,
+                    message=result_message,
+                ),
+                register_profile=profile,
             )

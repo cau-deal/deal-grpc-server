@@ -8,15 +8,15 @@ class User(pwdb.Model):
     email = peewee.CharField(primary_key=True)
     password = peewee.CharField()
     level = peewee.IntegerField(default=0)
-    state = peewee.IntegerField(default=0)
+    state = peewee.IntegerField(default=1)
     role = peewee.IntegerField(default=1)
     register_type = peewee.IntegerField(default=0)
     agree_with_terms = peewee.BooleanField(default=False)
     is_phone_authentication = peewee.IntegerField()
     is_account_authentication = peewee.IntegerField()
     profile_photo_url = peewee.IntegerField()
-    last_login_datetime = peewee.DateTimeField(default=datetime.datetime.now())
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    last_login_datetime = peewee.DateTimeField()
+    created_at = peewee.DateTimeField()
 
     class Meta:
         db_table = 'user'
@@ -25,7 +25,7 @@ class User(pwdb.Model):
 class JWTToken(pwdb.Model):
     token_key = peewee.CharField(primary_key=True)
     user_email = peewee.CharField()
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    created_at = peewee.DateTimeField()
 
     class Meta:
         db_table = "jwt_token"
@@ -44,7 +44,7 @@ class MissionModel(pwdb.Model):
     order_package_quantity = peewee.IntegerField()
     beginning = peewee.DateTimeField()
     deadline = peewee.DateTimeField()
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    created_at = peewee.DateTimeField()
     summary = peewee.CharField(null=True)
     contact_clause = peewee.TextField(null=True)
     specification = peewee.TextField(null=True)
@@ -59,7 +59,7 @@ class ConductMission(pwdb.Model):
     mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
     state = peewee.IntegerField(default=1)
     deadline = peewee.DateTimeField()
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    created_at = peewee.DateTimeField()
     complete_datetime = peewee.DateTimeField(null=True)
 
     class Meta:
@@ -71,7 +71,7 @@ class MissionExplanationImageModel(pwdb.Model):
     mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
     image_type = peewee.IntegerField()
     url = peewee.CharField()
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    created_at = peewee.DateTimeField()
 
     class Meta:
         db_table = 'mission_explanation_image'
@@ -104,7 +104,6 @@ class AccuseModel(pwdb.Model):
     class Meta:
         db_table = 'accuse'
 
-
 # PhoneAuth
 class PhoneAuthentication(pwdb.Model):
     user_email = peewee.ForeignKeyField(User, column_name='user_email')
@@ -114,7 +113,7 @@ class PhoneAuthentication(pwdb.Model):
     sex = peewee.IntegerField()
     is_native = peewee.BooleanField()
     birth = peewee.DateField()
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    created_at = peewee.DateTimeField()
 
     class Meta:
         db_table = 'phone_authentication'
@@ -126,7 +125,7 @@ class AccountAuthentication(pwdb.Model):
     account_num = peewee.CharField()
     name = peewee.CharField()
     bank = peewee.CharField()
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    created_at = peewee.DateTimeField()
 
     class Meta:
         db_table = 'account_authentication'
@@ -136,7 +135,7 @@ class WithdrawPoint(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
     user_email = peewee.ForeignKeyField(User, column_name='user_email')
     val = peewee.IntegerField()
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    created_at = peewee.DateTimeField()
 
     class Meta:
         db_table = 'withdraw_point'
@@ -146,7 +145,7 @@ class DepositPoint(pwdb.Model):
     user_email = peewee.ForeignKeyField(User, column_name='user_email')
     val = peewee.IntegerField()
     kind = peewee.IntegerField()
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    created_at = peewee.DateTimeField()
 
     class Meta:
         db_table = 'deposit_point'
@@ -156,7 +155,7 @@ class TransferPoint(pwdb.Model):
     sender_email = peewee.ForeignKeyField(User, column_name='sender_email')
     receiver_email = peewee.ForeignKeyField(User, column_name='receiver_email')
     val = peewee.IntegerField()
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    created_at = peewee.DateTimeField()
     mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id', null=True)
 
     class Meta:
@@ -166,7 +165,7 @@ class NoticeModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
     title = peewee.CharField()
     content = peewee.TextField()
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    created_at = peewee.DateTimeField()
 
     class Meta:
         db_table = 'notice'
@@ -176,16 +175,16 @@ class PushLog(pwdb.Model):
     receiver_email = peewee.ForeignKeyField(User, column_name='receiver_email')
     content = peewee.TextField()
     is_read = peewee.BooleanField(default=False)
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    created_at = peewee.DateTimeField()
 
     class Meta:
         db_table = 'push_log'
 
-class FCM(pwdb.Model):
+class FCMModel(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
     user_email = peewee.ForeignKeyField(User, column_name='user_email')
     fcm_key = peewee.CharField()
-    created_at = peewee.DateTimeField(default=datetime.datetime.now())
+    created_at = peewee.DateTimeField()
 
     class Meta:
         db_table = 'fcm'

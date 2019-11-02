@@ -11,8 +11,9 @@ from app.models import InquiryModel, User, PhoneAuthentication
 
 import datetime
 
+from protos.Profile_pb2 import Profile, UserState, Role
 from protos.UserService_pb2 import LookUpAuthInfoResponse, AuthInfo, IsAuth, ChangePasswordResult, \
-    ChangePasswordResponse, LookUpUserInfoResponse, Profile, UserState, Role
+    ChangePasswordResponse, LookUpUserInfoResponse
 from protos.UserService_pb2_grpc import UserServiceServicer
 
 
@@ -90,54 +91,55 @@ class UserServiceServicer(UserServiceServicer, metaclass=ServicerMeta):
             ),
         )
 
-    # def ChangePassword(self, request, context):
-    #
-    #     old_pw = hashlib.sha256(request.old_password.encode('utf-8')).hexdigest()
-    #     new_pw = hashlib.sha256(request.new_password.encode('utf-8')).hexdigest()
-    #
-    #     # init
-    #     result_code = ResultCode.UNKNOWN_RESULT_CODE
-    #     message = "Unknown UserService Message"
-    #     change_password_result = ChangePasswordResult.UNKNOWN_CHANGE_PASSWORD
-    #
-    #     db = pwdb.database
-    #
-    #     with db.atomic() as transaction:
-    #         try:
-    #             old_pw = User \
-    #                 .select(User.password) \
-    #                 .where(User.email == context.login_email)
-    #
-    #             # If old password is different from db
-    #             for pw in old_pw:
-    #                 if pw.password != old_pw:
-    #                     message = "old password is different."
-    #                     raise Exception
-    #
-    #             # Change Password (Update DB)
-    #             res = User \
-    #                 .update(password=new_pw) \
-    #                 .where(User.email == context.login_email) \
-    #                 .execute()
-    #
-    #             if res == 0:
-    #                 message = "Password Update failed"
-    #                 raise Exception
-    #
-    #             result_code = ResultCode.SUCCESS
-    #             message = "Password Change OK"
-    #             change_password_result = ChangePasswordResult.SUCCESS_CHANGE_PASSWORD
-    #
-    #         except Exception as e:
-    #             transaction.rollback()
-    #             result_code = ResultCode.ERROR
-    #             change_password_result = ChangePasswordResult.FAIL_CHANGE_PASSWORD
-    #             message = str(e)
-    #
-    #     return ChangePasswordResponse(
-    #         result=CommonResult(
-    #             result_code=result_code,
-    #             message=message,
-    #         ),
-    #         change_password_result=change_password_result,
-    #     )
+    def ChangePassword(self, request, context):
+        hash_old_pw = hashlib.sha256(request.old_password.encode('utf-8')).hexdigest()
+        hash_new_pw = hashlib.sha256(request.new_password.encode('utf-8')).hexdigest()
+
+        # init
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        message = "Unknown UserService Message"
+        change_password_result = ChangePasswordResult.UNKNOWN_CHANGE_PASSWORD
+    
+        db = pwdb.database
+    
+        with db.atomic() as transaction:
+            try:
+                old_pw = User \
+                    .select(User.password) \
+                    .where(User.email == context.login_email)
+
+                print(old_pw)
+                # If old password is different from db
+                for pw in old_pw:
+                    print(pw)
+                    if pw.password != hash_old_pw:
+                        message = "old password is different."
+                        raise Exception
+    
+                # Change Password (Update DB)
+                res = User \
+                    .update(password=hash_new_pw) \
+                    .where(User.email == context.login_email) \
+                    .execute()
+    
+                if res == 0:
+                    message = "Password Update failed"
+                    raise Exception
+    
+                result_code = ResultCode.SUCCESS
+                message = "Password Change OK"
+                change_password_result = ChangePasswordResult.SUCCESS_CHANGE_PASSWORD
+    
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                change_password_result = ChangePasswordResult.FAIL_CHANGE_PASSWORD
+                message = str(e)
+    
+        return ChangePasswordResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=message,
+            ),
+            change_password_result=change_password_result,
+        )

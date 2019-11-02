@@ -62,6 +62,7 @@ class PhoneServiceServicer(PhoneServiceServicer, metaclass=ServicerMeta):
                     sex=SEX[sex],
                     is_native=is_native,
                     birth=datetime.date(year=birth.year, month=birth.month, day=birth.day),
+                    created_at=datetime.datetime.now(),
                 )
 
                 if ins_res == 0:
@@ -71,6 +72,11 @@ class PhoneServiceServicer(PhoneServiceServicer, metaclass=ServicerMeta):
                     .update(is_phone_authentication=True) \
                     .where(User.email == context.login_email) \
                     .execute()
+
+                # level update(0 --> 1)
+                res = (User.update(level=1)
+                       .where(User.email == context.login_email)
+                       .execute())
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Phone Auth success"
