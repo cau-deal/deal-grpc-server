@@ -568,6 +568,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     raise Exception('Mission state is not DURING_MISSION, now state : ' + MISSION_STATE_STR[mission.state])
                 if mission.register_email == context.login_email:
                     raise Exception("Can't participate in self")
+                raise Exception('Test, (register_email, login_email) : ' + mission.register_email + ", " + context.login_email)
                 if mission.deadline < datetime.datetime.now():
                     raise Exception("Expired deadline")
 
