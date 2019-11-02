@@ -228,6 +228,7 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
         }
 
         is_duplication_email = IS_DUPLICATION_EMAIL[IsDuplicationEmail.UNKNOWN_IS_DUPLICATION_EMAIL]
+        count = 0
 
         db = pwdb.database
         with db.atomic() as transaction:
@@ -235,6 +236,7 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
                 user = User.select().where(
                     (User.email == email)
                 )
+                count = user.count()
 
                 if user.count() == 0:
                     is_duplication_email = IS_DUPLICATION_EMAIL[IsDuplicationEmail.TRUE_IS_DUPLICATION_EMAIL]
@@ -252,7 +254,7 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
         return CheckDuplicationEmailResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message
+                message=result_message + str(count)
             ),
             is_duplication_email=is_duplication_email,
         )
