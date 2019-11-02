@@ -115,6 +115,12 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 if deadline_datetime < datetime.datetime.now():
                     raise Exception("Invalid deadline")
 
+                if price_of_package <= 0 or unit_package <= 0 or order_package_quantity <= 0:
+                    raise Exception('invalid price or unit or quantity')
+
+                if order_package_quantity % unit_package != 0:
+                    raise ('order_package_quantity must be multiple by unit_package')
+
                 # 미션 시작 날짜가 오늘과 같으면 바로 진행 중으로 등록
                 if today_register:
                     query = MissionModel.create(
