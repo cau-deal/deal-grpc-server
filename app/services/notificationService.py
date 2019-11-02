@@ -32,6 +32,7 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
                 NoticeModel.create(
                     title=title,
                     content=content,
+                    created_at=datetime.datetime.now(),
                 )
 
                 user_query = (FCMModel
@@ -63,6 +64,7 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
                         PushLog.create(
                             receiver_email=row.user_email,
                             content=content,
+                            created_at=datetime.datetime.now()
                         )
 
                     except Exception as ee:
@@ -245,8 +247,8 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
                 else:
                     FCMModel.create(
                         fcm_key = fcm_key,
-                        user_email = context.login_email,
-                        created_at = datetime.datetime.now(),
+                        user_email=context.login_email,
+                        created_at=datetime.datetime.now(),
                     )
                     result_code = ResultCode.SUCCESS
                     result_message = "FCM Key create success"

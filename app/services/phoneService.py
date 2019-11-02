@@ -62,6 +62,7 @@ class PhoneServiceServicer(PhoneServiceServicer, metaclass=ServicerMeta):
                     sex=SEX[sex],
                     is_native=is_native,
                     birth=datetime.date(year=birth.year, month=birth.month, day=birth.day),
+                    created_at=datetime.datetime.now(),
                 )
 
                 if ins_res == 0:

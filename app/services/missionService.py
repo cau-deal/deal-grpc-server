@@ -177,6 +177,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                             mission_id=mission_id,
                             image_type=MISSION_EXPLANATION_IMAGE_TYPE[image_type],
                             url=url,
+                            created_at=datetime.datetime.now()
                         )
 
                     result_code = ResultCode.SUCCESS
@@ -554,6 +555,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     worker_email=context.login_email,
                     mission_id=mission_id,
                     deadline=datetime.datetime.now() + datetime.timedelta(days=1),
+                    created_at=datetime.datetime.now(),
                 )
 
                 # 미션 받은 뒤, 후처리도 나중에

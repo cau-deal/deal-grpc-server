@@ -112,7 +112,7 @@ class AccountServiceServicer(AccountServiceServicer, metaclass=ServicerMeta):
                     account_num=account_num,
                     name=real_name_response['account_holder_name'],
                     bank=BANK_STR[bank],
-                    created_at = datetime.datetime.now(),
+                    created_at=datetime.datetime.now(),
                 )
 
                 if ins_res == 0:
