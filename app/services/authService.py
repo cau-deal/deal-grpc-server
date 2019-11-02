@@ -216,3 +216,43 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
                 message="SUCCESS"
             )
         )
+
+    @unverified
+    def CheckDuplicationEmail(self, request, context):
+        email = request.email
+
+        IS_DUPLICATION_EMAIL = {
+            IsDuplicationEmail.UNKNOWN_IS_DUPLICATION_EMAIL: 0,
+            IsDuplicationEmail.TRUE_IS_DUPLICATION_EMAIL: 1,
+            IsDuplicationEmail.FALSE_IS_DUPLICATION_EMAIL: 2,
+        }
+
+        is_duplication_email = IS_DUPLICATION_EMAIL[IsDuplicationEmail.UNKNOWN_IS_DUPLICATION_EMAIL]
+
+        db = pwdb.database
+        with db.atomic() as transaction:
+            try:
+                user = User.select().where(
+                    (User.email == email)
+                )
+
+                if user.count() == 0:
+                    is_duplication_email = IS_DUPLICATION_EMAIL[IsDuplicationEmail.FALSE_IS_DUPLICATION_EMAIL]
+                else:
+                    is_duplication_email = IS_DUPLICATION_EMAIL[IsDuplicationEmail.TRUE_IS_DUPLICATION_EMAIL]
+
+                result_code = ResultCode.SUCCESS
+                result_message = 'SUCCESS'
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+        return CheckDuplicationEmailResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message
+            ),
+            is_duplication_email=is_duplication_email,
+        )
