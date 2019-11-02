@@ -553,7 +553,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 # @TODO: 할당 받을 수 있는 상태인지 살펴보기
                 query_mission = MissionModel.select().where(MissionModel.id == mission_id)
 
-                if query_mission.count():
+                if query_mission.count() == 0:
                     raise Exception('Not found mission')
 
                 mission = query_mission.get()
