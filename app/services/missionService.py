@@ -261,7 +261,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                 # keyword exist
                 else:
-                    #@TODO: where 절 의도대로 동작 X, 버그 수정해야 함 일단 @depreciate
                     # mission type is not all
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
@@ -272,7 +271,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
-                    # @TODO: where 절 의도대로 동작 X, 버그 수정해야 함 일단 @depreciate
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
