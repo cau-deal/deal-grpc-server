@@ -119,7 +119,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     raise Exception('invalid price or unit or quantity')
 
                 if order_package_quantity % unit_package != 0:
-                    raise ('order_package_quantity must be multiple by unit_package')
+                    raise Exception('order_package_quantity must be multiple by unit_package')
 
                 # 미션 시작 날짜가 오늘과 같으면 바로 진행 중으로 등록
                 if today_register:
