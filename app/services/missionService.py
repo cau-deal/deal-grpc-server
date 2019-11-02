@@ -539,9 +539,32 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         result_message = "Unknown get assigned mission"
         assign_mission_result = AssignMissionResult.UNKNOWN_ASSIGN_MISSION_RESULT
 
+        MISSION_STATE_STR = {
+            MissionState.UNKNOWN_MISSION_STATE: "UNKNOWN_MISSION_STATE",
+            MissionState.DURING_MISSION: "DURING_MISSION",
+            MissionState.SOLD_OUT: "SOLD_OUT",
+            MissionState.WATING_CONFIRM_PURCHASE: "WATING_CONFIRM_PURCHASE",
+            MissionState.COMPLETE_MISSION: "COMPLETE_MISSION",
+            MissionState.WAITING_REGISTER: "WAITING_REGISTER",
+        }
+
         with db.atomic() as transaction:
             try:
                 # @TODO: 할당 받을 수 있는 상태인지 살펴보기
+                query_mission = MissionModel.select().where(MissionModel.id == mission_id)
+
+                if query_mission.count():
+                    raise Exception('Not found mission')
+
+                mission = query_mission.get()
+
+                if mission.state != DURING_MISSION:
+                    raise Exception('Mission state is not DURING_MISSION, now state : ' + MISSION_STATE_STR[mission.state])
+
+                query_conduct_mission = (ConductMission.select()
+                                         .where((ConductMission.worker_email == context.login_email)
+                                                & (ConductMission.mission_id == mission_id)))
+
                 #query_mission = MissionModel.select().where(MissionModel.id == mission_id)
 
                 #mission = MissionModel
@@ -705,4 +728,42 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     message=result_message,
                 ),
                 register_profile=profile,
+            )
+
+    @verified
+    def GetParticipatedMissionState(self, request, context):
+        mission_id = request.mission_id
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Get Participated Mission State"
+
+        db = pwdb.database
+
+        conduct_mission_state = INIT_CONDUCT_MISSION_STATE
+
+        with db.atomic() as transaction:
+            try:
+                query = (ConductMission.select()
+                         .where((ConductMission.worker_email == context.login_email) &
+                                (ConductMission.mission_id == mission_id))
+                         .order_by((ConductMission.id).desc()))
+
+                if query.count() > 0:
+                    conduct_mission = query.get()
+                    conduct_mission_state = conduct_mission.state
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful Get Participated Mission State"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e) + " "
+
+            return GetParticipatedMissionStateResponse(
+                result=CommonResult(
+                    result_code=result_code,
+                    message=result_message,
+                ),
+                conduct_mission_state=conduct_mission_state,
             )
