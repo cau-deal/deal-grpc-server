@@ -177,6 +177,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                             mission_id=mission_id,
                             image_type=MISSION_EXPLANATION_IMAGE_TYPE[image_type],
                             url=url,
+                            created_at=datetime.datetime.now()
                         )
 
                     result_code = ResultCode.SUCCESS
@@ -260,7 +261,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                 # keyword exist
                 else:
-                    #@TODO: where 절 의도대로 동작 X, 버그 수정해야 함 일단 @depreciate
                     # mission type is not all
                     if mission_type != MissionType.ALL_MISSION_TYPE:
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
@@ -271,7 +271,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
-                    # @TODO: where 절 의도대로 동작 X, 버그 수정해야 함 일단 @depreciate
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
@@ -554,6 +553,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     worker_email=context.login_email,
                     mission_id=mission_id,
                     deadline=datetime.datetime.now() + datetime.timedelta(days=1),
+                    created_at=datetime.datetime.now(),
                 )
 
                 # 미션 받은 뒤, 후처리도 나중에
