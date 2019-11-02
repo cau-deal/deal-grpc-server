@@ -72,6 +72,11 @@ class PhoneServiceServicer(PhoneServiceServicer, metaclass=ServicerMeta):
                     .where(User.email == context.login_email) \
                     .execute()
 
+                # level update(0 --> 1)
+                res = (User.update(level=1)
+                       .where(User.email == context.login_email)
+                       .execute())
+
                 result_code = ResultCode.SUCCESS
                 result_message = "Phone Auth success"
                 phone_result = PhoneResult.SUCCESS_PHONE_RESULT
