@@ -12,3 +12,10 @@ def unverified(func):
         return func(*args, **kw)
 
     return wrapper
+
+def notification(func):
+    # args[0] => self, args[1] => request, args[2] => context
+    def wrapper(*args, **kw):
+        return func(*args, **kw)
+
+    return wrapper
