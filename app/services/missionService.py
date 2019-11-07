@@ -676,6 +676,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     query_idf = (IDF.select().where((IDF.mission_id == mission_id) &
                                                     IDF.state == WAITING__PROCESS).limit(mission.unit_package))
 
+                    raise Exception('conduct_mission_id : ' + str(conduct_mission_id) + '  url : ' + query_idf.get().url)
+
                     for row in query_idf:
                         ProcessedImageDataModel.create(
                             image_data_for_request_mission_url=row.url,
