@@ -677,7 +677,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                                     IDF.state == WAITING__PROCESS).limit(mission.unit_package))
 
                     for row in query_idf:
-                        ProcessedImageData.create(
+                        ProcessedImageDataModel.create(
                             image_data_for_request_mission_url=row.url,
                             conduct_mission_id=conduct_mission_id,
                             created_at=datetime.datetime.now(),

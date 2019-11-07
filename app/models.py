@@ -85,7 +85,7 @@ class ImageDataForRequestMission(pwdb.Model):
     class Meta:
         db_table = 'image_data_for_request_mission'
 
-class ProcessedImageData(pwdb.Model):
+class ProcessedImageDataModel(pwdb.Model):
     image_data_for_request_mission_url = peewee.CharField(primary_key=True)
     conduct_mission_id = peewee.ForeignKeyField(MissionModel, column_name='conduct_mission_id')
     created_at = peewee.DateTimeField()
