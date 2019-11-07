@@ -205,7 +205,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 except Exception as e:
                     transaction.rollback()
                     result_code = ResultCode.ERROR
-                    result_message = str(e)
+                    result_message = str(e) + 'Fail create in ImageDataForRequestMission'
                     register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
         if result_code == ResultCode.UNKNOWN_RESULT_CODE:
