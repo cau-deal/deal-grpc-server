@@ -78,7 +78,7 @@ class MissionExplanationImageModel(pwdb.Model):
 
 class ImageDataForRequestMission(pwdb.Model):
     url = peewee.CharField(primary_key=True)
-    mission = peewee.IntegerField()
+    mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
     state = peewee.IntegerField()
     created_at = peewee.DateTimeField()
 
