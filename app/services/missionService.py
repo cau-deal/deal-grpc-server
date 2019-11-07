@@ -131,7 +131,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     result_message = 'order_package_quantity must be multiple by unit_package'
                     raise Exception('order_package_quantity must be multiple by unit_package')
 
-                if mission_type == PROCESS_MISSION_TYPE and datas.size() != order_package_quantity:
+                if mission_type == PROCESS_MISSION_TYPE and len(datas) != order_package_quantity:
                     result_message = 'Order quantity and number of images do not match'
                     raise Exception('Order quantity and number of images do not match')
 
