@@ -600,6 +600,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             MissionState.WAITING_REGISTER: "WAITING_REGISTER",
         }
 
+        conduct_mission_id = 0
+
         with db.atomic() as transaction:
             try:
                 #할당 받을 수 있는 상태인지 확인
@@ -632,12 +634,14 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         raise Exception('Already assigned this mission, and not yet completed')
 
                 # 할당 받을 수 있는 경우, 진행.
-                ConductMission.create(
+                query_conduct_mission = ConductMission.create(
                     worker_email=context.login_email,
                     mission_id=mission_id,
                     deadline=datetime.datetime.now() + datetime.timedelta(days=1),
                     created_at=datetime.datetime.now(),
                 )
+
+                conduct_mission_id = query_conduct_mission.mission_id
 
                 # 미션 받은 뒤, 후처리
 
@@ -652,9 +656,10 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     mission.state = SOLD_OUT
                     mission.save()
 
-                result_code = ResultCode.SUCCESS
-                result_message = "Successful Get Assigned Mission"
-                assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
+                if mission.mission_type != PROCESS_MISSION_TYPE:
+                    result_code = ResultCode.SUCCESS
+                    result_message = "Successful Get Assigned Mission"
+                    assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
 
             except Exception as e:
                 transaction.rollback()
@@ -662,13 +667,44 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e)
                 assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
-            return GetAssignedMissionResponse(
-                result=CommonResult(
-                    result_code=result_code,
-                    message=result_message,
-                ),
-                assign_mission_result=assign_mission_result,
-            )
+        if result_code == ResultCode.UNKNOWN_RESULT_CODE and mission.mission_type == PROCESS_MISSION_TYPE:
+            with db.atomic() as transaction:
+                try:
+                    mission = MissionModel.select().where(MissionModel.id == mission_id).get()
+
+                    IDF = ImageDataForRequestMission.alias()
+                    query_idf = (IDF.select().where((IDF.mission_id == mission_id) &
+                                                    IDF.state == WAITING__PROCESS).limit(mission.unit_package))
+
+                    for row in query_idf:
+                        ProcessedImageData.create(
+                            image_data_for_request_mission_url=row.url,
+                            conduct_mission_id=conduct_mission_id,
+                            created_at=datetime.datetime.now(),
+                            labeling_result="",
+                        )
+                        
+                        # state 변경
+                        row.state = DURING_PROCESS
+                        row.save()
+
+                    result_code = ResultCode.SUCCESS
+                    result_message = "Successful Get Assigned Mission"
+                    assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
+
+                except Exception as e:
+                    transaction.rollback()
+                    result_code = ResultCode.ERROR
+                    result_message = str(e)
+                    assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
+
+        return GetAssignedMissionResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            assign_mission_result=assign_mission_result,
+        )
 
     @verified
     def SubmitCollectMissionOutput(self, request, context):

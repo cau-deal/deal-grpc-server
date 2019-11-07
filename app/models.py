@@ -79,7 +79,7 @@ class MissionExplanationImageModel(pwdb.Model):
 class ImageDataForRequestMission(pwdb.Model):
     url = peewee.CharField(primary_key=True)
     mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
-    state = peewee.IntegerField()
+    state = peewee.IntegerField(default=1)
     created_at = peewee.DateTimeField()
 
     class Meta:
@@ -88,9 +88,8 @@ class ImageDataForRequestMission(pwdb.Model):
 class ProcessedImageData(pwdb.Model):
     image_data_for_request_mission_url = peewee.CharField(primary_key=True)
     conduct_mission_id = peewee.ForeignKeyField(MissionModel, column_name='conduct_mission_id')
-    state = peewee.IntegerField(default=1)
     created_at = peewee.DateTimeField()
-    labeling_result = peewee.TextField()
+    labeling_result = peewee.TextField(null=True)
 
     class Meta:
         db_table = 'processed_image_data'
