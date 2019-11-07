@@ -641,7 +641,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     created_at=datetime.datetime.now(),
                 )
 
-                conduct_mission_id = query_conduct_mission.mission_id
+                conduct_mission_id = query_conduct_mission.id
 
                 # 미션 받은 뒤, 후처리
 
