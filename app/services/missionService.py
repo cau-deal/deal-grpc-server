@@ -5,7 +5,7 @@ from app.decorators import verified
 from app.extensions import pwdb, root_email
 from app.extensions_db import sPointServicer
 
-from app.models import MissionModel, User, PhoneAuthentication, ImageDataForRequestMission
+from app.models import MissionModel, User, PhoneAuthentication, ImageDataForRequestMission, ProcessedImageDataModel
 from app.models import ConductMission
 from app.models import MissionExplanationImageModel
 
