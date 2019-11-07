@@ -711,10 +711,15 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SubmitCollectMissionOutput(self, request, context):
-        pass
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        mission_id = request.mission_id
+
+        datas = request.datas
+
+        db = pwdb.database
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown get assigned mission"
+        submit_result = SubmitResult.UNKNOWN_SUBMIT_RESULT
 
     @verified
     def SubmitProcessMissionOutput(self, request, context):
