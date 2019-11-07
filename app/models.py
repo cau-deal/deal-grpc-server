@@ -76,6 +76,24 @@ class MissionExplanationImageModel(pwdb.Model):
     class Meta:
         db_table = 'mission_explanation_image'
 
+class ImageDataForRequestMission(pwdb.Model):
+    url = peewee.CharField(primary_key=True)
+    mission = peewee.IntegerField()
+    state = peewee.IntegerField()
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'image_data_for_request_mission'
+
+class ProcessedImageData(pwdb.Model):
+    image_data_for_request_mission_url = peewee.CharField(primary_key=True)
+    conduct_mission_id = peewee.ForeignKeyField(MissionModel, column_name='conduct_mission_id')
+    state = peewee.IntegerField(default=1)
+    created_at = peewee.DateTimeField()
+    labeling_result = peewee.TextField()
+
+    class Meta:
+        db_table = 'processed_image_data'
 
 # Deal Service
 

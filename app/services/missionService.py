@@ -5,7 +5,7 @@ from app.decorators import verified
 from app.extensions import pwdb, root_email
 from app.extensions_db import sPointServicer
 
-from app.models import MissionModel, User, PhoneAuthentication
+from app.models import MissionModel, User, PhoneAuthentication, ImageDataForRequestMission
 from app.models import ConductMission
 from app.models import MissionExplanationImageModel
 
@@ -31,6 +31,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
     def RegisterMission(self, request, context):
         # Mission Obj
         mission = request.mission
+
+        datas = request.datas
 
         # Mission Obj parsing
         title = mission.title
@@ -170,6 +172,25 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_code = ResultCode.ERROR
                 result_message = str(e) + " transaction1 error - mission_id :  " + str(mission_id)
                 register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+
+        if result_code == ResultCode.UNKNOWN_RESULT_CODE and mission_type == MISSION_TYPE[MissionType.PROCESS_MISSION_TYPE]:
+            with db.atomic() as transaction:
+                try:
+                    for data in datas:
+                        url = data.url
+
+                        ImageDataForRequestMission.create(
+                            url=url,
+                            mission_id=mission_id,
+                            state=WAITING__PROCESS,
+                            created_at=datetime.datetime.now(),
+                        )
+
+                except Exception as e:
+                    transaction.rollback()
+                    result_code = ResultCode.ERROR
+                    result_message = str(e)
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
         if result_code == ResultCode.UNKNOWN_RESULT_CODE:
             with db.atomic() as transaction:
