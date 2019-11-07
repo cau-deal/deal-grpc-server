@@ -198,6 +198,10 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                             created_at=datetime.datetime.now(),
                         )
 
+                    result_code = ResultCode.SUCCESS
+                    result_message = "Register Mission Success"
+                    register_mission_result = RegisterMissionResult.SUCCESS_REGISTER_MISSION_RESULT
+
                 except Exception as e:
                     transaction.rollback()
                     result_code = ResultCode.ERROR
