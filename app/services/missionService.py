@@ -108,30 +108,39 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 balance = sPointServicer.sLookUpBalance(context.login_email)
                 val = price_of_package * order_package_quantity
 
-                result_code = ResultCode.ERROR
-                register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
-
                 if balance < val:
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
                     result_message = "Insufficiency balance"
                     raise Exception("Insufficiency balance")
 
                 if today_register is False and (beginning_datetime < datetime.datetime.now()):
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
                     result_message = "Invalid beginning"
                     raise Exception("Invalid beginning")
 
                 if deadline_datetime < datetime.datetime.now():
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
                     result_message = "Invalid deadline"
                     raise Exception("Invalid deadline")
 
                 if price_of_package <= 0 or unit_package <= 0 or order_package_quantity <= 0:
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
                     result_message = 'invalid price or unit or quantity'
                     raise Exception('invalid price or unit or quantity')
 
                 if order_package_quantity % unit_package != 0:
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
                     result_message = 'order_package_quantity must be multiple by unit_package'
                     raise Exception('order_package_quantity must be multiple by unit_package')
 
                 if mission_type == PROCESS_MISSION_TYPE and len(datas) != order_package_quantity:
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
                     result_message = 'Order quantity and number of images do not match'
                     raise Exception('Order quantity and number of images do not match')
 
