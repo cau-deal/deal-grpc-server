@@ -37,7 +37,7 @@ class NotificationServiceServicer(NotificationServiceServicer, metaclass=Service
                 user_query = (FCMModel
                 .select(FCMModel.user_email, FCMModel.fcm_key))
 
-                # 모든 사용자에게 push를 보내는 부분(지금은 db 저장만 수행)
+                # 모든 사용자에게 push를 보내는 부분
                 for row in user_query:
                     message = messaging.Message(
                     android=messaging.AndroidConfig(

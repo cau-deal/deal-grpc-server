@@ -4,7 +4,7 @@ import hashlib
 from peewee import Database
 from sea.servicer import ServicerMeta
 
-from app.decorators import verified, unverified
+from app.decorators import verified, unverified, notification, silent_otification
 from app.extensions import JWT, pwdb, EmailSender
 from app.models import User, JWTToken
 
@@ -26,6 +26,7 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
         )
 
     @unverified
+    @notification
     def SignInWithCredential(self, request, context):
 
         email = request.email
