@@ -1,3 +1,5 @@
+import operator
+
 from peewee import JOIN, fn
 from sea.servicer import ServicerMeta
 
@@ -730,7 +732,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         datas = request.datas
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
-        result_message = "Unknown get assigned mission"
+        result_message = "Unknown submit collect mission output"
         submit_result = SubmitResult.UNKNOWN_SUBMIT_RESULT
 
         db = pwdb.database
@@ -779,7 +781,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 conduct_mission.save()
 
                 result_code = ResultCode.UNKNOWN_RESULT_CODE
-                result_message = "Success get assigned mission"
+                result_message = "Success submit collect mission output"
                 submit_result = SubmitResult.SUCCESS_SUBMIT_RESULT
 
             except Exception as e:
@@ -798,12 +800,14 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SubmitProcessMissionOutput(self, request, context):
+        # 아직 덜 구현
+        return
         mission_id = request.mission_id
 
         datas = request.datas
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
-        result_message = "Unknown get assigned mission"
+        result_message = "Unknown submit process mission output"
         submit_result = SubmitResult.UNKNOWN_SUBMIT_RESULT
 
         db = pwdb.database
@@ -827,7 +831,10 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                               .where(ProcessedImageData.conduct_mission_id == conduct_mission_id)
                                               .order_by((ProcessedImageData.url).desc()))
 
-                for data in datas:
+                datas_dict = datas.dicts()
+                datas_dict = sorted(datas_dict.items(), key=operator.itemgetter(0))
+
+                for data in datas_dict:
                     url = data.url
                     state = WAITING_VERIFICATION
                     created_at = datetime.datetime.now()
@@ -846,7 +853,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                                         .where())
 
                 result_code = ResultCode.UNKNOWN_RESULT_CODE
-                result_message = "Success get assigned mission"
+                result_message = "Success submit process mission output"
                 submit_result = SubmitResult.SUCCESS_SUBMIT_RESULT
 
             except Exception as e:
