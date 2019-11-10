@@ -313,13 +313,15 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                     (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
-                                 .where(MissionModel.mission_type == MISSION_TYPE[mission_type])
+                                 .where((MissionModel.mission_type == MISSION_TYPE[mission_type])
+                                        & (MissionModel.deadline > datetime.datetime.now()))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
+                                 .where(MissionModel.deadline > datetime.datetime.now())
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                 # keyword exist
                 else:
@@ -329,14 +331,16 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
                                  .where((MissionModel.mission_type == MISSION_TYPE[mission_type])
-                                        & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
+                                        & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword))
+                                        & (MissionModel.deadline > datetime.datetime.now()))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
-                                 .where((MissionModel.title ** keyword) | (MissionModel.contents ** keyword))
+                                 .where(((MissionModel.title ** keyword) | (MissionModel.contents ** keyword))
+                                        & (MissionModel.deadline > datetime.datetime.now()))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
 
                 result_code = ResultCode.SUCCESS
@@ -794,10 +798,70 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SubmitProcessMissionOutput(self, request, context):
-        pass
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        mission_id = request.mission_id
+
+        datas = request.datas
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown get assigned mission"
+        submit_result = SubmitResult.UNKNOWN_SUBMIT_RESULT
+
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                query_conduct_mission = (ConductMission.select().where(
+                    (ConductMission.mission_id == mission_id) & (ConductMission.worker_email == context.login_email)
+                    & (ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE)))
+
+                if query_conduct_mission.count() == 0:
+                    raise Exception('Not found, valid conduct mission')
+
+                conduct_mission = query_conduct_mission.get()
+
+                conduct_mission_id = conduct_mission.id
+
+                mission = (MissionModel.select().where(MissionModel.id == mission_id)).get()
+
+                query_processed_image_data = (ProcessedImageData.select()
+                                              .where(ProcessedImageData.conduct_mission_id == conduct_mission_id)
+                                              .order_by((ProcessedImageData.url).desc()))
+
+                for data in datas:
+                    url = data.url
+                    state = WAITING_VERIFICATION
+                    created_at = datetime.datetime.now()
+
+                    ProcessedImageData.create(
+                        image_data_for_request_mission_url=data.url,
+                        conduct_mission_id=conduct_mission_id,
+                        created_at=created_at,
+                        labeling_result=data.labeling_result,
+                    )
+
+                conduct_mission.state = WAITING_VERIFICATION
+                conduct_mission.save()
+
+                query_image_data_for_request_mission = (ImageDataForRequestMission.select()
+                                                        .where())
+
+                result_code = ResultCode.UNKNOWN_RESULT_CODE
+                result_message = "Success get assigned mission"
+                submit_result = SubmitResult.SUCCESS_SUBMIT_RESULT
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                submit_result = SubmitResult.FAIL_SUBMIT_RESUlT
+
+        return SubmitCollectMissionOutputResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            submit_result=submit_result,
+        )
 
     @verified
     def CountFetchMission(self, request, context):
