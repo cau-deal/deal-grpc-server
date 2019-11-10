@@ -735,7 +735,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             try:
                 query_conduct_mission = (ConductMission.select().where(
                     (ConductMission.mission_id == mission_id) & (ConductMission.worker_email == context.login_email)
-                    & (ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE))).get()
+                    & (ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE)))
 
                 if query_conduct_mission.count() == 0:
                     raise Exception('Not found, valid conduct mission')
@@ -774,11 +774,23 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 conduct_mission.state = WAITING_VERIFICATION
                 conduct_mission.save()
 
+                result_code = ResultCode.UNKNOWN_RESULT_CODE
+                result_message = "Success get assigned mission"
+                submit_result = SubmitResult.SUCCESS_SUBMIT_RESULT
+
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
                 result_message = str(e)
-                assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
+                submit_result = SubmitResult.FAIL_SUBMIT_RESUlT
+
+        return SubmitCollectMissionOutputResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            submit_result=submit_result,
+        )
 
     @verified
     def SubmitProcessMissionOutput(self, request, context):
