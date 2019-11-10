@@ -4,7 +4,7 @@ import hashlib
 from peewee import Database
 from sea.servicer import ServicerMeta
 
-from app.decorators import verified, unverified, notification, silent_otification
+from app.decorators import verified, unverified, notification, silent_notification
 from app.extensions import JWT, pwdb, EmailSender
 from app.models import User, JWTToken
 
