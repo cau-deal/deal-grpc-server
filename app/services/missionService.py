@@ -5,7 +5,8 @@ from app.decorators import verified
 from app.extensions import pwdb, root_email
 from app.extensions_db import sPointServicer
 
-from app.models import MissionModel, User, PhoneAuthentication, ImageDataForRequestMission, ProcessedImageDataModel
+from app.models import MissionModel, User, PhoneAuthentication, ImageDataForRequestMission, ProcessedImageDataModel, \
+    ImageDataModel, SoundDataModel, SurveyDataModel, LabelModel
 from app.models import ConductMission
 from app.models import MissionExplanationImageModel
 
@@ -33,6 +34,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         mission = request.mission
 
         datas = request.datas
+        labels = request.labels
 
         # Mission Obj parsing
         title = mission.title
@@ -210,6 +212,14 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     result_code = ResultCode.SUCCESS
                     result_message = "Register Mission Success"
                     register_mission_result = RegisterMissionResult.SUCCESS_REGISTER_MISSION_RESULT
+
+                    for label in labels:
+                        created_at = datetime.datetime.now()
+                        LabelModel.create(
+                            mission_id=mission_id,
+                            label=label,
+                            created_at=created_at,
+                        )
 
                 except Exception as e:
                     transaction.rollback()
@@ -715,11 +725,60 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         datas = request.datas
 
-        db = pwdb.database
-
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown get assigned mission"
         submit_result = SubmitResult.UNKNOWN_SUBMIT_RESULT
+
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                query_conduct_mission = (ConductMission.select().where(
+                    (ConductMission.mission_id == mission_id) & (ConductMission.worker_email == context.login_email)
+                    & (ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE))).get()
+
+                if query_conduct_mission.count() == 0:
+                    raise Exception('Not found, valid conduct mission')
+
+                conduct_mission = query_conduct_mission.get()
+
+                conduct_mission_id = conduct_mission.id
+
+                mission = (MissionModel.select().where(MissionModel.id == mission_id)).get()
+
+                data_type = mission.data_type
+
+                target_model = MissionModel.alias()
+
+                if data_type == IMAGE:
+                    target_model = ImageDataModel.alias()
+                elif data_type == SOUND:
+                    target_model = SoundDataModel.alias()
+                elif data_type == SURVEY:
+                    target_model = SurveyDataModel.alias()
+                else:
+                    raise Exception('Unknown data type')
+
+                for data in datas:
+                    url = data.url
+                    state = WAITING_VERIFICATION
+                    created_at = datetime.datetime.now()
+
+                    target_model.create(
+                        url=url,
+                        conduct_mission_id=conduct_mission_id,
+                        state=state,
+                        created_at=created_at,
+                    )
+
+                conduct_mission.state = WAITING_VERIFICATION
+                conduct_mission.save()
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
     @verified
     def SubmitProcessMissionOutput(self, request, context):

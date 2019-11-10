@@ -96,6 +96,42 @@ class ProcessedImageDataModel(pwdb.Model):
     class Meta:
         db_table = 'processed_image_data'
 
+class ImageDataModel(pwdb.Model):
+    url = peewee.CharField(primary_key=True)
+    conduct_mission_id = peewee.ForeignKeyField(ConductMission, column_name='conduct_mission_id')
+    state = peewee.IntegerField(default=3)
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'image_data'
+
+class SoundDataModel(pwdb.Model):
+    url = peewee.CharField(primary_key=True)
+    conduct_mission_id = peewee.ForeignKeyField(ConductMission, column_name='conduct_mission_id')
+    state = peewee.IntegerField(default=3)
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'sound_data'
+
+class SurveyDataModel(pwdb.Model):
+    url = peewee.CharField(primary_key=True)
+    conduct_mission_id = peewee.ForeignKeyField(ConductMission, column_name='conduct_mission_id')
+    state = peewee.IntegerField(default=3)
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'survey_data'
+
+class LabelModel(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
+    label = peewee.CharField()
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'label'
+
 # Deal Service
 
 class InquiryModel(pwdb.Model):
@@ -136,7 +172,6 @@ class PhoneAuthentication(pwdb.Model):
 
     class Meta:
         db_table = 'phone_authentication'
-
 
 # PhoneAuth
 class AccountAuthentication(pwdb.Model):
