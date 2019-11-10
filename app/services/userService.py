@@ -11,10 +11,11 @@ from app.models import InquiryModel, User, PhoneAuthentication
 
 import datetime
 
-from protos.Profile_pb2 import Profile, UserState, Role
-from protos.UserService_pb2 import LookUpAuthInfoResponse, AuthInfo, IsAuth, ChangePasswordResult, \
-    ChangePasswordResponse, LookUpUserInfoResponse
+
+from protos.UserService_pb2 import *
 from protos.UserService_pb2_grpc import UserServiceServicer
+from protos.Profile_pb2 import *
+from protos.Profile_pb2_grpc import *
 
 
 class UserServiceServicer(UserServiceServicer, metaclass=ServicerMeta):

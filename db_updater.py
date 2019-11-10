@@ -49,11 +49,25 @@ class MissionModel(BaseModel):
     class Meta:
         db_table = 'mission'
 
-missions = MissionModel.select(MissionModel.id, MissionModel.state, MissionModel.deadline)
+class ConductMission(BaseModel):
+    id = IntegerField(primary_key=True)
+    worker_email = ForeignKeyField(User, column_name='worker_email')
+    mission_id = ForeignKeyField(MissionModel, column_name='mission_id')
+    state = IntegerField(default=1)
+    deadline = DateTimeField()
+    created_at = DateTimeField(default=datetime.datetime.now())
+    complete_datetime = DateTimeField(null=True)
 
+    class Meta:
+        db_table = 'conduct_mission'
+        
+
+missions = MissionModel.select(MissionModel.id, MissionModel.state, MissionModel.deadline)
+conduct_missions = ConductMission.select(ConductMission.id, ConductMission.state, ConductMission.deadline)
 
 now_time = datetime.datetime.now()
 
+# Mission State Update
 for row in missions.dicts():
     mission_id = row['id']
     mission_state = row['state']
@@ -72,5 +86,21 @@ for row in missions.dicts():
 
 print(str(now_time)+" Mission complete state update finished.")
 
-        
-        
+for row in conduct_missions.dicts():
+    mission_id = row['id']
+    mission_state = row['state']
+    mission_deadline = row['deadline']
+    with db.atomic() as transaction:
+        try:
+            if(mission_state==4):
+                pass
+
+            if now_time >= mission_deadline:
+                ConductMission.update(state=4).where(ConductMission.id == mission_id).execute()
+        except Exception as e:
+            transaction.rollback()
+            print(e)
+            print("Conduct Mission ID "+str(mission_id)+" state update failed.")
+            pass
+
+print(str(now_time)+" Conduct Mission complete state update finished.")
