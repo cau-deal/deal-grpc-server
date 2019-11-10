@@ -76,6 +76,61 @@ class MissionExplanationImageModel(pwdb.Model):
     class Meta:
         db_table = 'mission_explanation_image'
 
+class ImageDataForRequestMission(pwdb.Model):
+    url = peewee.CharField(primary_key=True)
+    mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
+    state = peewee.IntegerField(default=1)
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'image_data_for_request_mission'
+
+class ProcessedImageDataModel(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    image_data_for_request_mission_url = peewee.ForeignKeyField(ImageDataForRequestMission,
+                                                                column_name='image_data_for_request_mission_url')
+    conduct_mission_id = peewee.ForeignKeyField(ConductMission, column_name='conduct_mission_id')
+    created_at = peewee.DateTimeField()
+    labeling_result = peewee.TextField(null=True)
+
+    class Meta:
+        db_table = 'processed_image_data'
+
+class ImageDataModel(pwdb.Model):
+    url = peewee.CharField(primary_key=True)
+    conduct_mission_id = peewee.ForeignKeyField(ConductMission, column_name='conduct_mission_id')
+    state = peewee.IntegerField(default=3)
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'image_data'
+
+class SoundDataModel(pwdb.Model):
+    url = peewee.CharField(primary_key=True)
+    conduct_mission_id = peewee.ForeignKeyField(ConductMission, column_name='conduct_mission_id')
+    state = peewee.IntegerField(default=3)
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'sound_data'
+
+class SurveyDataModel(pwdb.Model):
+    url = peewee.CharField(primary_key=True)
+    conduct_mission_id = peewee.ForeignKeyField(ConductMission, column_name='conduct_mission_id')
+    state = peewee.IntegerField(default=3)
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'survey_data'
+
+class LabelModel(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
+    label = peewee.CharField()
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'label'
 
 # Deal Service
 
@@ -117,7 +172,6 @@ class PhoneAuthentication(pwdb.Model):
 
     class Meta:
         db_table = 'phone_authentication'
-
 
 # PhoneAuth
 class AccountAuthentication(pwdb.Model):

@@ -1,3 +1,5 @@
+import operator
+
 from peewee import JOIN, fn
 from sea.servicer import ServicerMeta
 
@@ -5,7 +7,8 @@ from app.decorators import verified
 from app.extensions import pwdb, root_email
 from app.extensions_db import sPointServicer
 
-from app.models import MissionModel, User, PhoneAuthentication
+from app.models import MissionModel, User, PhoneAuthentication, ImageDataForRequestMission, ProcessedImageDataModel, \
+    ImageDataModel, SoundDataModel, SurveyDataModel, LabelModel
 from app.models import ConductMission
 from app.models import MissionExplanationImageModel
 
@@ -31,6 +34,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
     def RegisterMission(self, request, context):
         # Mission Obj
         mission = request.mission
+
+        datas = request.datas
+        labels = request.labels
 
         # Mission Obj parsing
         title = mission.title
@@ -107,13 +113,40 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 val = price_of_package * order_package_quantity
 
                 if balance < val:
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                    result_message = "Insufficiency balance"
                     raise Exception("Insufficiency balance")
 
                 if today_register is False and (beginning_datetime < datetime.datetime.now()):
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                    result_message = "Invalid beginning"
                     raise Exception("Invalid beginning")
 
                 if deadline_datetime < datetime.datetime.now():
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                    result_message = "Invalid deadline"
                     raise Exception("Invalid deadline")
+
+                if price_of_package <= 0 or unit_package <= 0 or order_package_quantity <= 0:
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                    result_message = 'invalid price or unit or quantity'
+                    raise Exception('invalid price or unit or quantity')
+
+                if order_package_quantity % unit_package != 0:
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                    result_message = 'order_package_quantity must be multiple by unit_package'
+                    raise Exception('order_package_quantity must be multiple by unit_package')
+
+                if mission_type == PROCESS_MISSION_TYPE and len(datas) != order_package_quantity:
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                    result_message = 'Order quantity and number of images do not match'
+                    raise Exception('Order quantity and number of images do not match')
 
                 # 미션 시작 날짜가 오늘과 같으면 바로 진행 중으로 등록
                 if today_register:
@@ -164,6 +197,37 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_code = ResultCode.ERROR
                 result_message = str(e) + " transaction1 error - mission_id :  " + str(mission_id)
                 register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+
+        if result_code == ResultCode.UNKNOWN_RESULT_CODE and mission_type == MISSION_TYPE[MissionType.PROCESS_MISSION_TYPE]:
+            with db.atomic() as transaction:
+                try:
+                    for data in datas:
+                        url = data.url
+
+                        ImageDataForRequestMission.create(
+                            url=url,
+                            mission_id=mission_id,
+                            state=WAITING__PROCESS,
+                            created_at=datetime.datetime.now(),
+                        )
+
+                    result_code = ResultCode.SUCCESS
+                    result_message = "Register Mission Success"
+                    register_mission_result = RegisterMissionResult.SUCCESS_REGISTER_MISSION_RESULT
+
+                    for label in labels:
+                        created_at = datetime.datetime.now()
+                        LabelModel.create(
+                            mission_id=mission_id,
+                            label=label,
+                            created_at=created_at,
+                        )
+
+                except Exception as e:
+                    transaction.rollback()
+                    result_code = ResultCode.ERROR
+                    result_message = str(e) + 'Fail create in ImageDataForRequestMission'
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
         if result_code == ResultCode.UNKNOWN_RESULT_CODE:
             with db.atomic() as transaction:
@@ -251,13 +315,15 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                     (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
-                                 .where(MissionModel.mission_type == MISSION_TYPE[mission_type])
+                                 .where((MissionModel.mission_type == MISSION_TYPE[mission_type])
+                                        & (MissionModel.deadline > datetime.datetime.now()))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
+                                 .where(MissionModel.deadline > datetime.datetime.now())
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                 # keyword exist
                 else:
@@ -267,14 +333,16 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
                                  .where((MissionModel.mission_type == MISSION_TYPE[mission_type])
-                                        & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword)))
+                                        & ((MissionModel.title ** keyword) | (MissionModel.contents ** keyword))
+                                        & (MissionModel.deadline > datetime.datetime.now()))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
                     # mission type is all
                     else:
                         query = (MissionModel.select(MissionModel, MEI.url.alias('url'))
                                  .join(MEI, JOIN.LEFT_OUTER, on=((MissionModel.id == MEI.mission_id) &
                                 (MEI.image_type == MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE)))
-                                 .where((MissionModel.title ** keyword) | (MissionModel.contents ** keyword))
+                                 .where(((MissionModel.title ** keyword) | (MissionModel.contents ** keyword))
+                                        & (MissionModel.deadline > datetime.datetime.now()))
                                  .order_by((MissionModel.id).desc()).offset(_offset).limit(amount))
 
                 result_code = ResultCode.SUCCESS
@@ -539,42 +607,75 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         result_message = "Unknown get assigned mission"
         assign_mission_result = AssignMissionResult.UNKNOWN_ASSIGN_MISSION_RESULT
 
+        MISSION_STATE_STR = {
+            MissionState.UNKNOWN_MISSION_STATE: "UNKNOWN_MISSION_STATE",
+            MissionState.DURING_MISSION: "DURING_MISSION",
+            MissionState.SOLD_OUT: "SOLD_OUT",
+            MissionState.WATING_CONFIRM_PURCHASE: "WATING_CONFIRM_PURCHASE",
+            MissionState.COMPLETE_MISSION: "COMPLETE_MISSION",
+            MissionState.WAITING_REGISTER: "WAITING_REGISTER",
+        }
+
+        conduct_mission_id = 0
+
         with db.atomic() as transaction:
             try:
-                # @TODO: 할당 받을 수 있는 상태인지 살펴보기
-                #query_mission = MissionModel.select().where(MissionModel.id == mission_id)
+                #할당 받을 수 있는 상태인지 확인
+                query_mission = MissionModel.select().where(MissionModel.id == mission_id)
 
-                #mission = MissionModel
-                #for row in query_mission:
-                #    mission = row
+                if query_mission.count() == 0:
+                    raise Exception('Not found mission')
 
-                # 받을 수 있다고 가정하고, 정상 시나리오만 구현 진행. 예외 처리는 나중에
-                ConductMission.create(
+                mission = query_mission.get()
+
+                if mission.state != DURING_MISSION:
+                    raise Exception('Mission state is not DURING_MISSION, now state : ' + MISSION_STATE_STR[mission.state])
+                if mission.register_email.email == context.login_email:
+                    raise Exception("Can't participate in self")
+                if mission.deadline < datetime.datetime.now():
+                    raise Exception("Expired deadline")
+
+                query_conduct_mission = (ConductMission.select()
+                         .where((ConductMission.worker_email == context.login_email) &
+                                (ConductMission.mission_id == mission_id))
+                         .order_by((ConductMission.id).desc()))
+
+                if query_conduct_mission.count() > 0:
+                    conduct_mission = query_conduct_mission.get()
+                    conduct_mission_state = conduct_mission.state
+
+                    if (conduct_mission_state == DURING_MISSION_CONDUCT_MISSION_STATE
+                        or conduct_mission_state == WAITING_VERIFICATION_CONDUCT_MISSION_STATE
+                            or conduct_mission_state == DURING_VERIFICATION_CONDUCT_MISSION_STATE):
+                        raise Exception('Already assigned this mission, and not yet completed')
+
+                # 할당 받을 수 있는 경우, 진행.
+                query_conduct_mission = ConductMission.create(
                     worker_email=context.login_email,
                     mission_id=mission_id,
                     deadline=datetime.datetime.now() + datetime.timedelta(days=1),
                     created_at=datetime.datetime.now(),
                 )
 
-                # 미션 받은 뒤, 후처리도 나중에
-                """
-                #GetAssignedMission-2
-                cntval = ConductMission.select().count().where(
-                    (ConductMission.mission_id == mission_id)
-                    & (ConductMission.state <=4)
-                )
+                conduct_mission_id = query_conduct_mission.id
 
-                ms = Mission.select().where(
-                    mission_id == Mission.id
-                )
+                # 미션 받은 뒤, 후처리
 
-                if ms.order_package_quantity >= cntval:
-                    Mission.update(state=MissionState.SOLD_OUT).where(Mission.id == mission_id).execute()
-                """
+                query_conduct_mission = (ConductMission.select()
+                                         .where((ConductMission.mission_id == mission_id)
+                                                & (ConductMission.state != RETURN_VERIFICATION_CONDUCT_MISSION_STATE)
+                                                & (ConductMission.state != FAIL_MISSION_CONDUCT_MISSION_STATE)))
 
-                result_code = ResultCode.SUCCESS
-                result_message = "Successful Get Assigned Mission"
-                assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
+                cnt_conduct_mission = query_conduct_mission.count()
+
+                if mission.order_package_quantity <= cnt_conduct_mission:
+                    mission.state = SOLD_OUT
+                    mission.save()
+
+                if mission.mission_type != PROCESS_MISSION_TYPE:
+                    result_code = ResultCode.SUCCESS
+                    result_message = "Successful Get Assigned Mission"
+                    assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
 
             except Exception as e:
                 transaction.rollback()
@@ -582,27 +683,192 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e)
                 assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
-            return GetAssignedMissionResponse(
-                result=CommonResult(
-                    result_code=result_code,
-                    message=result_message,
-                ),
-                assign_mission_result=assign_mission_result,
-            )
+        if result_code == ResultCode.UNKNOWN_RESULT_CODE and mission.mission_type == PROCESS_MISSION_TYPE:
+            with db.atomic() as transaction:
+                try:
+                    mission = MissionModel.select().where(MissionModel.id == mission_id).get()
+
+                    IDF = ImageDataForRequestMission.alias()
+                    query_idf = (IDF.select().where((IDF.mission_id == mission_id) &
+                                                    IDF.state == WAITING__PROCESS).limit(mission.unit_package))
+
+                    if query_idf.count < mission.unit_package:
+                        raise Exception('Not enough stock')
+
+                    for row in query_idf:
+                        ProcessedImageDataModel.create(
+                            image_data_for_request_mission_url=row.url,
+                            conduct_mission_id=conduct_mission_id,
+                            created_at=datetime.datetime.now(),
+                            labeling_result="",
+                        )
+                        
+                        # state 변경
+                        row.state = DURING_PROCESS
+                        row.save()
+
+                    result_code = ResultCode.SUCCESS
+                    result_message = "Successful Get Assigned Mission"
+                    assign_mission_result = AssignMissionResult.SUCCESS_ASSIGN_MISSION_RESULT
+
+                except Exception as e:
+                    transaction.rollback()
+                    result_code = ResultCode.ERROR
+                    result_message = str(e)
+                    assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
+
+        return GetAssignedMissionResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            assign_mission_result=assign_mission_result,
+        )
 
     @verified
     def SubmitCollectMissionOutput(self, request, context):
-        pass
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        mission_id = request.mission_id
+
+        datas = request.datas
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown submit collect mission output"
+        submit_result = SubmitResult.UNKNOWN_SUBMIT_RESULT
+
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                query_conduct_mission = (ConductMission.select().where(
+                    (ConductMission.mission_id == mission_id) & (ConductMission.worker_email == context.login_email)
+                    & (ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE)))
+
+                if query_conduct_mission.count() == 0:
+                    raise Exception('Not found, valid conduct mission')
+
+                conduct_mission = query_conduct_mission.get()
+
+                conduct_mission_id = conduct_mission.id
+
+                mission = (MissionModel.select().where(MissionModel.id == mission_id)).get()
+
+                data_type = mission.data_type
+
+                target_model = MissionModel.alias()
+
+                if data_type == IMAGE:
+                    target_model = ImageDataModel.alias()
+                elif data_type == SOUND:
+                    target_model = SoundDataModel.alias()
+                elif data_type == SURVEY:
+                    target_model = SurveyDataModel.alias()
+                else:
+                    raise Exception('Unknown data type')
+
+                for data in datas:
+                    url = data.url
+                    state = WAITING_VERIFICATION
+                    created_at = datetime.datetime.now()
+
+                    target_model.create(
+                        url=url,
+                        conduct_mission_id=conduct_mission_id,
+                        state=state,
+                        created_at=created_at,
+                    )
+
+                conduct_mission.state = WAITING_VERIFICATION
+                conduct_mission.save()
+
+                result_code = ResultCode.UNKNOWN_RESULT_CODE
+                result_message = "Success submit collect mission output"
+                submit_result = SubmitResult.SUCCESS_SUBMIT_RESULT
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                submit_result = SubmitResult.FAIL_SUBMIT_RESUlT
+
+        return SubmitCollectMissionOutputResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            submit_result=submit_result,
+        )
 
     @verified
     def SubmitProcessMissionOutput(self, request, context):
-        pass
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        # 아직 덜 구현
+        return
+        mission_id = request.mission_id
+
+        datas = request.datas
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown submit process mission output"
+        submit_result = SubmitResult.UNKNOWN_SUBMIT_RESULT
+
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                query_conduct_mission = (ConductMission.select().where(
+                    (ConductMission.mission_id == mission_id) & (ConductMission.worker_email == context.login_email)
+                    & (ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE)))
+
+                if query_conduct_mission.count() == 0:
+                    raise Exception('Not found, valid conduct mission')
+
+                conduct_mission = query_conduct_mission.get()
+
+                conduct_mission_id = conduct_mission.id
+
+                mission = (MissionModel.select().where(MissionModel.id == mission_id)).get()
+
+                query_processed_image_data = (ProcessedImageData.select()
+                                              .where(ProcessedImageData.conduct_mission_id == conduct_mission_id)
+                                              .order_by((ProcessedImageData.url).desc()))
+
+                datas_dict = datas.dicts()
+                datas_dict = sorted(datas_dict.items(), key=operator.itemgetter(0))
+
+                for data in datas_dict:
+                    url = data.url
+                    state = WAITING_VERIFICATION
+                    created_at = datetime.datetime.now()
+
+                    ProcessedImageData.create(
+                        image_data_for_request_mission_url=data.url,
+                        conduct_mission_id=conduct_mission_id,
+                        created_at=created_at,
+                        labeling_result=data.labeling_result,
+                    )
+
+                conduct_mission.state = WAITING_VERIFICATION
+                conduct_mission.save()
+
+                query_image_data_for_request_mission = (ImageDataForRequestMission.select()
+                                                        .where())
+
+                result_code = ResultCode.UNKNOWN_RESULT_CODE
+                result_message = "Success submit process mission output"
+                submit_result = SubmitResult.SUCCESS_SUBMIT_RESULT
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+                submit_result = SubmitResult.FAIL_SUBMIT_RESUlT
+
+        return SubmitCollectMissionOutputResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            submit_result=submit_result,
+        )
 
     @verified
     def CountFetchMission(self, request, context):
@@ -705,4 +971,42 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     message=result_message,
                 ),
                 register_profile=profile,
+            )
+
+    @verified
+    def GetParticipatedMissionState(self, request, context):
+        mission_id = request.mission_id
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Get Participated Mission State"
+
+        db = pwdb.database
+
+        conduct_mission_state = INIT_CONDUCT_MISSION_STATE
+
+        with db.atomic() as transaction:
+            try:
+                query = (ConductMission.select()
+                         .where((ConductMission.worker_email == context.login_email) &
+                                (ConductMission.mission_id == mission_id))
+                         .order_by((ConductMission.id).desc()))
+
+                if query.count() > 0:
+                    conduct_mission = query.get()
+                    conduct_mission_state = conduct_mission.state
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful Get Participated Mission State"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e) + " "
+
+            return GetParticipatedMissionStateResponse(
+                result=CommonResult(
+                    result_code=result_code,
+                    message=result_message,
+                ),
+                conduct_mission_state=conduct_mission_state,
             )
