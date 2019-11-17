@@ -28,7 +28,6 @@ import datetime
 
 from protos.Profile_pb2 import Profile
 
-
 class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
     @verified
     def RegisterMission(self, request, context):
@@ -909,13 +908,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_code = ResultCode.ERROR
                 result_message = str(e)
 
-            return CountFetchMissionResponse(
-                result=CommonResult(
-                    result_code=result_code,
-                    message=result_message + " register mission :  " + str(count1) + "  conduct mission : " + str(count2),
-                ),
-                val=count,
-            )
+        return CountFetchMissionResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message + " register mission :  " + str(count1) + "  conduct mission : " + str(count2),
+            ),
+            val=count,
+        )
 
     @verified
     def GetMissionOwnerInfo(self, request, context):
@@ -965,13 +964,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e) + " "
                 assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
-            return GetMissionOwnerInfoResponse(
-                result=CommonResult(
-                    result_code=result_code,
-                    message=result_message,
-                ),
-                register_profile=profile,
-            )
+        return GetMissionOwnerInfoResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            register_profile=profile,
+        )
 
     @verified
     def GetParticipatedMissionState(self, request, context):
@@ -1003,10 +1002,44 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_code = ResultCode.ERROR
                 result_message = str(e) + " "
 
-            return GetParticipatedMissionStateResponse(
-                result=CommonResult(
-                    result_code=result_code,
-                    message=result_message,
-                ),
-                conduct_mission_state=conduct_mission_state,
-            )
+        return GetParticipatedMissionStateResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            conduct_mission_state=conduct_mission_state,
+        )
+
+    def GetLabels(self, request, context):
+        mission_id = request.mission_id
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Get labels"
+
+        labels = []
+
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                query = (LabelModel.select().where(LabelModel.mission_id == mission_id))
+
+                for row in query:
+                    labels.append(row.label)
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful Get labels"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e) + " "
+
+        return GetLabelsResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            labels=labels
+        )
+
