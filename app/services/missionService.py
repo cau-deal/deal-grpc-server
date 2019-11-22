@@ -799,7 +799,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SubmitProcessMissionOutput(self, request, context):
-        # 아직 덜 구현
+        # 구현하다가 막혀서 정리하고 다시 시도해야함.
         return
         mission_id = request.mission_id
 
@@ -834,15 +834,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 datas_dict = sorted(datas_dict.items(), key=operator.itemgetter(0))
 
                 for data in datas_dict:
-                    url = data.url
-                    state = WAITING_VERIFICATION
                     created_at = datetime.datetime.now()
 
                     ProcessedImageData.create(
-                        image_data_for_request_mission_url=data.url,
+                        image_data_for_request_mission_url=data['url'],
                         conduct_mission_id=conduct_mission_id,
                         created_at=created_at,
-                        labeling_result=data.labeling_result,
+                        labeling_result=data['labeling_result'],
                     )
 
                 conduct_mission.state = WAITING_VERIFICATION
