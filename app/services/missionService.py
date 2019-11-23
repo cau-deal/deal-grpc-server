@@ -691,7 +691,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     query_idf = (IDF.select().where((IDF.mission_id == mission_id) &
                                                     IDF.state == WAITING__PROCESS).limit(mission.unit_package))
 
-                    if query_idf.get().count < mission.unit_package:
+                    if query_idf.count() < mission.unit_package:
                         raise Exception('Not enough stock')
 
                     for row in query_idf:
