@@ -242,3 +242,14 @@ class FCMModel(pwdb.Model):
 
     class Meta:
         db_table = 'fcm'
+
+class KakaoPayModel(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    user_email = user_email = peewee.ForeignKeyField(User, column_name='user_email')
+    tid = peewee.CharField()
+    state = peewee.IntegerField()
+    val = peewee.IntegerField()
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'kakaopay'
