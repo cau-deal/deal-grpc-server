@@ -679,7 +679,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e)
+                result_message = str(e) + ' problem1'
                 assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
         if result_code == ResultCode.UNKNOWN_RESULT_CODE and mission.mission_type == PROCESS_MISSION_TYPE:
@@ -691,7 +691,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     query_idf = (IDF.select().where((IDF.mission_id == mission_id) &
                                                     IDF.state == WAITING__PROCESS).limit(mission.unit_package))
 
-                    if query_idf.count < mission.unit_package:
+                    if query_idf.get().count < mission.unit_package:
                         raise Exception('Not enough stock')
 
                     for row in query_idf:
@@ -713,7 +713,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 except Exception as e:
                     transaction.rollback()
                     result_code = ResultCode.ERROR
-                    result_message = str(e)
+                    result_message = str(e) + ' problem2'
                     assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
         return GetAssignedMissionResponse(
