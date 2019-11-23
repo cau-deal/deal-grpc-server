@@ -851,7 +851,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e)
                 submit_result = SubmitResult.FAIL_SUBMIT_RESUlT
 
-        return SubmitCollectMissionOutputResponse(
+        return SubmitProcessMissionOutputResponse(
             result=CommonResult(
                 result_code=result_code,
                 message=result_message,
@@ -1033,3 +1033,37 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             labels=labels
         )
 
+   def GetLabelingResult(self, request, context):
+        url = request.url
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Get label result"
+
+        db = pwdb.database
+
+        labeling_result = ''
+
+        with db.atomic() as transaction:
+            try:
+                query = (ProcessedImageDataModel.select()
+                             .where(ProcessedImageDataModel.image_data_for_request_mission_url == url))
+
+                if query.count() == 0:
+                    Exception('No exist such url')
+
+                labeling_result = query.get().labeling_result
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful Get label result"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e) + " "
+
+        return GetLabelingResultResponse(
+            result=CommonResult(
+                result_code=result_code,
+            ),
+            label_result=labeling_result
+        )
