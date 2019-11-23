@@ -102,6 +102,9 @@ ENV/
 # mkdocs documentation
 /site
 
+# json files
+*.json
+
 # mypy
 .mypy_cache/
 
@@ -110,3 +113,5 @@ protos
 
 # configs/default/__init__.py
 configs/default/__init.py
+
+
