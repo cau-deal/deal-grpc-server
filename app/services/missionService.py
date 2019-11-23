@@ -799,8 +799,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SubmitProcessMissionOutput(self, request, context):
-        # 구현하다가 막혀서 정리하고 다시 시도해야함.
-        return
         mission_id = request.mission_id
 
         datas = request.datas
@@ -826,28 +824,23 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 mission = (MissionModel.select().where(MissionModel.id == mission_id)).get()
 
-                query_processed_image_data = (ProcessedImageData.select()
-                                              .where(ProcessedImageData.conduct_mission_id == conduct_mission_id)
-                                              .order_by((ProcessedImageData.url).desc()))
-
                 datas_dict = datas.dicts()
-                datas_dict = sorted(datas_dict.items(), key=operator.itemgetter(0))
+                #datas_dict = sorted(datas_dict.items(), key=operator.itemgetter(0))
 
                 for data in datas_dict:
-                    created_at = datetime.datetime.now()
+                    processed_image_data = (ProcessedImageDataModel.select()
+                                            .where(ProcessedImageDataModel.image_data_for_request_mission_url == data['url'])).get()
 
-                    ProcessedImageData.create(
-                        image_data_for_request_mission_url=data['url'],
-                        conduct_mission_id=conduct_mission_id,
-                        created_at=created_at,
-                        labeling_result=data['labeling_result'],
-                    )
+                    processed_image_data.labeling_result = data['labeling_result']
+                    processed_image_data.save()
+
+                    image_data_for_request_mission = (ImageDataForRequestMission.select()
+                                                      .where(ImageDataForRequestMission.url == data['url'])).get()
+                    image_data_for_request_mission.state = WAITING_VERIFICATION
+                    image_data_for_request_mission.save()
 
                 conduct_mission.state = WAITING_VERIFICATION
                 conduct_mission.save()
-
-                query_image_data_for_request_mission = (ImageDataForRequestMission.select()
-                                                        .where())
 
                 result_code = ResultCode.UNKNOWN_RESULT_CODE
                 result_message = "Success submit process mission output"
