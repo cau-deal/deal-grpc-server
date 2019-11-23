@@ -824,18 +824,17 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 mission = (MissionModel.select().where(MissionModel.id == mission_id)).get()
 
-                datas_dict = datas.dicts()
-                #datas_dict = sorted(datas_dict.items(), key=operator.itemgetter(0))
+               #datas_dict = sorted(datas_dict.items(), key=operator.itemgetter(0))
 
-                for data in datas_dict:
+                for data in datas:
                     processed_image_data = (ProcessedImageDataModel.select()
-                                            .where(ProcessedImageDataModel.image_data_for_request_mission_url == data['url'])).get()
+                                            .where(ProcessedImageDataModel.image_data_for_request_mission_url == data.data.url)).get()
 
-                    processed_image_data.labeling_result = data['labeling_result']
+                    processed_image_data.labeling_result = data.data.url
                     processed_image_data.save()
 
                     image_data_for_request_mission = (ImageDataForRequestMission.select()
-                                                      .where(ImageDataForRequestMission.url == data['url'])).get()
+                                                      .where(ImageDataForRequestMission.url == data.data.url)).get()
                     image_data_for_request_mission.state = WAITING_VERIFICATION
                     image_data_for_request_mission.save()
 
