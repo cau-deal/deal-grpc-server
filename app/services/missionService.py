@@ -1061,7 +1061,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e)
+                result_message = str(e) + " count : " + str(query.count())
 
         return GetLabelingResultResponse(
             result=CommonResult(
