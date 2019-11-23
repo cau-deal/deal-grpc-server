@@ -1051,7 +1051,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                              .where(ProcessedImageDataModel.image_data_for_request_mission_url == url))
 
                 if query.count() == 0:
-                    Exception('No exist such url')
+                    raise Exception('No exist such url')
 
                 labeling_result = query.get().labeling_result
 
@@ -1061,7 +1061,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e) + " " + str(query.count())
+                result_message = str(e)
 
         return GetLabelingResultResponse(
             result=CommonResult(
