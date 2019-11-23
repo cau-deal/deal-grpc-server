@@ -1000,6 +1000,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             conduct_mission_state=conduct_mission_state,
         )
 
+    @verified
     def GetLabels(self, request, context):
         mission_id = request.mission_id
 
@@ -1033,7 +1034,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             labels=labels
         )
 
-   def GetLabelingResult(self, request, context):
+    @verified
+    def GetLabelingResult(self, request, context):
         url = request.url
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
