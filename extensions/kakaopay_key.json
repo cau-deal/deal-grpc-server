@@ -1,6 +1,0 @@
-{
-    "kakao_auth":"KakaoAK 96d9b31137316e368e98813d24cebc22",
-    "approval_url":"https://grpc.snhyun.me:5555/success",
-    "fail_url":"https://grpc.snhyun.me:5555/fail",
-    "cancel_url":"https://grpc.snhyun.me:5555/cancel"
-}
