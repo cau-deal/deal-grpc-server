@@ -743,7 +743,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     & (ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE)))
 
                 if query_conduct_mission.count() == 0:
-                    raise Exception('Not found, valid conduct mission')
+                    raise Exception('Not found(valid conduct mission)')
 
                 conduct_mission = query_conduct_mission.get()
 
@@ -816,7 +816,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     & (ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE)))
 
                 if query_conduct_mission.count() == 0:
-                    raise Exception('Not found, valid conduct mission : ' + query_conduct_mission)
+                    raise Exception('Not found(valid conduct mission) : ' + query_conduct_mission)
 
                 conduct_mission = query_conduct_mission.get()
 
