@@ -679,7 +679,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e)
+                result_message = str(e) + ' problem1'
                 assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
         if result_code == ResultCode.UNKNOWN_RESULT_CODE and mission.mission_type == PROCESS_MISSION_TYPE:
@@ -691,7 +691,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     query_idf = (IDF.select().where((IDF.mission_id == mission_id) &
                                                     IDF.state == WAITING__PROCESS).limit(mission.unit_package))
 
-                    if query_idf.count < mission.unit_package:
+                    if query_idf.count() < mission.unit_package:
                         raise Exception('Not enough stock')
 
                     for row in query_idf:
@@ -713,7 +713,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 except Exception as e:
                     transaction.rollback()
                     result_code = ResultCode.ERROR
-                    result_message = str(e)
+                    result_message = str(e) + ' problem2'
                     assign_mission_result = AssignMissionResult.FAIL_ASSIGN_MISSION_RESULT
 
         return GetAssignedMissionResponse(
@@ -743,7 +743,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     & (ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE)))
 
                 if query_conduct_mission.count() == 0:
-                    raise Exception('Not found, valid conduct mission')
+                    raise Exception('Not found(valid conduct mission)')
 
                 conduct_mission = query_conduct_mission.get()
 
@@ -799,8 +799,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def SubmitProcessMissionOutput(self, request, context):
-        # 아직 덜 구현
-        return
         mission_id = request.mission_id
 
         datas = request.datas
@@ -818,7 +816,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     & (ConductMission.state == DURING_MISSION_CONDUCT_MISSION_STATE)))
 
                 if query_conduct_mission.count() == 0:
-                    raise Exception('Not found, valid conduct mission')
+                    raise Exception('Not found(valid conduct mission) : ' + query_conduct_mission)
 
                 conduct_mission = query_conduct_mission.get()
 
@@ -826,30 +824,22 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 mission = (MissionModel.select().where(MissionModel.id == mission_id)).get()
 
-                query_processed_image_data = (ProcessedImageData.select()
-                                              .where(ProcessedImageData.conduct_mission_id == conduct_mission_id)
-                                              .order_by((ProcessedImageData.url).desc()))
+               #datas_dict = sorted(datas_dict.items(), key=operator.itemgetter(0))
 
-                datas_dict = datas.dicts()
-                datas_dict = sorted(datas_dict.items(), key=operator.itemgetter(0))
+                for data in datas:
+                    processed_image_data = (ProcessedImageDataModel.select()
+                                            .where(ProcessedImageDataModel.image_data_for_request_mission_url == data.data.url)).get()
 
-                for data in datas_dict:
-                    url = data.url
-                    state = WAITING_VERIFICATION
-                    created_at = datetime.datetime.now()
+                    processed_image_data.labeling_result = data.data.url
+                    processed_image_data.save()
 
-                    ProcessedImageData.create(
-                        image_data_for_request_mission_url=data.url,
-                        conduct_mission_id=conduct_mission_id,
-                        created_at=created_at,
-                        labeling_result=data.labeling_result,
-                    )
+                    image_data_for_request_mission = (ImageDataForRequestMission.select()
+                                                      .where(ImageDataForRequestMission.url == data.data.url)).get()
+                    image_data_for_request_mission.state = WAITING_VERIFICATION
+                    image_data_for_request_mission.save()
 
                 conduct_mission.state = WAITING_VERIFICATION
                 conduct_mission.save()
-
-                query_image_data_for_request_mission = (ImageDataForRequestMission.select()
-                                                        .where())
 
                 result_code = ResultCode.UNKNOWN_RESULT_CODE
                 result_message = "Success submit process mission output"
@@ -861,7 +851,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_message = str(e)
                 submit_result = SubmitResult.FAIL_SUBMIT_RESUlT
 
-        return SubmitCollectMissionOutputResponse(
+        return SubmitProcessMissionOutputResponse(
             result=CommonResult(
                 result_code=result_code,
                 message=result_message,
@@ -1010,6 +1000,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             conduct_mission_state=conduct_mission_state,
         )
 
+    @verified
     def GetLabels(self, request, context):
         mission_id = request.mission_id
 
@@ -1043,3 +1034,38 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             labels=labels
         )
 
+    @verified
+    def GetLabelingResult(self, request, context):
+        url = request.url
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Get label result"
+
+        db = pwdb.database
+
+        labeling_result = ''
+
+        with db.atomic() as transaction:
+            try:
+                query = (ProcessedImageDataModel.select()
+                             .where(ProcessedImageDataModel.image_data_for_request_mission_url == url))
+
+                if query.count() == 0:
+                    raise Exception("No exist such url")
+
+                labeling_result = query.get().labeling_result
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful Get label result"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+        return GetLabelingResultResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            label_result=labeling_result
+        )
