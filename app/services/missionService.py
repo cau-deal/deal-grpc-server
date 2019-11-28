@@ -1092,6 +1092,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                             recommend_image_url=row.url,
                         )
                     )
+                    s += "xxx"
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Get Recommend Mission Images"

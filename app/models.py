@@ -14,7 +14,7 @@ class User(pwdb.Model):
     agree_with_terms = peewee.BooleanField(default=False)
     is_phone_authentication = peewee.IntegerField()
     is_account_authentication = peewee.IntegerField()
-    profile_photo_url = peewee.IntegerField()
+    profile_photo_url = peewee.CharField()
     last_login_datetime = peewee.DateTimeField()
     created_at = peewee.DateTimeField()
 
