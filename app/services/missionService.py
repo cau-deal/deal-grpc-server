@@ -1085,7 +1085,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 query = (RecommendMission.select())
 
                 for row in query:
-                    s += row.url
+                    s += row.url + "   " + str(row.mission_id)
                     mission_recommend_images.append(
                         MissionRecommendImage(
                             mission_id=row.mission_id,
