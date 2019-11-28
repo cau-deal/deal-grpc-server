@@ -8,7 +8,7 @@ from app.extensions import pwdb, root_email
 from app.extensions_db import sPointServicer
 
 from app.models import MissionModel, User, PhoneAuthentication, ImageDataForRequestMission, ProcessedImageDataModel, \
-    ImageDataModel, SoundDataModel, SurveyDataModel, LabelModel
+    ImageDataModel, SoundDataModel, SurveyDataModel, LabelModel, RecommendMission
 from app.models import ConductMission
 from app.models import MissionExplanationImageModel
 
@@ -1068,4 +1068,41 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 message=result_message,
             ),
             label_result=labeling_result
+        )
+
+    @verified
+    def GetRecommendMissionImages(self, request, context):
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Get Recommend Mission Images"
+
+        db = pwdb.database
+
+        mission_recommend_images = []
+
+        with db.atomic() as transaction:
+            try:
+                query = (RecommendMission.select())
+
+                for row in query:
+                    mission_recommend_images.append(
+                        MissionRecommendImage(
+                            mission_id=row.mission_id,
+                            recommend_image_url=row.url,
+                        )
+                    )
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful Get Recommend Mission Images"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+        return GetRecommendMissionImagesResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            mission_recommend_images=mission_recommend_images
         )

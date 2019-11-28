@@ -246,6 +246,7 @@ class FCMModel(pwdb.Model):
 class RecommendMission(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
     mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
+    url = peewee.CharField()
     created_at = peewee.DateTimeField()
 
     class Meta:
