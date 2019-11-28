@@ -1078,12 +1078,14 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         db = pwdb.database
 
         mission_recommend_images = []
+        s = ""
 
         with db.atomic() as transaction:
             try:
                 query = (RecommendMission.select())
 
                 for row in query:
+                    s += row.url
                     mission_recommend_images.append(
                         MissionRecommendImage(
                             mission_id=row.mission_id,
@@ -1097,7 +1099,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e)
+                result_message = str(e) + s
 
         return GetRecommendMissionImagesResponse(
             result=CommonResult(
