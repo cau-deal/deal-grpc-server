@@ -1085,14 +1085,12 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 query = (RecommendMission.select())
 
                 for row in query:
-                    s += row.url + "   " + str(type(row.mission_id.id))
                     mission_recommend_images.append(
                         MissionRecommendImage(
                             mission_id=row.mission_id.id,
                             recommend_image_url=row.url,
                         )
                     )
-                    s += "xxx"
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Get Recommend Mission Images"
