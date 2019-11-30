@@ -1107,3 +1107,39 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             ),
             mission_recommend_images=mission_recommend_images
         )
+
+    @verified
+    def DecidePurchase(self, request, context):
+        mission_id = request.mission_id
+        decide_purchase_distractor = request.decide_purchase_distractor
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown decide purchase"
+
+        db = pwdb.database
+
+        with db.atomic() as transaction:
+            try:
+                mission = (MissionModel.select().where(MissionModel.id == mission_id)).get()
+
+                if decide_purchase_distractor == DecidePurchaseDistractor.DECIDE_OK:
+                    mission.state = MissionState.COMPLETE_MISSION
+                    mission.save()
+                elif decide_purchase_distractor == DecidePurchaseDistractor.DECIDE_RETURN:
+                    mission.state = MissionState.RETURNED_MISSION
+                    mission.save()
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful decide purchase"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+        return DecidePurchaseResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+        )
