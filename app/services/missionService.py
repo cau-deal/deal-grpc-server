@@ -983,6 +983,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 if query.count() > 0:
                     conduct_mission = query.get()
                     conduct_mission_state = conduct_mission.state
+                else:
+                    raise Exception('There is no result that meets the conditions.')
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Get Participated Mission State"
