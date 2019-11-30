@@ -984,6 +984,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     conduct_mission = query.get()
                     conduct_mission_state = conduct_mission.state
                 else:
+                    conduct_mission_state = ConductMissionState.UNKNOWN_CONDUCT_MISSION_STATE
                     raise Exception('There is no result that meets the conditions.')
 
                 result_code = ResultCode.SUCCESS
