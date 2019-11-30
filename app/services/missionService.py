@@ -1122,6 +1122,12 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             try:
                 mission = (MissionModel.select().where(MissionModel.id == mission_id)).get()
 
+                if mission.register_email != context.login_email:
+                    raise Exception("You are not owner of this mission")
+
+                if mission.state != MissionState.WATING_CONFIRM_PURCHASE:
+                    raise Exception("A state of this mission isn't 'WATING_CONFIRM_PURCHASE' ")
+
                 if decide_purchase_distractor == DecidePurchaseDistractor.DECIDE_OK:
                     mission.state = MissionState.COMPLETE_MISSION
                     mission.save()
