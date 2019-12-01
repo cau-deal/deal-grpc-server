@@ -1201,7 +1201,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     ProcessedImageDataModel.conduct_mission_id == conduct_mission_id))
 
                 for row in query_processed_image_data:
-                    urls.append(row.image_data_for_request_mission_url)
+                    urls.append(row.image_data_for_request_mission_url.url)
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful GetProcessMissionImagesResponse"
