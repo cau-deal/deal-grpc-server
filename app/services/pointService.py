@@ -96,7 +96,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                         {
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.DEPOSIT],
-                            'created_at' : row.created_at
+                            'created_at': row.created_at,
+                            'reason_detail': '입금'
                         }
                     )
 
@@ -105,7 +106,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                         {
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.COMPLETE_MISSION],
-                            'created_at': row.created_at
+                            'created_at': row.created_at,
+                            'reason_detail': '미션 완료'
                         }
                     )
 
@@ -114,7 +116,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                         {
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.PLUS_EVENT],
-                            'created_at': row.created_at
+                            'created_at': row.created_at,
+                            'reason_detail': '이벤트'
                         }
                     )
 
@@ -192,7 +195,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                         {
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.WITHDRAW],
-                            'created_at': row.created_at
+                            'created_at': row.created_at,
+                            'reason_detail': '출금'
                         }
                     )
 
@@ -201,7 +205,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                         {
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.REQUEST_MISSION],
-                            'created_at': row.created_at
+                            'created_at': row.created_at,
+                            'reason_detail': '미션 등록'
                         }
                     )
 
@@ -210,7 +215,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                         {
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.MINUS_EVENT],
-                            'created_at': row.created_at
+                            'created_at': row.created_at,
+                            'reason_detail': '이벤트'
                         }
                     )
 
