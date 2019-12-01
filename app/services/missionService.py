@@ -668,7 +668,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 cnt_conduct_mission = query_conduct_mission.count()
 
-                if mission.order_package_quantity <= cnt_conduct_mission:
+                if mission.order_package_quantity <= cnt_conduct_mission * mission.unit_package:
                     mission.state = SOLD_OUT
                     mission.save()
 
