@@ -228,7 +228,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     result_message = str(e) + 'Fail create in ImageDataForRequestMission'
                     register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
-        if result_code == ResultCode.UNKNOWN_RESULT_CODE:
+        if result_code == ResultCode.UNKNOWN_RESULT_CODE or result_code == ResultCode.SUCCESS:
             with db.atomic() as transaction:
                 try:
                     # 이미지가 있으면 저장
