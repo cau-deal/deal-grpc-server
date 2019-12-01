@@ -780,7 +780,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 conduct_mission.state = WAITING_VERIFICATION
                 conduct_mission.save()
 
-                result_code = ResultCode.UNKNOWN_RESULT_CODE
+                result_code = ResultCode.SUCCESS
                 result_message = "Success submit collect mission output"
                 submit_result = SubmitResult.SUCCESS_SUBMIT_RESULT
 
@@ -842,7 +842,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 conduct_mission.state = WAITING_VERIFICATION
                 conduct_mission.save()
 
-                result_code = ResultCode.UNKNOWN_RESULT_CODE
+                result_code = ResultCode.SUCCESS
                 result_message = "Success submit process mission output"
                 submit_result = SubmitResult.SUCCESS_SUBMIT_RESULT
 
