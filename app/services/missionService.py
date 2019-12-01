@@ -986,7 +986,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     conduct_mission_state = ConductMissionState.UNKNOWN_CONDUCT_MISSION_STATE
                     raise Exception('There is no mission that meets mission id')
 
-                owner_email = query_owner_email.get().register_email
+                owner_email = query_owner_email.get().register_email.email
 
                 if query.count() > 0:
                     conduct_mission = query.get()
