@@ -997,6 +997,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Get Participated Mission State"
+                result_message += "  " + owner_email + "  " + context.login_email
 
             except Exception as e:
                 transaction.rollback()
