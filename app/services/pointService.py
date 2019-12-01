@@ -123,11 +123,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
                 tmp_point_histories.sort(key=itemgetter('created_at'), reverse=True)
 
-                s =""
-
                 for row in tmp_point_histories:
                     c = row['created_at']
-                    s += row['reason_detail']
                     point_histories.append(
                         PointHistory(
                             val=row['val'],
@@ -150,7 +147,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
         return LookUpPointHistoryResponse(
             result=CommonResult(
                 result_code=result_code,
-                message=result_message + s,
+                message=result_message,
             ),
             point_histories=point_histories,
         )
