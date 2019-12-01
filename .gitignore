@@ -1,7 +1,7 @@
 #pycharm
 .idea/
 .vscode/
-.configs/
+configs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -106,4 +106,7 @@ ENV/
 .mypy_cache/
 
 # protos
-protos/
+protos
+
+# configs/default/__init__.py
+configs/default/__init.py

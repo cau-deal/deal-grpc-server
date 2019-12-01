@@ -9,6 +9,8 @@ from firebase_admin import credentials
 from extensions.jwt import JWT
 from extensions.emailSender import EmailSender
 
+root_email = 'grpc_test@test.com'
+
 pwdb = Peeweext()
 
 firebase_cred = credentials.Certificate("/home/ubuntu/simple-grpc-server/keys/firebase-service.json")

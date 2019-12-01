@@ -4,7 +4,7 @@ import hashlib
 from peewee import Database
 from sea.servicer import ServicerMeta
 
-from app.decorators import verified, unverified
+from app.decorators import verified, unverified, notification, silent_notification
 from app.extensions import JWT, pwdb, EmailSender
 from app.models import User, JWTToken
 
@@ -12,6 +12,7 @@ from protos.AuthService_pb2 import *
 from protos.AuthService_pb2_grpc import *
 
 from protos.CommonResult_pb2 import *
+from protos.Profile_pb2 import UserState
 
 
 class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
@@ -26,6 +27,7 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
         )
 
     @unverified
+    @notification
     def SignInWithCredential(self, request, context):
 
         email = request.email
@@ -48,7 +50,7 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
                     user.last_login_datetime = datetime.datetime.now()
                     user.save()
 
-                    if user.state == 1:
+                    if user.state == UserState.BANNED:
                         raise Exception("You are blocked.")
 
                 access_token = JWT.get_access_token(email)
@@ -214,4 +216,44 @@ class AuthServiceServicer(AuthServiceServicer, metaclass=ServicerMeta):
                 result_code=ResultCode.SUCCESS,
                 message="SUCCESS"
             )
+        )
+
+    @unverified
+    def CheckDuplicationEmail(self, request, context):
+        email = request.email
+
+        IS_DUPLICATION_EMAIL = {
+            IsDuplicationEmail.UNKNOWN_IS_DUPLICATION_EMAIL: 0,
+            IsDuplicationEmail.TRUE_IS_DUPLICATION_EMAIL: 1,
+            IsDuplicationEmail.FALSE_IS_DUPLICATION_EMAIL: 2,
+        }
+
+        is_duplication_email = IS_DUPLICATION_EMAIL[IsDuplicationEmail.UNKNOWN_IS_DUPLICATION_EMAIL]
+
+        db = pwdb.database
+        with db.atomic() as transaction:
+            try:
+                user = User.select().where(
+                    (User.email == email)
+                )
+
+                if user.count() == 0:
+                    is_duplication_email = IS_DUPLICATION_EMAIL[IsDuplicationEmail.FALSE_IS_DUPLICATION_EMAIL]
+                else:
+                    is_duplication_email = IS_DUPLICATION_EMAIL[IsDuplicationEmail.TRUE_IS_DUPLICATION_EMAIL]
+
+                result_code = ResultCode.SUCCESS
+                result_message = 'SUCCESS'
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+        return CheckDuplicationEmailResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message
+            ),
+            is_duplication_email=is_duplication_email,
         )
