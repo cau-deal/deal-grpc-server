@@ -11,7 +11,6 @@ from app.models import InquiryModel, User, PhoneAuthentication
 
 import datetime
 
-
 from protos.UserService_pb2 import *
 from protos.UserService_pb2_grpc import UserServiceServicer
 from protos.Profile_pb2 import *
@@ -144,3 +143,39 @@ class UserServiceServicer(UserServiceServicer, metaclass=ServicerMeta):
             ),
             change_password_result=change_password_result,
         )
+
+    @verified
+    def UpdateProfilePhotoURL(self, request, context):
+        profile_photo_url = request.profile_photo_url
+
+        # init
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        message = "Unknown UserService Message"
+    
+        db = pwdb.database
+        
+        with db.atomic() as transaction:
+            try:
+                res = User \
+                    .update(profile_photo_url=profile_photo_url) \
+                    .where(User.email == context.login_email) \
+                    .execute()
+
+                if res == 0:
+                    message = "URL update is failed."
+                    raise Exception
+
+                message = "URL successfully updated"
+                result_code = ResultCode.SUCCESS
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                message = str(e)
+
+            return UpdateProfilePhotoURLResponse(
+                result = CommonResult(
+                    result_code=result_code,
+                    message=message,
+                ),
+            )
