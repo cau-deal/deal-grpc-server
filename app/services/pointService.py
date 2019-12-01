@@ -4,8 +4,8 @@ from peewee import Database
 from sea.servicer import ServicerMeta
 
 from app.decorators import verified, unverified
-from app.extensions import pwdb
-from app.extensions import KakaoPayUrl
+
+from app.extensions import *
 from app.extensions_db import sPointServicer
 
 from app.models import DepositPoint
@@ -56,6 +56,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def LookUpPlusPointHistory(self, request, context):
+        # issue : event랑 work랑 지금 섞여서 혼잡해짐. 일단 구동상 event가 없으므로 우선 생각 X
         last_days = request.last_days
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
@@ -85,6 +86,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 query_deposit = (DepositPoint.select(DepositPoint.val, DepositPoint.created_at)
                          .where((DepositPoint.user_email == context.login_email) & (DepositPoint.created_at >= from_day)))
 
+                """"
                 query_get_work_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
                          .where((TransferPoint.receiver_email == context.login_email)
                                 & (TransferPoint.created_at >= from_day) & (TransferPoint.mission_id.is_null(False))))
@@ -92,13 +94,18 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 query_get_event_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
                          .where((TransferPoint.receiver_email == context.login_email)
                                 & (TransferPoint.created_at >= from_day) & (TransferPoint.mission_id.is_null(True))))
+                """
+                query_get_work_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
+                                        .where((TransferPoint.receiver_email == context.login_email)
+                                               & (TransferPoint.created_at >= from_day)))
 
                 for row in query_deposit:
                     tmp_point_histories.append(
                         {
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.DEPOSIT],
-                            'created_at' : row.created_at
+                            'created_at': row.created_at,
+                            'reason_detail': '입금'
                         }
                     )
 
@@ -107,18 +114,21 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                         {
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.COMPLETE_MISSION],
-                            'created_at': row.created_at
+                            'created_at': row.created_at,
+                            'reason_detail': '미션 완료'
                         }
                     )
-
+                """
                 for row in query_get_event_point:
                     tmp_point_histories.append(
                         {
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.PLUS_EVENT],
-                            'created_at': row.created_at
+                            'created_at': row.created_at,
+                            'reason_detail': '이벤트(포인트 증가)'
                         }
                     )
+                """
 
                 tmp_point_histories.sort(key=itemgetter('created_at'), reverse=True)
 
@@ -129,7 +139,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                             val=row['val'],
                             point_alter_reason=row['point_alter_reason'],
                             created_at=Datetime(year=c.year, month=c.month, day=c.day,
-                                                hour=c.hour, min=c.minute, sec=c.second)
+                                                hour=c.hour, min=c.minute, sec=c.second),
+                            reason_detail=row['reason_detail']
                         )
                     )
 
@@ -152,6 +163,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def LookUpMinusPointHistory(self, request, context):
+        # issue : event랑 work랑 지금 섞여서 혼잡해짐. 일단 구동상 event가 없으므로 우선 생각 X
         last_days = request.last_days
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
@@ -181,6 +193,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 query_withdraw = (WithdrawPoint.select(WithdrawPoint.val, WithdrawPoint.created_at)
                         .where((WithdrawPoint.user_email == context.login_email) & (WithdrawPoint.created_at >= from_day)))
 
+                """
                 query_cost_request_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
                         .where((TransferPoint.sender_email == context.login_email)
                                 & (TransferPoint.created_at >= from_day) & (TransferPoint.mission_id.is_null(False))))
@@ -188,13 +201,18 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                 query_cost_event_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
                         .where((TransferPoint.sender_email == context.login_email)
                                 & (TransferPoint.created_at >= from_day) & (TransferPoint.mission_id.is_null(True))))
+                """
+                query_cost_request_point = (TransferPoint.select(TransferPoint.val, TransferPoint.created_at)
+                                            .where((TransferPoint.sender_email == context.login_email)
+                                                   & (TransferPoint.created_at >= from_day)))
 
                 for row in query_withdraw:
                     tmp_point_histories.append(
                         {
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.WITHDRAW],
-                            'created_at': row.created_at
+                            'created_at': row.created_at,
+                            'reason_detail': '출금'
                         }
                     )
 
@@ -203,18 +221,21 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                         {
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.REQUEST_MISSION],
-                            'created_at': row.created_at
+                            'created_at': row.created_at,
+                            'reason_detail': '미션 등록'
                         }
                     )
-
+                """
                 for row in query_cost_event_point:
                     tmp_point_histories.append(
                         {
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.MINUS_EVENT],
-                            'created_at': row.created_at
+                            'created_at': row.created_at,
+                            'reason_detail': '이벤트(포인트 감소)'
                         }
                     )
+                """
 
                 tmp_point_histories.sort(key=itemgetter('created_at'), reverse=True)
 
@@ -225,7 +246,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                             val=row['val'],
                             point_alter_reason=row['point_alter_reason'],
                             created_at=Datetime(year=c.year, month=c.month, day=c.day,
-                                                hour=c.hour, min=c.minute, sec=c.second)
+                                                hour=c.hour, min=c.minute, sec=c.second),
+                            reason_detail=row['reason_detail']
                         )
                     )
 

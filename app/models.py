@@ -14,7 +14,7 @@ class User(pwdb.Model):
     agree_with_terms = peewee.BooleanField(default=False)
     is_phone_authentication = peewee.IntegerField()
     is_account_authentication = peewee.IntegerField()
-    profile_photo_url = peewee.IntegerField()
+    profile_photo_url = peewee.CharField()
     last_login_datetime = peewee.DateTimeField()
     created_at = peewee.DateTimeField()
 
@@ -253,3 +253,12 @@ class KakaoPayModel(pwdb.Model):
 
     class Meta:
         db_table = 'kakaopay'
+
+class RecommendMission(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
+    url = peewee.CharField()
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'recommend_mission'
