@@ -1173,3 +1173,48 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 message=result_message,
             ),
         )
+
+    @verified
+    def GetProcessMissionImages(self, request, context):
+        mission_id = request.mission_id
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown GetProcessMissionImagesResponse"
+
+        db = pwdb.database
+
+        urls = []
+
+        with db.atomic() as transaction:
+            try:
+                query_conduct_mission = (ConductMission.select().where(
+                    (ConductMission.mission_id == mission_id) & (ConductMission.worker_email == context.login_email) &
+                    (ConductMission.state == ConductMissionState.DURING_MISSION_CONDUCT_MISSION_STATE)
+                ))
+
+                if query_conduct_mission.count() != 1:
+                    raise Exception("query conduct mission'count is not equal 1")
+
+                conduct_mission_id = query_conduct_mission.get().id
+
+                query_processed_image_data = (ProcessedImageDataModel.select().where(
+                    ProcessedImageDataModel.conduct_mission_id == conduct_mission_id))
+
+                for row in query_processed_image_data:
+                    urls.append(row.image_data_for_request_mission_url)
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful GetProcessMissionImagesResponse"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+        return GetProcessMissionImagesResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            urls=urls
+        )
