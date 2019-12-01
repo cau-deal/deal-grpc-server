@@ -746,6 +746,11 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 if query_conduct_mission.count() == 0:
                     raise Exception('Not found(valid conduct mission)')
 
+                unit_package = (MissionModel.select().where(MissionModel.id == mission_id)).get().unit_package
+
+                if len(datas) != unit_package:
+                    raise Exception('Units do not match')
+
                 conduct_mission = query_conduct_mission.get()
 
                 conduct_mission_id = conduct_mission.id
