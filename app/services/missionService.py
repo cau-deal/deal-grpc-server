@@ -964,6 +964,8 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
     @verified
     def GetParticipatedMissionState(self, request, context):
+        # issue(12/01) : 현재 이 메서드 설계상 미션 완료하고 같은 미션을 다시 받는게 불가능해 보임
+        # 고치려면 프로토부터 싹다 바꿔야 하므로 우선 인지만 해둠.
         mission_id = request.mission_id
 
         result_code = ResultCode.UNKNOWN_RESULT_CODE
@@ -997,7 +999,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 result_code = ResultCode.SUCCESS
                 result_message = "Successful Get Participated Mission State"
-                result_message += "  " + owner_email + "  " + context.login_email
 
             except Exception as e:
                 transaction.rollback()
