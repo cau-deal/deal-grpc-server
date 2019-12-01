@@ -117,6 +117,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     result_message = "Insufficiency balance"
                     raise Exception("Insufficiency balance")
 
+                # 시작일이 오늘 이후인지 확인
                 if today_register is False and (beginning_datetime < datetime.datetime.now()):
                     result_code = ResultCode.ERROR
                     register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
