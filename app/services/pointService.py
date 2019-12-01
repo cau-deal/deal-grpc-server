@@ -117,7 +117,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.PLUS_EVENT],
                             'created_at': row.created_at,
-                            'reason_detail': '이벤트'
+                            'reason_detail': '이벤트(포인트 증가)'
                         }
                     )
 
@@ -130,7 +130,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                             val=row['val'],
                             point_alter_reason=row['point_alter_reason'],
                             created_at=Datetime(year=c.year, month=c.month, day=c.day,
-                                                hour=c.hour, min=c.minute, sec=c.second)
+                                                hour=c.hour, min=c.minute, sec=c.second),
+                            reason_detail=row['reason_detail']
                         )
                     )
 
@@ -216,7 +217,7 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                             'val': row.val,
                             'point_alter_reason': POINT_ALTER_REASON[PointAlterReason.MINUS_EVENT],
                             'created_at': row.created_at,
-                            'reason_detail': '이벤트'
+                            'reason_detail': '이벤트(포인트 감소)'
                         }
                     )
 
@@ -229,7 +230,8 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
                             val=row['val'],
                             point_alter_reason=row['point_alter_reason'],
                             created_at=Datetime(year=c.year, month=c.month, day=c.day,
-                                                hour=c.hour, min=c.minute, sec=c.second)
+                                                hour=c.hour, min=c.minute, sec=c.second),
+                            reason_detail=row['reason_detail']
                         )
                     )
 
