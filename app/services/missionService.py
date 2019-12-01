@@ -194,7 +194,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
-                result_message = str(e) + " transaction1 error - mission_id :  " + str(mission_id)
+                result_message = str(e) + " transaction1 error"
                 register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
 
         if result_code == ResultCode.UNKNOWN_RESULT_CODE and mission_type == MISSION_TYPE[MissionType.PROCESS_MISSION_TYPE]:
