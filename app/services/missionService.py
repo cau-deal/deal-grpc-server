@@ -980,11 +980,13 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                 (ConductMission.mission_id == mission_id))
                          .order_by((ConductMission.id).desc()))
 
+                owner_email = (MissionModel.select().where(MissionModel.id == mission_id)).get().register_email
+
                 if query.count() > 0:
                     conduct_mission = query.get()
                     conduct_mission_state = conduct_mission.state
-                else:
-                    conduct_mission_state = ConductMissionState.UNKNOWN_CONDUCT_MISSION_STATE
+                if owner_email == context.login_email:
+                    conduct_mission_state = ConductMissionState.TRY_SELF_CONDUCT_MISSION_STATE
                     raise Exception('There is no result that meets the conditions.')
 
                 result_code = ResultCode.SUCCESS
