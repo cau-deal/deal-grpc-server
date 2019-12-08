@@ -1463,3 +1463,166 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             ),
             survey_id=surveys_id
         )
+
+    @verified
+    def GetDatasToValid(self, request, context):
+        mission_type = request.mission_type
+        data_type = request.data_type
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown GetDatasToValid"
+
+        db = pwdb.database
+
+        conduct_mission_id = 0
+        datas = []
+        labels = []
+        model = ImageDataModel.alias()
+
+        with db.atomic() as transaction:
+            try:
+                if mission_type == MissionType.COLLECT_MISSION_TYPE:
+                    if data_type == DataType.IMAGE:
+                        model = ImageDataModel.alias()
+                    elif data_type == DataType.SOUND:
+                        model = SoundDataModel.alias()
+                    else:
+                        raise Exception('data type error, "not defined" or "SURVEY" (collect mission)')
+
+                    query = (model.select().where((model.state == DataState.DURING_VERIFICATION)))
+
+                    if query.count() != 0:
+                        conduct_mission_id = query.get().conduct_mission_id
+                        query = (model.select().where((model.conduct_mission_id == conduct_mission_id)))
+
+                        for row in query:
+                            datas.append(row.url)
+
+                elif mission_type == MissionType.PROCESS_MISSION_TYPE:
+                    if data_type == DataType.IMAGE:
+                        query = (ImageDataForRequestMission.select().
+                                 where((ImageDataForRequestMission.state == DataState.DURING_VERIFICATION)))
+
+                        if query.count() != 0:
+                            url = query.get().url
+
+                            model = ProcessedImageDataModel.alias()
+
+                            conduct_mission_id = (model.select().where(
+                                model.image_data_for_request_mission_url == url)).conduct_mission_id
+
+                            query = (model.select().where(model.conduct_mission_id == conduct_mission_id))
+
+                            for row in query:
+                                datas.append(row.url)
+                                labels.append(row.labeling_result)
+                    else:
+                        raise Exception('data type error(process mission)')
+                    pass
+                else:
+                    raise Exception('mission type error')
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful GetDatasToValid"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+        return GetDatasToValidResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            conduct_mission_id=conduct_mission_id,
+            datas=datas,
+            labels=labels
+        )
+
+    @verified
+    def SetDatasToValid(self, request, context):
+        mission_type = request.mission_type
+        data_type = request.data_type
+        conduct_mission_id = request.conduct_mission_id
+        decide_validation = request.decide_validation
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown SetDatasToValid"
+
+        db = pwdb.database
+
+        model = ImageDataModel.alias()
+
+        with db.atomic() as transaction:
+            try:
+                if mission_type == MissionType.COLLECT_MISSION_TYPE:
+                    if data_type == DataType.IMAGE:
+                        model = ImageDataModel.alias()
+                    elif data_type == DataType.SOUND:
+                        model = SoundDataModel.alias()
+                    else:
+                        raise Exception('data type error, "not defined" or "SURVEY" (collect mission)')
+
+                    query = (model.select().where((model.conduct_mission_id == conduct_mission_id)))
+
+                    if query.count() != 0:
+                        for row in query:
+                            row.state = decide_validation
+                            row.save()
+
+                        conduct_mission = (ConductMission.select().where(ConductMission.id == conduct_mission_id)).get()
+
+                        if decide_validation == DecideValidation.DECIDE_VALIDATION_OK:
+                            conduct_mission.state = ConductMissionState.COMPLETE_VERIFICATION_CONDUCT_MISSION_STATE
+                        elif decide_validation == DecideValidation.DECIDE_VALIDATION_RETURN:
+                            conduct_mission.state = ConductMissionState.RETURN_VERIFICATION_CONDUCT_MISSION_STATE
+
+                        conduct_mission.save()
+                    else:
+                        raise Exception('invalid conduct mission')
+
+                elif mission_type == MissionType.PROCESS_MISSION_TYPE:
+                    if data_type == DataType.IMAGE:
+                        query = (ProcessedImageDataModel.select().where(
+                            ProcessedImageDataModel.conduct_mission_id == conduct_mission_id))
+
+                        if query.count() != 0:
+                            for row in query:
+                                url = row.image_data_for_request_mission_url
+
+                                sub_query = (ImageDataForRequestMission.select().where(
+                                    ImageDataForRequestMission.url == url))
+
+                                obj = sub_query.get()
+                                obj.state = decide_validation
+                                obj.save()
+
+                        conduct_mission = (ConductMission.select().where(ConductMission.id == conduct_mission_id)).get()
+
+                        if decide_validation == DecideValidation.DECIDE_VALIDATION_OK:
+                            conduct_mission.state = ConductMissionState.COMPLETE_VERIFICATION_CONDUCT_MISSION_STATE
+                        elif decide_validation == DecideValidation.DECIDE_VALIDATION_RETURN:
+                            conduct_mission.state = ConductMissionState.RETURN_VERIFICATION_CONDUCT_MISSION_STATE
+
+                        conduct_mission.save()
+                    else:
+                        raise Exception('data type error(process mission)')
+                    pass
+                else:
+                    raise Exception('mission type error')
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful SetDatasToValid"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+        return GetDatasToValidResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+        )
