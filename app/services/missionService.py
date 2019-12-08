@@ -1715,3 +1715,46 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             datas=datas,
             labels=labels
         )
+
+    @verified
+    def SetMissionDatasToValidRequest(self, request, context):
+        mission_id = request.mission_id
+        decide_validation = request.decide_validation
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown SetMissionDatasToValidRequest"
+
+        db = pwdb.database
+
+        model = ImageDataModel.alias()
+
+        with db.atomic() as transaction:
+            try:
+                query = (MissionModel.select().where(MissionModel.id == mission_id))
+
+                if query.count() == 0:
+                    raise Exception('invalid mission id')
+
+                mission = query.get()
+
+                if decide_validation == DecideValidation.DECIDE_VALIDATION_OK:
+                    mission.state = MissionState.COMPLETE_MISSION
+                elif decide_validation == DecideValidation.DECIDE_VALIDATION_RETURN:
+                    mission.state = MissionState.RETURNED_MISSION
+
+                mission.save()
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful SetMissionDatasToValidRequest"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+        return SetMissionDatasToValidResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+        )
