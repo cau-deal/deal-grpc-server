@@ -1509,7 +1509,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                             model = ProcessedImageDataModel.alias()
 
                             conduct_mission_id = (model.select().where(
-                                model.image_data_for_request_mission_url == url)).conduct_mission_id
+                                model.image_data_for_request_mission_url == url)).conduct_mission_id.id
 
                             query = (model.select().where(model.conduct_mission_id == conduct_mission_id))
 
