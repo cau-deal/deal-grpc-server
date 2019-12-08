@@ -1489,7 +1489,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     else:
                         raise Exception('data type error, "not defined" or "SURVEY" (collect mission)')
 
-                    query = (model.select().where((model.state == DataState.DURING_VERIFICATION)))
+                    query = (model.select().where((model.state == DataState.WAITING_VERIFICATION)))
 
                     if query.count() != 0:
                         conduct_mission_id = query.get().conduct_mission_id
@@ -1501,7 +1501,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 elif mission_type == MissionType.PROCESS_MISSION_TYPE:
                     if data_type == DataType.IMAGE:
                         query = (ImageDataForRequestMission.select().
-                                 where((ImageDataForRequestMission.state == DataState.DURING_VERIFICATION)))
+                                 where((ImageDataForRequestMission.state == DataState.WAITING_VERIFICATION)))
 
                         if query.count() != 0:
                             url = query.get().url
@@ -1568,7 +1568,11 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                     if query.count() != 0:
                         for row in query:
-                            row.state = decide_validation
+                            if decide_validation == DecideValidation.DECIDE_VALIDATION_OK:
+                                row.state = COMPLETE_VERIFICATION
+                            elif decide_validation == DecideValidation.DECIDE_VALIDATION_RETURN:
+                                row.state = RETURN_VERIFICATION
+
                             row.save()
 
                         conduct_mission = (ConductMission.select().where(ConductMission.id == conduct_mission_id)).get()
@@ -1595,7 +1599,12 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                                     ImageDataForRequestMission.url == url))
 
                                 obj = sub_query.get()
-                                obj.state = decide_validation
+
+                                if decide_validation == DecideValidation.DECIDE_VALIDATION_OK:
+                                    obj.state = COMPLETE_VERIFICATION
+                                elif decide_validation == DecideValidation.DECIDE_VALIDATION_RETURN:
+                                    obj.state = RETURN_VERIFICATION
+
                                 obj.save()
 
                         conduct_mission = (ConductMission.select().where(ConductMission.id == conduct_mission_id)).get()
