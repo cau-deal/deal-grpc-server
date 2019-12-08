@@ -1635,3 +1635,84 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 message=result_message,
             ),
         )
+
+    @verified
+    def GetMissionDatasToValid(self, request, context):
+        mission_id = request.mission_id
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown GetMissionDatasToValid"
+
+        db = pwdb.database
+
+        datas = []
+        labels = []
+        model = ImageDataModel.alias()
+
+        with db.atomic() as transaction:
+            try:
+                query = (MissionModel.select.where(MissionModel.id == mission_id))
+
+                if query.count() == 0:
+                    raise Exception('invalid mission id')
+
+                mission = query.get()
+
+                mission_type = mission.mission_type
+                data_type = mission.data_type
+
+                if mission_type == MissionType.COLLECT_MISSION_TYPE:
+                    if data_type == DataType.IMAGE:
+                        model = ImageDataModel.alias()
+                    elif data_type == DataType.SOUND:
+                        model = SoundDataModel.alias()
+                    else:
+                        raise Exception('data type error, "not defined" or "SURVEY" (collect mission)')
+
+                    conduct_missions = (ConductMission.select.where(ConductMission.mission_id == mission_id))
+
+                    for row in conduct_missions:
+                        conduct_mission_id = row.id
+
+                        query = (model.select().where((model.conduct_mission_id == conduct_mission_id)))
+
+                        for row in query:
+                            datas.append(row.url)
+
+                elif mission_type == MissionType.PROCESS_MISSION_TYPE:
+                    if data_type == DataType.IMAGE:
+                        urls = (ImageDataForRequestMission.select().
+                                 where((ImageDataForRequestMission.mission_id == mission_id)))
+
+                        for row in urls:
+                            url = row.url
+
+                            query = (ProcessedImageDataModel.select().where(
+                                ProcessedImageDataModel.image_data_for_request_mission_url == url))
+
+                            datas.append(url)
+                            labels.append(query.get().labeling_result)
+
+                    else:
+                        raise Exception('data type error(process mission)')
+                    pass
+                else:
+                    raise Exception('mission type error')
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful GetDatasToValid"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+        return GetDatasToValidResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            mission_id=mission_id,
+            datas=datas,
+            labels=labels
+        )
