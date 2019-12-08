@@ -4,12 +4,14 @@ from peewee import Database
 from sea.servicer import ServicerMeta
 
 from app.decorators import verified, unverified
+
 from app.extensions import *
 from app.extensions_db import sPointServicer
 
 from app.models import DepositPoint
 from app.models import WithdrawPoint
 from app.models import TransferPoint
+from app.models import KakaoPayModel
 from protos.Datetime_pb2 import Datetime
 
 from protos.PointService_pb2 import *
@@ -288,8 +290,71 @@ class PointServiceServicer(PointServiceServicer, metaclass=ServicerMeta):
         result_code = ResultCode.UNKNOWN_RESULT_CODE
         result_message = "Unknown Deposit"
         deposit_result = DEPOSIT_RESULT[DepositResult.UNKNOWN_DEPOSIT_RESULT]
-
+        
         db = pwdb.database
+
+        # Kakao Pay URL get
+        if deposit_type == DepositType.KAKAO_PAY:
+            try:
+                tid, pay_url = KakaoPayUrl.getTidAndUrl(context.login_email, val)
+
+                with db.atomic() as transaction:
+                    try:
+                        paymodel = KakaoPayModel.select(KakaoPayModel.user_email).where(KakaoPayModel.user_email == context.login_email)
+                        
+                        if paymodel.count() == 0:
+                            KakaoPayModel.create(
+                                user_email = context.login_email,
+                                tid = tid,
+                                state=0,
+                                val = val,
+                                created_at = datetime.datetime.now(),
+                            )
+                        else:
+                            res = (KakaoPayModel.update(
+                                state=0,
+                                tid=tid,
+                                val=val,
+                                created_at=datetime.datetime.now(),
+                            ).where(KakaoPayModel.user_email == context.login_email)\
+                            .execute())
+
+                        result_code = ResultCode.SUCCESS
+                        result_message = "Kakao Pay Deposit success"
+                        deposit_result = DEPOSIT_RESULT[DepositResult.SUCCESS_DEPOSIT_RESULT]
+
+                        return DepositResponse(
+                            result=CommonResult(
+                            result_code=result_code,
+                            message=result_message,
+                            ),
+                            deposit_result=deposit_result,
+                            kakaopay_url=pay_url,
+                        )
+
+                    except Exception as e:
+                        transaction.rollback()
+                        result_message="DB Kakao Pay Error"
+                        return DepositResponse(
+                            result=CommonResult(
+                            result_code=result_code,
+                            message=result_message,
+                            ),
+                            deposit_result=deposit_result,
+                        )
+
+            except Exception as e:
+                print("KakaoPay Request Error")
+                print(e)
+                result_message = "KakaoPay Request Error"
+                return DepositResponse(
+                            result=CommonResult(
+                            result_code=result_code,
+                            message=result_message,
+                            ),
+                            deposit_result=deposit_result,
+                        )
+
 
         with db.atomic() as transaction:
             try:

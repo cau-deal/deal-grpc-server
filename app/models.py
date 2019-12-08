@@ -243,6 +243,17 @@ class FCMModel(pwdb.Model):
     class Meta:
         db_table = 'fcm'
 
+class KakaoPayModel(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    user_email = user_email = peewee.ForeignKeyField(User, column_name='user_email')
+    tid = peewee.CharField()
+    state = peewee.IntegerField()
+    val = peewee.IntegerField()
+    created_at = peewee.DateTimeField()
+
+    class Meta:
+        db_table = 'kakaopay'
+
 class RecommendMission(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
     mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
@@ -251,6 +262,7 @@ class RecommendMission(pwdb.Model):
 
     class Meta:
         db_table = 'recommend_mission'
+<<<<<<< HEAD
 
 class MissionSurveyMap(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
@@ -259,3 +271,5 @@ class MissionSurveyMap(pwdb.Model):
 
     class Meta:
         db_table = 'mission_survey_map'
+=======
+>>>>>>> 13a4bda7a89df656c2dec118843a5d9eab49233f
