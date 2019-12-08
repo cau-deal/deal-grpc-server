@@ -1224,9 +1224,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         # Mission Obj
         mission = request.mission
 
-        datas = request.datas
-        labels = request.labels
-
         # Mission Obj parsing
         title = mission.title
         contents = mission.contents
