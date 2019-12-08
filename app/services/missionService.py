@@ -1707,7 +1707,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_code = ResultCode.ERROR
                 result_message = str(e)
 
-        return GetDatasToValidResponse(
+        return GetMissionDatasToValidResponse(
             result=CommonResult(
                 result_code=result_code,
                 message=result_message,
