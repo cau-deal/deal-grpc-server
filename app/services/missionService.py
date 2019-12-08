@@ -1651,7 +1651,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         with db.atomic() as transaction:
             try:
-                query = (MissionModel.select.where(MissionModel.id == mission_id))
+                query = (MissionModel.select().where(MissionModel.id == mission_id))
 
                 if query.count() == 0:
                     raise Exception('invalid mission id')
@@ -1669,7 +1669,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     else:
                         raise Exception('data type error, "not defined" or "SURVEY" (collect mission)')
 
-                    conduct_missions = (ConductMission.select.where(ConductMission.mission_id == mission_id))
+                    conduct_missions = (ConductMission.select().where(ConductMission.mission_id == mission_id))
 
                     for row in conduct_missions:
                         conduct_mission_id = row.id
@@ -1681,8 +1681,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
                 elif mission_type == MissionType.PROCESS_MISSION_TYPE:
                     if data_type == DataType.IMAGE:
-                        urls = (ImageDataForRequestMission.select().
-                                 where((ImageDataForRequestMission.mission_id == mission_id)))
+                        urls = (ImageDataForRequestMission.select().where((ImageDataForRequestMission.mission_id == mission_id)))
 
                         for row in urls:
                             url = row.url
