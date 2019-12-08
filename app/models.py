@@ -251,3 +251,11 @@ class RecommendMission(pwdb.Model):
 
     class Meta:
         db_table = 'recommend_mission'
+
+class MissionSurveyMap(pwdb.Model):
+    id = peewee.IntegerField(primary_key=True)
+    mission_id = peewee.ForeignKeyField(MissionModel, column_name='mission_id')
+    survey_id = peewee.IntegerField()
+
+    class Meta:
+        db_table = 'mission_survey_map'

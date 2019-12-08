@@ -8,7 +8,7 @@ from app.extensions import pwdb, root_email
 from app.extensions_db import sPointServicer
 
 from app.models import MissionModel, User, PhoneAuthentication, ImageDataForRequestMission, ProcessedImageDataModel, \
-    ImageDataModel, SoundDataModel, SurveyDataModel, LabelModel, RecommendMission
+    ImageDataModel, SoundDataModel, SurveyDataModel, LabelModel, RecommendMission, MissionSurveyMap
 from app.models import ConductMission
 from app.models import MissionExplanationImageModel
 
@@ -1217,4 +1217,219 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 message=result_message,
             ),
             urls=urls
+        )
+
+    @verified
+    def RegisterSurveyMission(self, request, context):
+        # Mission Obj
+        mission = request.mission
+
+        datas = request.datas
+        labels = request.labels
+
+        # Mission Obj parsing
+        title = mission.title
+        contents = mission.contents
+        mission_type = mission.mission_type
+        data_type = mission.data_type
+        unit_package = mission.unit_package
+        price_of_package = mission.price_of_package
+        order_package_quantity = mission.order_package_quantity
+        deadline = mission.deadline
+        beginning = mission.beginning
+        deadline_datetime = datetime.datetime(year=deadline.year, month=deadline.month, day=deadline.day,
+                                              hour=deadline.hour, minute=deadline.min, second=deadline.sec)
+        beginning_datetime = datetime.datetime(year=beginning.year, month=beginning.month, day=beginning.day,
+                                               hour=beginning.hour, minute=beginning.min, second=beginning.sec)
+        summary = mission.summary
+        contact_clause = mission.contact_clause
+        specification = mission.specification
+        mission_explanation_images = mission.mission_explanation_images
+        survey_id = mission.survey_id
+
+        # Database Obj
+        db = pwdb.database
+
+        # Return Mission Response default
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown Register Mission"
+        register_mission_result = RegisterMissionResult.UNKNOWN_REGISTER_MISSION_RESULT
+
+        # ENUM Mission Type
+        MISSION_TYPE = {
+            MissionType.UNKNOWN_MISSION_TYPE: 0,
+            MissionType.ALL_MISSION_TYPE: 1,
+            MissionType.COLLECT_MISSION_TYPE: 2,
+            MissionType.PROCESS_MISSION_TYPE: 3,
+        }
+
+        # ENUM Data Type
+        DATA_TYPE = {
+            DataType.UNKNOWN_DATA_TYPE: 0,
+            DataType.IMAGE: 1,
+            DataType.SOUND: 2,
+            DataType.SURVEY: 3,
+        }
+
+        # ENUM Mission State
+        MISSION_STATE = {
+            MissionState.UNKNOWN_MISSION_STATE: 0,
+            MissionState.DURING_MISSION: 1,
+            MissionState.SOLD_OUT: 2,
+            MissionState.WATING_CONFIRM_PURCHASE: 3,
+            MissionState.COMPLETE_MISSION: 4,
+            MissionState.WAITING_REGISTER: 5,
+        }
+
+        # ENUM Mission Explanation Image Type
+        MISSION_EXPLANATION_IMAGE_TYPE = {
+            MissionExplanationImageType.UNKNOWN_MISSION_EXPLANATION_IMAGE_TYPE: 0,
+            MissionExplanationImageType.THUMBNAIL_MISSION_EXPLANATION_IMAGE_TYPE: 1,
+            MissionExplanationImageType.BACKGROUND_MISSION_EXPLANATION_IMAGE_TYPE: 2,
+            MissionExplanationImageType.MAIN_TEXT_MISSION_EXPLANATION_IMAGE_TYPE: 3,
+        }
+        mission_id = 0
+
+        now = datetime.datetime.now()
+        today_register = False
+
+        if now.year == beginning.year and now.month == beginning.month and now.day == beginning.day:
+            today_register = True
+
+        with db.atomic() as transaction:
+            try:
+                # 잔액 확인 후, 미션 등록 가능 여부 판단
+                balance = sPointServicer.sLookUpBalance(context.login_email)
+                val = price_of_package * order_package_quantity
+
+                if balance < val:
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                    result_message = "Insufficiency balance"
+                    raise Exception("Insufficiency balance")
+
+                # 시작일이 오늘 이후인지 확인
+                if today_register is False and (beginning_datetime < datetime.datetime.now()):
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                    result_message = "Invalid beginning"
+                    raise Exception("Invalid beginning")
+
+                if deadline_datetime < datetime.datetime.now():
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                    result_message = "Invalid deadline"
+                    raise Exception("Invalid deadline")
+
+                if price_of_package <= 0 or unit_package <= 0 or order_package_quantity <= 0:
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                    result_message = 'invalid price or unit or quantity'
+                    raise Exception('invalid price or unit or quantity')
+
+                if order_package_quantity % unit_package != 0:
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                    result_message = 'order_package_quantity must be multiple by unit_package'
+                    raise Exception('order_package_quantity must be multiple by unit_package')
+
+                if mission_type == PROCESS_MISSION_TYPE and len(datas) != order_package_quantity:
+                    result_code = ResultCode.ERROR
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+                    result_message = 'Order quantity and number of images do not match'
+                    raise Exception('Order quantity and number of images do not match')
+
+                # 미션 시작 날짜가 오늘과 같으면 바로 진행 중으로 등록
+                if today_register:
+                    query = MissionModel.create(
+                        register_email=context.login_email,
+                        title=title,
+                        contents=contents,
+                        mission_type=MISSION_TYPE[mission_type],
+                        data_type=DATA_TYPE[data_type],
+                        state=MISSION_STATE[MissionState.DURING_MISSION],
+                        unit_package=unit_package,
+                        price_of_package=price_of_package,
+                        order_package_quantity=order_package_quantity,
+                        beginning=beginning_datetime,
+                        deadline=deadline_datetime,
+                        created_at=datetime.datetime.now(),
+                        summary=summary,
+                        contact_clause=contact_clause,
+                        specification=specification,
+                    )
+                # 미션 시작 날짜가 오늘과 다르면 등록대기로 등록
+                else:
+                    query = MissionModel.create(
+                        register_email=context.login_email,
+                        title=title,
+                        contents=contents,
+                        mission_type=MISSION_TYPE[mission_type],
+                        data_type=DATA_TYPE[data_type],
+                        state=MISSION_STATE[MissionState.WAITING_REGISTER],
+                        unit_package=unit_package,
+                        price_of_package=price_of_package,
+                        order_package_quantity=order_package_quantity,
+                        beginning=beginning_datetime,
+                        deadline=deadline_datetime,
+                        created_at=datetime.datetime.now(),
+                        summary=summary,
+                        contact_clause=contact_clause,
+                        specification=specification,
+                    )
+
+                mission_id = query.id
+
+                # 잔액 차감(운영자에게 돈이 지불된다)
+                sPointServicer.givePoint(context.login_email, root_email, val, 0)
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e) + " transaction1 error"
+                register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+
+        if result_code != ResultCode.ERROR:
+            with db.atomic() as transaction:
+                try:
+                    MissionSurveyMap.create(
+                        mission=mission,
+                        survey_id=survey_id
+                    )
+
+                except Exception as e:
+                    transaction.rollback()
+                    result_code = ResultCode.ERROR
+                    result_message = str(e) + " transaction2 error - mission_id :  " + str(mission_id)
+                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
+
+        if result_code == ResultCode.UNKNOWN_RESULT_CODE or result_code == ResultCode.SUCCESS:
+            with db.atomic() as transaction:
+                try:
+                    # 이미지가 있으면 저장
+                    for mission_explanation_image in mission_explanation_images:
+                        url = mission_explanation_image.url
+                        image_type = mission_explanation_image.type
+
+                        MissionExplanationImageModel.create(
+                            mission_id=mission_id,
+                            image_type=MISSION_EXPLANATION_IMAGE_TYPE[image_type],
+                            url=url,
+                            created_at=datetime.datetime.now()
+                        )
+
+                    result_code = ResultCode.SUCCESS
+                    result_message = "Register Mission Success"
+                    register_mission_result = RegisterMissionResult.SUCCESS_REGISTER_MISSION_RESULT
+
+                except Exception as e:
+                    transaction.rollback()
+                    result_code = ResultCode.ERROR
+                    result_message = str(e) + " transaction3 error - mission_id :  " + str(mission_id)
+
+        return RegisterSurveyMissionResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message + " mission_id :  " + str(mission_id)
+            ),
         )
