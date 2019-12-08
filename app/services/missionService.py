@@ -1717,7 +1717,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         )
 
     @verified
-    def SetMissionDatasToValidRequest(self, request, context):
+    def SetMissionDatasToValid(self, request, context):
         mission_id = request.mission_id
         decide_validation = request.decide_validation
 
