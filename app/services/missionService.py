@@ -1242,7 +1242,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
         contact_clause = mission.contact_clause
         specification = mission.specification
         mission_explanation_images = mission.mission_explanation_images
-        survey_id = mission.survey_id
+        surveys_id = mission.survey_id
 
         # Database Obj
         db = pwdb.database
@@ -1385,7 +1385,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 try:
                     MissionSurveyMap.create(
                         mission_id=mission_id,
-                        survey_id=survey_id
+                        surveys_id=surveys_id
                     )
 
                 except Exception as e:
