@@ -1492,7 +1492,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     query = (model.select().where((model.state == DataState.WAITING_VERIFICATION)))
 
                     if query.count() != 0:
-                        conduct_mission_id = query.get().conduct_mission_id
+                        conduct_mission_id = query.get().conduct_mission_id.id
                         query = (model.select().where((model.conduct_mission_id == conduct_mission_id)))
 
                         for row in query:
