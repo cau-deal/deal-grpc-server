@@ -1330,12 +1330,6 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                     result_message = 'order_package_quantity must be multiple by unit_package'
                     raise Exception('order_package_quantity must be multiple by unit_package')
 
-                if mission_type == PROCESS_MISSION_TYPE and len(datas) != order_package_quantity:
-                    result_code = ResultCode.ERROR
-                    register_mission_result = RegisterMissionResult.FAIL_REGISTER_MISSION_RESULT
-                    result_message = 'Order quantity and number of images do not match'
-                    raise Exception('Order quantity and number of images do not match')
-
                 # 미션 시작 날짜가 오늘과 같으면 바로 진행 중으로 등록
                 if today_register:
                     query = MissionModel.create(
@@ -1390,7 +1384,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
             with db.atomic() as transaction:
                 try:
                     MissionSurveyMap.create(
-                        mission=mission,
+                        mission_id=mission_id,
                         survey_id=survey_id
                     )
 
