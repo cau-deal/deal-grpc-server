@@ -262,7 +262,6 @@ class RecommendMission(pwdb.Model):
 
     class Meta:
         db_table = 'recommend_mission'
-<<<<<<< HEAD
 
 class MissionSurveyMap(pwdb.Model):
     id = peewee.IntegerField(primary_key=True)
@@ -271,5 +270,4 @@ class MissionSurveyMap(pwdb.Model):
 
     class Meta:
         db_table = 'mission_survey_map'
-=======
->>>>>>> 13a4bda7a89df656c2dec118843a5d9eab49233f
+
