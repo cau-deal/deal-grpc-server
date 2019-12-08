@@ -1249,7 +1249,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
 
         # Return Mission Response default
         result_code = ResultCode.UNKNOWN_RESULT_CODE
-        result_message = "Unknown Register Mission"
+        result_message = "Unknown RegisterSurveyMission"
         register_mission_result = RegisterMissionResult.UNKNOWN_REGISTER_MISSION_RESULT
 
         # ENUM Mission Type
@@ -1374,6 +1374,9 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 # 잔액 차감(운영자에게 돈이 지불된다)
                 sPointServicer.givePoint(context.login_email, root_email, val, 0)
 
+                result_code = ResultCode.SUCCESS
+                result_message = "RegisterSurveyMission Success"
+
             except Exception as e:
                 transaction.rollback()
                 result_code = ResultCode.ERROR
@@ -1410,7 +1413,7 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                         )
 
                     result_code = ResultCode.SUCCESS
-                    result_message = "Register Mission Success"
+                    result_message = "RegisterSurveyMission Success"
                     register_mission_result = RegisterMissionResult.SUCCESS_REGISTER_MISSION_RESULT
 
                 except Exception as e:
@@ -1423,4 +1426,40 @@ class MissionServiceServicer(MissionServiceServicer, metaclass=ServicerMeta):
                 result_code=result_code,
                 message=result_message + " mission_id :  " + str(mission_id)
             ),
+        )
+
+    @verified
+    def GetSurveyId(self, request, context):
+        mission_id = request.mission_id
+
+        result_code = ResultCode.UNKNOWN_RESULT_CODE
+        result_message = "Unknown GetProcessMissionImagesResponse"
+
+        db = pwdb.database
+
+        surveys_id = 0
+
+        with db.atomic() as transaction:
+            try:
+                query = (MissionSurveyMap.select().where((MissionSurveyMap.mission_id == mission_id)))
+
+                if query.count() != 1:
+                    raise Exception("query'count is not equal 1")
+
+                surveys_id = query.get().surveys_id
+
+                result_code = ResultCode.SUCCESS
+                result_message = "Successful GetProcessMissionImagesResponse"
+
+            except Exception as e:
+                transaction.rollback()
+                result_code = ResultCode.ERROR
+                result_message = str(e)
+
+        return GetSurveyIdResponse(
+            result=CommonResult(
+                result_code=result_code,
+                message=result_message,
+            ),
+            survey_id=surveys_id
         )
